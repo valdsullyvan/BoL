@@ -1,3 +1,6 @@
+-- [[ He is not my script, i'm just changing some things and trying to resolve the errors :D ]] --
+
+
 --[[ 
 		  _  __           _                          _    
 		 | |/ /          ( )                        | |   
