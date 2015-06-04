@@ -20,6 +20,7 @@
 			  Removed skin hack from TAB and code because it's too fat to load and to useless.. We don't need a skin to carry, but, if you want a skin go with MK Jogo/Mk LoL, it's a skin hack usable for all champions without script and that's legal..
 			  Cleared the code and refresh some broken function..
 	 13h00		  First try in custom game...
+	 		  Something is wrong with prodiction.lua
 			  ]]--
 
 local charNames = {
@@ -55,8 +56,6 @@ local srcLib = Require("SourceLib")
 
 srcLib:Add("vPrediction", "https://raw.github.com/Hellsing/BoL/master/common/VPrediction.lua")
 srcLib:Add("SOW", "https://raw.github.com/Hellsing/BoL/master/common/SOW.lua")
-if VIP_USER then
-	srcLib:Add("Prodiction", "https://bitbucket.org/Klokje/public-klokjes-bol-scripts/raw/ec830facccefb3b52212dba5696c08697c3c2854/Test/Prodiction/Prodiction.lua")
 end
 
 srcLib:Check()
