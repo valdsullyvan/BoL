@@ -22,6 +22,8 @@
 	 13h00		  First try in custom game...
 	 		  Something is wrong with prodiction.lua
 	 		  Removed Prodiction.lua if vip user : if VIP_USER then	srcLib:Add("Prodiction", "https://bitbucket.org/Klokje/public-klokjes-bol-scripts/raw/ec830facccefb3b52212dba5696c08697c3c2854/Test/Prodiction/Prodiction.lua")
+	 		  Patched l.60 because of broken func with prodiction..
+	 		  Something wrong with the AutoPot now.
 			  ]]--
 
 local charNames = {
@@ -57,7 +59,6 @@ local srcLib = Require("SourceLib")
 
 srcLib:Add("vPrediction", "https://raw.github.com/Hellsing/BoL/master/common/VPrediction.lua")
 srcLib:Add("SOW", "https://raw.github.com/Hellsing/BoL/master/common/SOW.lua")
-end
 
 srcLib:Check()
 
