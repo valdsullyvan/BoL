@@ -24,7 +24,10 @@
 	 		  Removed Prodiction.lua if vip user : if VIP_USER then	srcLib:Add("Prodiction", "https://bitbucket.org/Klokje/public-klokjes-bol-scripts/raw/ec830facccefb3b52212dba5696c08697c3c2854/Test/Prodiction/Prodiction.lua")
 	 		  Patched l.60 because of broken func with prodiction..
 	 		  Something wrong with the AutoPot now.
-			  ]]--
+	 13h20            AutoPot has been sucessfully cleared now.
+	 		  New errors, l.270 and l.731, i resolve that.
+	 		  
+	 		  ]]--
 
 local charNames = {
     
