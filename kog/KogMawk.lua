@@ -17,6 +17,7 @@
 		  Updated Stacking
 		  Updated Stacking for not VIP_USERS
 		  Updated Scripts for targeting all users, free and vip.
+		  Removed skin hack from TAB and code because it's too fat to load and to useless.. We don't need a skin to carry, but, if you want a skin go with MK Jogo/Mk LoL, it's a skin hack usable for all champions without script and that's legal..
 		  ]]--
 
 local charNames = {
