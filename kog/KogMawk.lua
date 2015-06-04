@@ -26,6 +26,8 @@
 	 		  Something wrong with the AutoPot now.
 	 13h20            AutoPot has been sucessfully cleared now.
 	 		  New errors, l.270 and l.731, i resolve that.
+	 		  Cleared TAB one more time.
+	 13h30		  Finish for now, i'll see later, i don't find a way to patch the ult..
 	 		  
 	 		  ]]--
 
