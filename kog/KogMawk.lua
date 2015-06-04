@@ -110,17 +110,12 @@ local ItemData = {
 	[3144] = {name = "Bilgewater Cutlass", 			range = 500, 			slot = nil,	ready = false},
 	[3153] = {name = "Blade of The Ruined King",	range = 450, 			slot = nil,	ready = false},
 	[3146] = {name = "Hextech Gunblade",			range = 700,			slot = nil, ready = false},
-	[3128] = {name = "Deathfire Grasp",				range = 750,			slot = nil, ready = false},
-	[3142] = {name = "Youmuu's Ghostblade",			range = myHero.range, 	slot = nil,	ready = false,	noTarget = true},
-	[3131] = {name = "Sword of the Divine",			range = myHero.range,	slot = nil,	ready = false,	noTarget = true}
+	[3142] = {name = "Youmuu's Ghostblade",			range = myHero.range, 	slot = nil,	ready = false,	noTarget = true}
 }
 local TargetList = {[_Q] = nil, [_W] = nil, [_E] = nil, [_R] = nil, ["main"] = nil}
 local PassiveTracker = {status = false, startClock = 0, startPoint = nil, ms = nil, target = nil}
 local LastPotCast = {red = 0, blue = 0, flask = 0}
 local Recalling
-
-local SkinList = { "Classic" ,"Caterpillar Kog'Maw", "Sonoran Kog'Maw", "Monarch Kog'Maw", "Reindeer Kog'Maw", "Lion Dance Kog'Maw", "Deep Sea Kog'Maw", "Jurassic Kog'Maw", "Battlecast Kog'Maw"}
-local lastSkin = 0
 
 local orbwalkerChekced = false
 
