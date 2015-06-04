@@ -21,6 +21,7 @@
 			  Cleared the code and refresh some broken function..
 	 13h00		  First try in custom game...
 	 		  Something is wrong with prodiction.lua
+	 		  Removed Prodiction.lua if vip user : if VIP_USER then	srcLib:Add("Prodiction", "https://bitbucket.org/Klokje/public-klokjes-bol-scripts/raw/ec830facccefb3b52212dba5696c08697c3c2854/Test/Prodiction/Prodiction.lua")
 			  ]]--
 
 local charNames = {
