@@ -1,4 +1,4 @@
--- [[ He is not my script, i'm just changing some things and trying to resolve the errors :D ]] --
+-- [[ He is not my onw base of script, i'm just changing some things and trying to resolve the errors :D ]]-
 
 
 --[[ 
