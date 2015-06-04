@@ -1052,22 +1052,6 @@ function __initMenu()
 	-- Passive
 	Menu:addParam("useP", "Auto Passive", SCRIPT_PARAM_ONOFF, true)
 	
-	-- Skins
-	if VIP_USER then
-        Menu:addSubMenu("[VIP] Skin", 'skins')
-        Menu.skins:addParam("enabled", "Enable Skin Hack (DO NOT IF 4.21)", SCRIPT_PARAM_ONOFF, false)
-
-        for i, skin in pairs(SkinList) do
-
-            Menu.skins:addParam("skin" .. tostring(i), skin, SCRIPT_PARAM_ONOFF, false)
-
-        end
-
-		Menu:addParam("prediction", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "PROdiction"})
-		
-	end
-	
-	
 	-- Enemy's Menu
 	for _,enemy in pairs(GetEnemyHeroes()) do
 		-- Carry
