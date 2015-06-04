@@ -11,15 +11,15 @@
 			     __/ |                      
 			    |___/      
 			    
-	Updated : Removed old item
-		  Removed skin hack
-		  Removed autoPot (Useless for me..)
-		  Updated Stacking
-		  Updated Stacking for not VIP_USERS
-		  Updated Scripts for targeting all users, free and vip.
-		  Removed skin hack from TAB and code because it's too fat to load and to useless.. We don't need a skin to carry, but, if you want a skin go with MK Jogo/Mk LoL, it's a skin hack usable for all champions without script and that's legal..
-		  Cleared the code and refresh some broken function..
-		  ]]--
+04/06/15	Updated : Removed old item
+			  Removed skin hack
+			  Removed autoPot (Useless for me..)
+			  Updated Stacking
+			  Updated Stacking for not VIP_USERS
+			  Updated Scripts for targeting all users, free and vip.
+			  Removed skin hack from TAB and code because it's too fat to load and to useless.. We don't need a skin to carry, but, if you want a skin go with MK Jogo/Mk LoL, it's a skin hack usable for all champions without script and that's legal..
+			  Cleared the code and refresh some broken function..
+			  ]]--
 
 local charNames = {
     
