@@ -11,8 +11,11 @@
 			     __/ |                      
 			    |___/      
 			    
-	Updated : Remove old item
-		  Remove skin hack
+	Updated : Removed old item
+		  Removed skin hack
+		  Removed autoPot (Useless for me..)
+		  Updated Stacking
+		  Updated Stacking for not VIP_USERS
 ]]--
 
 local charNames = {
