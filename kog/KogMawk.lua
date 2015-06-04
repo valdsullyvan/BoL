@@ -16,7 +16,8 @@
 		  Removed autoPot (Useless for me..)
 		  Updated Stacking
 		  Updated Stacking for not VIP_USERS
-]]--
+		  Updated Scripts for targeting all users, free and vip.
+		  ]]--
 
 local charNames = {
     
