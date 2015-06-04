@@ -253,21 +253,6 @@ function OnDraw()
 
     end
 
-    -- Skin Hack
-    if Menu and Menu.skins and Menu.skins.enabled then
-        SkinHack()
-    else
-
-        for i, v in pairs(SkinList) do
-
-            if Menu.skins["skin"..i] then
-                Menu.skins["skin"..i] = false
-            end
-
-        end
-
-    end
-
 end
 
 function OnGainBuff(unit, buff)
@@ -819,39 +804,6 @@ function GetPassiveRange(ms)
 	end
 	
 	return range
-end
-
-function AutoPot()
-	-- Health Pot
-	if Menu and Menu.extras and Menu.extras.autopot and Menu.extras.autopot.hp ~= 0 and Menu.extras.autopot.hp > (myHero.health * 100) / myHero.maxHealth and GetTickCount() > LastPotCast.red + 15000 then
-		PotSlot = GetInventorySlotItem(2003)
-		if PotSlot then
-			CastSpell(PotSlot)
-			LastPotCast.red = GetTickCount()
-		else
-			CastFlask = true
-		end
-	end
-	
-	-- Mana Pot
-	if Menu and Menu.extras and Menu.extras.autopot and Menu.extras.autopot.mn ~= 0 and Menu.extras.autopot.mn > myManaPct() and GetTickCount() > LastPotCast.blue + 15000 then
-		PotSlot = GetInventorySlotItem(2004)
-		if PotSlot then
-			CastSpell(PotSlot)
-			LastPotCast.blue = GetTickCount()
-		else
-			CastFlask = true
-		end
-	end
-	
-	-- Flask
-	if CastFlask and GetTickCount() > LastPotCast.flask + 12000 then
-		FlaskSlot = GetInventorySlotItem(2041)
-		if FlaskSlot then
-			CastSpell(FlaskSlot)
-			LastPotCast.flask = GetTickCount()
-		end
-	end
 end
 
 function IsRunningAway(hero)
