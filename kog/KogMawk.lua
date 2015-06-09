@@ -11,23 +11,7 @@
 			     __/ |                      
 			    |___/      
 			    
-04/06/15 12h00	Updated : Removed old item
-			  Removed skin hack
-			  Removed autoPot (Useless for me..)
-			  Updated Stacking
-			  Updated Stacking for not VIP_USERS
-			  Updated Scripts for targeting all users, free and vip.
-			  Removed skin hack from TAB and code because it's too fat to load and to useless.. We don't need a skin to carry, but, if you want a skin go with MK Jogo/Mk LoL, it's a skin hack usable for all champions without script and that's legal..
-			  Cleared the code and refresh some broken function..
-	 13h00		  First try in custom game...
-	 		  Something is wrong with prodiction.lua
-	 		  Removed Prodiction.lua if vip user : if VIP_USER then	srcLib:Add("Prodiction", "https://bitbucket.org/Klokje/public-klokjes-bol-scripts/raw/ec830facccefb3b52212dba5696c08697c3c2854/Test/Prodiction/Prodiction.lua")
-	 		  Patched l.60 because of broken func with prodiction..
-	 		  Something wrong with the AutoPot now.
-	 13h20            AutoPot has been sucessfully cleared now.
-	 		  New errors, l.270 and l.731, i resolve that.
-	 		  Cleared TAB one more time.
-	 13h30		  Finish for now, i'll see later, i don't find a way to patch the ult..
+Removed some things and patched the other, it's working now.
 	 		  
 	 		  ]]--
 
