@@ -1032,19 +1032,16 @@ function __initMenu()
 	
 	-- Enemy's Menu
 	for _,enemy in pairs(GetEnemyHeroes()) do
-		-- Carry
 		Menu.carry.Q:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		Menu.carry.W:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		Menu.carry.E:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		Menu.carry.R:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		
-		-- Harass
 		Menu.harass.Q:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		Menu.harass.W:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		Menu.harass.E:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		Menu.harass.R:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 		
-		-- BOTRK
 		Menu.carry.items:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_LIST, 1, {"Normal Cast", "Max Heal", "Chase", "Don't Cast"})
 	end
 	
