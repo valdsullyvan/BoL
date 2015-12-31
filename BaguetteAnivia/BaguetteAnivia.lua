@@ -7,7 +7,7 @@
 
 	Github link : https://github.com/spyk1/BoL/blob/master/BaguetteAnivia/BaguetteAnivia.lua
 
-	Forum Thread : 
+	Forum Thread : http://forum.botoflegends.com/topic/87964-beta-baguette-anivia/
 
 ]]--
 
@@ -24,10 +24,6 @@ if not charNames[myHero.charName] then return end
    	 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteAnivia]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 
 	end
-
-	if not VIP_USER then 
-		EnvoiMessage("You need to be VIP "..GetUser().."! Sorry.")
-	elseif VIP_USER then
 
 		function CurrentTimeInMillis()
 			return (os.clock() * 1000);
@@ -49,7 +45,7 @@ if not charNames[myHero.charName] then return end
 				if ServerVersion then
 					if tonumber(version) < ServerVersion then
 						EnvoiMessage("New version available "..ServerVersion)
-						EnvoiMessage("Updating, please don't press F9")
+						EnvoiMessage(">>Updating, please don't press F9<<")
 						DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
 					else
 						DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
@@ -178,14 +174,14 @@ if not charNames[myHero.charName] then return end
 						Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 70, 0, 100)
 						Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
 						Param.miscellaneous.Pots:addParam("potselect", "Select you'r potion : (Need F9)", SCRIPT_PARAM_LIST, 1, {"Health Potion", "Cookie", "Hunter's Potion", "Refillable Potion", "Corrupting Potion"})
-					Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchanger")
-						Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true)
-						Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true)
-						Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"})
-						Param.miscellaneous.skinchanger:addParam("n", "CREDIT to Divine", SCRIPT_PARAM_LIST, 0, {})
-						Param.miscellaneous.skinchanger:addParam("n", "CREDIT to PvPSuite", SCRIPT_PARAM_LIST, 0, {})
-						Param.miscellaneous.skinchanger:addParam("n", "for p_skinChanger", SCRIPT_PARAM_LIST, 0, {})
-					Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
+					if VIP_USER then Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchanger") end
+						if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
+						if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, false) end
+						if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
+						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to Divine", SCRIPT_PARAM_LIST, 0, {}) end
+						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to PvPSuite", SCRIPT_PARAM_LIST, 0, {}) end
+						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "for p_skinChanger", SCRIPT_PARAM_LIST, 0, {}) end
+					Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"}) end
 					Param.miscellaneous:addParam("Qgapclos", "Use gapcloser?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
@@ -504,9 +500,6 @@ if not charNames[myHero.charName] then return end
 	       
 	        end
 
-	        	if WaveClearKey == false then
-	        		Param.SXMenu.keys.lastHit = false
-	        	end
 
 				if combostatus == 1 or harasstatus == 1 or waveclearstatus == 1 or lanecleartatus == 1 or jungleclearstatus == 1 then
 
@@ -667,8 +660,6 @@ if not charNames[myHero.charName] then return end
 
 		function WaveClear()
 
-			Param.SXMenu.keys.lastHit = true
-
 			enemyMinions:update()
 
 			local canonheal = ((CurrentTimeInMillis()/6000)+700)
@@ -680,7 +671,7 @@ if not charNames[myHero.charName] then return end
 									CastQ(minion)
 							end
 
-							if GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY and (minion.maxHealth >= canonheal) and Edmg > minion.health then
+							if GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY and (minion.maxHealth >= canonheal) then
 								CastE(minion)
 							end
 
@@ -1728,4 +1719,3 @@ if not charNames[myHero.charName] then return end
 
 		 	},
 		}
-	end
