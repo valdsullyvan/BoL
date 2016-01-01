@@ -29,7 +29,7 @@ if not charNames[myHero.charName] then return end
 			return (os.clock() * 1000);
 		end
 
-		local version = "0.30"
+		local version = "0.31"
 		local author = "spyk"
 		local SCRIPT_NAME = "BaguetteAnivia"
 		local AUTOUPDATE = true
@@ -1014,7 +1014,7 @@ if not charNames[myHero.charName] then return end
 	 			end
 			end
 
-			if not Param.drawing.disablealldrawings then
+			if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
 				if Param.drawing.wallmenu.active then
 					for i,group in pairs(wallSpots) do
 			 			if Param.drawing.wallmenu.holdwall and Param.drawing.wallmenu.holdshow > 500 then
