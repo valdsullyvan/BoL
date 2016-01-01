@@ -26,8 +26,8 @@ end
 function CurrentTimeInMillis()
 	return (os.clock() * 1000);
 end
-
-local version = "0.34"
+-- Starting AutoUpdate
+local version = "0.35"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -53,15 +53,13 @@ if AUTOUPDATE then
 		EnvoiMessage("Error downloading version info")
 	end
 end
-
+-- End Of AutoUpdate
 local ts
 local Qm = nil
 local Rm = nil
 local Qdmg, Edmg, Rdmg, iDmg, totalDamage, health, mana, maxHealth, maxMana = 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0
-
 local TextList = {"Ignite = Kill", "Q = Kill", "DoubleQ = Kill", "Q + Ignite = Kill", "DoubleQ + Ignite = Kill", "Q + FrozenE = Kill", "DoubleQ + FrozenE = Kill", "Q + FrozenE + Ignite = Kill", "DoubleQ + FrozenE + Ignite = Kill", "Q + FrozenE + R for 1s = Kill", "DoubleQ + FrozenE + R for 1s = Kill", "DoubleQ + FrozenE + R for 3s = Kill", "Q + FrozenE + R + Ignite = Kill", "DoubleQ + FrozenE + R + Ignite = Kill", "DoubleQ + FrozenE + R for 3s + Ignite = Kill", "Not Killable"}
 local KillText = {}
-
 local lastElixir = 0
 local lastPotion = 0
 local lastFrostQuennCast = 0
@@ -97,12 +95,12 @@ local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 function OnLoad()
 
-	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [TheBirdReloaded]</b></font> <font color=\"#ffffff\">by spyk</font>")
-
+	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
+	--
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
-
+	--
 	Param = scriptConfig("[Baguette] Anivia", "BaguetteAnivia")
-
+	--
 	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
 		Param:permaShow("n4")
 	--
@@ -232,7 +230,7 @@ function OnLoad()
 	elseif (Param.miscellaneous.skinchanger['changeSkin']) then
 		SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
 	end
-
+	
 	CustomLoad()
 
 	if Param.miscellaneous.Pots.potselect == 1 then
