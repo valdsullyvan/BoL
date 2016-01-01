@@ -248,7 +248,7 @@ function CustomLoad()
 	GenerateTables()
 	if _G.Reborn_Initialised then
 	elseif _G.Reborn_Loaded then
-		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
+		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 		EnvoiMessage("Loaded SAC:R")
 	else
@@ -266,7 +266,7 @@ function CustomLoad()
 function LoadOrb()
 
 	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then	
-		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
+		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 		require("SxOrbWalk")
 		EnvoiMessage("Loaded SxOrbWalk")
