@@ -29,7 +29,7 @@ if not charNames[myHero.charName] then return end
 			return (os.clock() * 1000);
 		end
 
-		local version = "0.27"
+		local version = "0.28"
 		local author = "spyk"
 		local SCRIPT_NAME = "BaguetteAnivia"
 		local AUTOUPDATE = true
@@ -135,7 +135,7 @@ if not charNames[myHero.charName] then return end
 					Param.Clear.LaneClear:addParam("UseE", "Use (E) Spell in LaneClear?", SCRIPT_PARAM_ONOFF, true)
 					Param.Clear.LaneClear:addParam("UseR", "Use (R) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
 					Param.Clear.LaneClear:addParam("UseAA", "Use Auto Attacks in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
-				Param.Clear:addSubMenu("JungleClear to fucked up you'r jungler..", "JungleClear")
+				Param.Clear:addSubMenu("JungleClear", "JungleClear")
 					Param.Clear.JungleClear:addParam("junglecleartoggle", "Toggle JungleClear?", SCRIPT_PARAM_ONKEYTOGGLE, false, 109)
 					Param.Clear.JungleClear:addParam("jungleclearkey", "Key to JungleClear :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("N"))
 					Param.Clear.JungleClear:addParam("manamanager", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
@@ -188,7 +188,7 @@ if not charNames[myHero.charName] then return end
 					Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("ManualR","Automaticly disable R if no ennemy in?", SCRIPT_PARAM_ONOFF , false)
 			Param:addSubMenu("Draws or.. fps stealers!", "drawing")
-				Param.drawing:addParam("disablealldrawings","Disable all theses fucking draws?", SCRIPT_PARAM_ONOFF, false)
+				Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
 				Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
 				Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
 			 	Param.drawing:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
