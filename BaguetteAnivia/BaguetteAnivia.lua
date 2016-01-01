@@ -480,7 +480,7 @@ if not charNames[myHero.charName] then return end
 					AutoPotions()
 				end
 
-				if not Param.drawing.disablealldrawings and summonersRiftMap then
+				if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
 					if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
 						for i,group in pairs(wallSpots) do
 			 				for x, wallSpot in pairs(group.Locations) do
