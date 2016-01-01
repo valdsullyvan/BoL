@@ -29,7 +29,7 @@ if not charNames[myHero.charName] then return end
 			return (os.clock() * 1000);
 		end
 
-		local version = "0.29"
+		local version = "0.30"
 		local author = "spyk"
 		local SCRIPT_NAME = "BaguetteAnivia"
 		local AUTOUPDATE = true
@@ -480,7 +480,7 @@ if not charNames[myHero.charName] then return end
 					AutoPotions()
 				end
 
-				if not Param.drawing.disablealldrawings then
+				if not Param.drawing.disablealldrawings and summonersRiftMap then
 					if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
 						for i,group in pairs(wallSpots) do
 			 				for x, wallSpot in pairs(group.Locations) do
