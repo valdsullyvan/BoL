@@ -29,7 +29,7 @@ if not charNames[myHero.charName] then return end
 			return (os.clock() * 1000);
 		end
 
-		local version = "0.31"
+		local version = "0.32"
 		local author = "spyk"
 		local SCRIPT_NAME = "BaguetteAnivia"
 		local AUTOUPDATE = true
@@ -186,7 +186,7 @@ if not charNames[myHero.charName] then return end
 					Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-					Param.miscellaneous:addParam("ManualR","Automaticly disable R if no ennemy in?", SCRIPT_PARAM_ONOFF , true)
+					Param.miscellaneous:addParam("ManualR","Automaticly disable R if no enemy in?", SCRIPT_PARAM_ONOFF , true)
 			Param:addSubMenu("Drawing", "drawing")
 				Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
 				Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
@@ -285,7 +285,7 @@ if not charNames[myHero.charName] then return end
 		function LoadOrb()
 
 			if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then	
-				DelayAction(function()EnvoiMessage("This script was created by a really strange brain, you should check the forum thread for the settings. Hihii :)")end, 5)
+				DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 				DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 
 				require("SxOrbWalk")
