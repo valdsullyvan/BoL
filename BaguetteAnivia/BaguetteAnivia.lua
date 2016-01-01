@@ -27,7 +27,7 @@ function CurrentTimeInMillis()
 	return (os.clock() * 1000);
 end
 -- Starting AutoUpdate
-local version = "0.35"
+local version = "0.36"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -45,6 +45,7 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+				DelayAction(function() EnvoiMessage("What's new : 'Will fix auto potion in 0.37, dosen't need to F9x2 anymore, Code cleanup done and removed useless options.")end, 15)
 			else
 				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
@@ -62,12 +63,10 @@ local TextList = {"Ignite = Kill", "Q = Kill", "DoubleQ = Kill", "Q + Ignite = K
 local KillText = {}
 local lastElixir = 0
 local lastPotion = 0
+local ActualPotTime = 15
 local lastFrostQuennCast = 0
 local lastSeraphin = 0
 local lastQss = 0
-local ActualPot = "RegenerationPotion"
-local ActualPotName = "Health Potion"
-local ActualPotName = 15
 local QSS = "QuicksilverSash" or "itemmercurial"
 local combostatus = 0
 local harasstatus = 0
@@ -94,7 +93,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 function OnLoad()
-
+--
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
@@ -183,7 +182,6 @@ function OnLoad()
 			Param.miscellaneous.Pots:addParam("potswithscript", "Use potions with this script?", SCRIPT_PARAM_ONOFF, true)
 			Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
 			Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
-			Param.miscellaneous.Pots:addParam("potselect", "Select you'r potion : (Need F9)", SCRIPT_PARAM_LIST, 1, {"Health Potion", "Cookie", "Hunter's Potion", "Refillable Potion", "Corrupting Potion"})
 		--
 		if VIP_USER then Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchanger") end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
@@ -233,28 +231,6 @@ function OnLoad()
 	
 	CustomLoad()
 
-	if Param.miscellaneous.Pots.potselect == 1 then
-		ActualPot = "RegenerationPotion"
-		ActualPotName = "Health Potion"
-		ActualPotTime = 15
-	elseif Param.miscellaneous.Pots.potselect == 2 then
-		ActualPot = "ItemMiniRegenPotion"
-		ActualPotName = "Cookie"
-		ActualPotTime = 15
-	elseif Param.miscellaneous.Pots.potselect == 3 then
-
-		ActualPot = "ItemCrystalFlaskJungle"
-		ActualPotName = "Hunter's Potion"
-		ActualPotTime = 8
-	elseif Param.miscellaneous.Pots.potselect == 4 then
-		ActualPot = "ItemCrystalFlask"
-		ActualPotName = "Refillable Potion"
-		ActualPotTime = 12
-	elseif Param.miscellaneous.Pots.potselect == 5 then
-		ActualPot = "ItemDarkCrystalFlask"
-		ActualPotName = "Corrupting Potion"
-		ActualPotTime = 12
-	end
 end
 
 function OnUnload()
@@ -271,7 +247,7 @@ function CustomLoad()
 	GenerateTables()
 	if _G.Reborn_Initialised then
 	elseif _G.Reborn_Loaded then
-		DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
+		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 		EnvoiMessage("Loaded SAC:R")
 	else
@@ -289,7 +265,7 @@ function CustomLoad()
 function LoadOrb()
 
 	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then	
-		DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
+		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 		require("SxOrbWalk")
 		EnvoiMessage("Loaded SxOrbWalk")
@@ -368,11 +344,11 @@ function OnTick()
 		Target = GetCustomTarget()
 		WdansR(Target)
 		-- Creating Key 
-		ComboKey = Param.Combo.comboKey or Param.Combo.combotoggle
-		HarassKey = Param.Harass.Harasskey or Param.Harass.Harasstoggle
-		LaneClearKey = Param.Clear.LaneClear.laneclearkey or Param.Clear.LaneClear.lanecleartoggle
-		JungleClearKey = Param.Clear.JungleClear.jungleclearkey or Param.Clear.JungleClear.junglecleartoggle
-		WaveClearKey = Param.Clear.WaveClear.waveclearkey or Param.Clear.WaveClear.wavecleartoggle
+		ComboKey = Param.Combo.comboKey
+		HarassKey = Param.Harass.Harasskey
+		LaneClearKey = Param.Clear.LaneClear.laneclearkey
+		JungleClearKey = Param.Clear.JungleClear.jungleclearkey
+		WaveClearKey = Param.Clear.WaveClear.waveclearkey
 		if ComboKey then 
 			Combo(Target)
 		end
@@ -397,7 +373,7 @@ function OnTick()
 		if Param.miscellaneous.ManualR then
 			if Rm ~= nil then
 				if not ValidR() then
-					if not Param.Clear.JungleClear.jungleclearkey or Param.Clear.LaneClear.laneclearkey then
+					if not JungleClearKey or LaneClearKey or WaveClearKey then
 						CastSpell(_R) 
 					end
 				end
@@ -441,72 +417,61 @@ function OnTick()
 end
 
 function drawCircles(x,y,z,color)
- 
         DrawCircle(x, y, z, Param.drawing.wallmenu.radius, 0xFFFFFF)
- 
 end
 
 function WdansR(unit)
-if Param.miscellaneous.WdansR then
-
-if unit and unit.type == myHero.type and unit.team ~= myHero.team then
-
-if unit.hasMovePath and unit.path.count > 1 and Rm and myHero:CanUseSpell(_W) == READY then
-
-local path = unit.path:Path(2)
-
-if GetDistance(path, Rm) > 210 and GetDistance(unit, Rm) < 175  then
-
-local p1 = Vector(unit) + (Vector(path) - Vector(unit)):normalized() * 0.6 * unit.ms
-
-if GetDistance(p1) < 1000 and GetDistance(Rm, p1) > 150 and GetDistance(Rm, p1) < 250 and GetDistance(unit, path) > GetDistance(unit, p1) then
-
-CastSpell(_W, p1.x, p1.z)
-end
-end
-end
-end
-end
+	if Param.miscellaneous.WdansR then
+		if unit and unit.type == myHero.type and unit.team ~= myHero.team then
+			if unit.hasMovePath and unit.path.count > 1 and Rm and myHero:CanUseSpell(_W) == READY then
+			local path = unit.path:Path(2)
+				if GetDistance(path, Rm) > 210 and GetDistance(unit, Rm) < 175  then
+				local p1 = Vector(unit) + (Vector(path) - Vector(unit)):normalized() * 0.6 * unit.ms
+					if GetDistance(p1) < 1000 and GetDistance(Rm, p1) > 150 and GetDistance(Rm, p1) < 250 and GetDistance(unit, path) > GetDistance(unit, p1) then
+						CastSpell(_W, p1.x, p1.z)
+					end
+				end
+			end
+		end
+	end
 end
 
 function GetCustomTarget()
-ts:update()	
-if ValidTarget(ts.target) and ts.target.type == myHero.type then
-return ts.target
-else
-return nil
-end
+	ts:update()	
+	if ValidTarget(ts.target) and ts.target.type == myHero.type then
+		return ts.target
+	else
+		return nil
+	end
 end
 
 function Combo(unit)
-if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
-if Param.Combo.UseQ then 
-CastQ(unit)
-end	
-if Param.Combo.UseE then 
-CastE(unit)
-end	
-if Param.Combo.UseR then 
-CastR(unit)
-end	
-end
+	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+		if Param.Combo.UseQ then 
+			CastQ(unit)
+		end	
+		if Param.Combo.UseE then 
+			CastE(unit)
+		end	
+		if Param.Combo.UseR then 
+			CastR(unit)
+		end	
+	end
 end
 
 function Harass(unit)
-ts:update()
-if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
-if(myHero:CanUseSpell(_Q) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100 ) and ts.target ~= nil and Param.Harass.UseQ ) then 
-  	CastQ(unit)
-end
-
-if(myHero:CanUseSpell(_E) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100 ) and ts.target ~= nil and Param.Harass.UseE ) then 
- 	CastE(unit)
-end
-
-if(myHero:CanUseSpell(_R) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100) and ts.target ~= nil and Param.Harass.UseR ) then
-CastR(unit)
-end
-end
+	ts:update()
+	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+		if(myHero:CanUseSpell(_Q) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100 ) and ts.target ~= nil and Param.Harass.UseQ ) then 
+	  		CastQ(unit)
+		end
+		if(myHero:CanUseSpell(_E) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100 ) and ts.target ~= nil and Param.Harass.UseE ) then 
+	 		CastE(unit)
+		end
+		if(myHero:CanUseSpell(_R) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100) and ts.target ~= nil and Param.Harass.UseR ) then
+			CastR(unit)
+		end
+	end
 end
 
 function ManaLaneClear()
@@ -534,493 +499,431 @@ function ManaWaveClear()
 end
 
 function LaneClear()
-enemyMinions:update()
-
-if not ManaLaneClear() then
-for i, minion in pairs(enemyMinions.objects) do
-if ValidTarget(minion) and minion ~= nil then
-if Param.Clear.LaneClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
-CastQ(minion)
-end
-
-if Param.Clear.LaneClear.UseE and GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
-CastE(minion)
-end
-
-if Param.Clear.LaneClear.UseR and GetDistance(minion) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
-CastR(minion)
-end
-end
-end
-end
+	enemyMinions:update()
+	if not ManaLaneClear() then
+		for i, minion in pairs(enemyMinions.objects) do
+			if ValidTarget(minion) and minion ~= nil then
+				if Param.Clear.LaneClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+					CastQ(minion)
+				end
+				if Param.Clear.LaneClear.UseE and GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
+					CastE(minion)
+				end
+				if Param.Clear.LaneClear.UseR and GetDistance(minion) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
+					CastR(minion)
+				end
+			end
+		end
+	end
 end
 
 function WaveClear()
-
-enemyMinions:update()
-
-local canonheal = ((CurrentTimeInMillis()/6000)+700)
-
-if not ManaWaveClear() then
-for i, minion in pairs(enemyMinions.objects) do
-if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) then
-if GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and (minion.maxHealth >= canonheal) then
-CastQ(minion)
-end
-
-if GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY and (minion.maxHealth >= canonheal) then
-CastE(minion)
-end
-
-if GetDistance(minion) <= SkillR.range and myHero:CanUseSpell(_R) == READY and (minion.maxHealth >= canonheal) then
-CastR(minion)
-end 
-end
-end
-end
+	enemyMinions:update()
+	local canonheal = ((CurrentTimeInMillis()/6000)+700)
+	if not ManaWaveClear() then
+		for i, minion in pairs(enemyMinions.objects) do
+			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) then
+				if GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and (minion.maxHealth >= canonheal) then
+					CastQ(minion)
+				end
+				if GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY and (minion.maxHealth >= canonheal) then
+					CastE(minion)
+				end
+				if GetDistance(minion) <= SkillR.range and myHero:CanUseSpell(_R) == READY and (minion.maxHealth >= canonheal) then
+					CastR(minion)
+				end 
+			end
+		end
+	end
 end
 
 function JungleClear()
-jungleMinions:update()
-if not ManaJungleClear() then
-for i, jungleMinion in pairs(jungleMinions.objects) do
-if jungleMinion ~= nil then
-
-if Param.Clear.JungleClear then CastSpell(_E, jungleMinion)
-end
-
-if Param.Clear.JungleClear then CastR(jungleMinion)
-end
-end
-end
-end
+	jungleMinions:update()
+	if not ManaJungleClear() then
+		for i, jungleMinion in pairs(jungleMinions.objects) do
+			if jungleMinion ~= nil then
+				if Param.Clear.JungleClear then
+					CastSpell(_E, jungleMinion)
+				end
+				if Param.Clear.JungleClear then 
+					CastR(jungleMinion)
+				end
+			end
+		end
+	end
 end
 
 function CastQ(unit)
-if Qm ~=nil then
-return end
-if unit ~= nil and GetDistance(unit) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
-CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false)
- 
-if HitChance >= 2 then
-CastSpell(_Q, CastPosition.x, CastPosition.z)
-end
-end
+	if Qm ~=nil then return end
+	if unit ~= nil and GetDistance(unit) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false)
+		if HitChance >= 2 then
+			CastSpell(_Q, CastPosition.x, CastPosition.z)
+		end
+	end
 end
 
 function CastW(unit)
-if unit ~= nil and GetDistance(unit) <= SkillW.range and myHero:CanUseSpell(_W) == READY then
-CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillW.delay, SkillW.width, SkillW.range, SkillW.speed, myHero, false)
-
-if HitChance >= 2 then
-CastSpell(_W, CastPosition.x, CastPosition.z)
-end
-end
+	if unit ~= nil and GetDistance(unit) <= SkillW.range and myHero:CanUseSpell(_W) == READY then
+	CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillW.delay, SkillW.width, SkillW.range, SkillW.speed, myHero, false)
+		if HitChance >= 2 then
+			CastSpell(_W, CastPosition.x, CastPosition.z)
+		end
+	end
 end
 
 function CastE(unit)
-if Param.miscellaneous.EGel then
-if TargetHaveBuff("chilled", unit) then
-if myHero:CanUseSpell(_E) == READY then
-CastSpell(_E, unit)
-end
-end
-else
-if myHero:CanUseSpell(_E) == READY then
-CastSpell(_E, unit)
-end
-end
+	if Param.miscellaneous.EGel then
+		if TargetHaveBuff("chilled", unit) then
+			if myHero:CanUseSpell(_E) == READY then
+				CastSpell(_E, unit)
+			end
+		end
+	else
+		if myHero:CanUseSpell(_E) == READY then
+			CastSpell(_E, unit)
+		end
+	end
 end
 
 function CastR(unit)
-if Rm ~= nil then
-return
-end
-
-if JungleClearKey and RM ~= nil then
-return
-end
-
-if unit ~= nil and GetDistance(unit) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
-CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false)
-
-if HitChance >= 2 then
-CastSpell(_R, CastPosition.x, CastPosition.z)
-end
-end
+	if Rm ~= nil then return end
+		if JungleClearKey and RM ~= nil then return end
+			if unit ~= nil and GetDistance(unit) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
+				CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false)
+				if HitChance >= 2 then
+					CastSpell(_R, CastPosition.x, CastPosition.z)
+				end
+			end
+		--
+	--
 end
 
 function DetectQ()
-
-if Param.miscellaneous.QError == 1 then
-
-QZone = 200
-
-elseif Param.miscellaneous.QError == 2 then
-
-QZone = 195
-
-elseif Param.miscellaneous.QError == 3 then
-
-QZone = 190
-
-end
-
-if LaneClearKey then 
-for i, minion in ipairs(enemyMinions.objects) do
-if ValidTarget(minion) and minion.visible and Qm and not minion.dead then
-if GetDistance(minion, Qm) <= 200 then
-CastSpell(_Q)
-end
-end
-end
-end
-
-if WaveClearKey then 
-for i, minion in ipairs(enemyMinions.objects) do
-if ValidTarget(minion) and minion.visible and Qm and not minion.dead then
-if (minion.maxHealth >= ((CurrentTimeInMillis()/6000)+700)) and GetDistance(minion, Qm) <= QZone then
-CastSpell(_Q)
-end
-end
-end
-end
-
-for i, enemy in ipairs(GetEnemyHeroes()) do
-if ValidTarget(enemy) and enemy.visible and Qm and not enemy.dead then
-if GetDistance(enemy, Qm) <= QZone then
-CastSpell(_Q)
-end
-end
-end
+	if Param.miscellaneous.QError == 1 then
+		QZone = 200
+	elseif Param.miscellaneous.QError == 2 then
+		QZone = 195
+	elseif Param.miscellaneous.QError == 3 then
+		QZone = 190
+	end
+	if LaneClearKey then 
+		for i, minion in ipairs(enemyMinions.objects) do
+			if ValidTarget(minion) and minion.visible and Qm and not minion.dead then
+				if GetDistance(minion, Qm) <= 200 then
+					CastSpell(_Q)
+				end
+			end
+		end
+	end
+	if WaveClearKey then 
+		for i, minion in ipairs(enemyMinions.objects) do
+			if ValidTarget(minion) and minion.visible and Qm and not minion.dead then
+				if (minion.maxHealth >= ((CurrentTimeInMillis()/6000)+700)) and GetDistance(minion, Qm) <= QZone then
+					CastSpell(_Q)
+				end
+			end
+		end
+	end
+	for i, enemy in ipairs(GetEnemyHeroes()) do
+		if ValidTarget(enemy) and enemy.visible and Qm and not enemy.dead then
+			if GetDistance(enemy, Qm) <= QZone then
+				CastSpell(_Q)
+			end
+		end
+	end
 end
 
 function ValidR()
-local count = 0
-for i = 1, heroManager.iCount, 1 do
-local hero = heroManager:GetHero(i)
-if hero.team ~= myHero.team and ValidTarget(hero) then
-if GetDistance(hero, Rm) < 500 then
-count = count + 1
-end
-end
-end
-if count > 0 then return true else return false end	
+	local TargetCount = 0
+	for i = 1, heroManager.iCount, 1 do
+		local hero = heroManager:GetHero(i)
+		if hero.team ~= myHero.team and ValidTarget(hero) then
+			if GetDistance(hero, Rm) < 500 then
+				TargetCount = TargetCount + 1
+			end
+		end
+	end
+	if TargetCount > 0 then 
+		return true 
+	else 
+		return false 
+	end	
 end
 
 
 function CalcSpellDamage(enemy)
-
-if not enemy then return end 
-
-return ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageQ)) or 0), ((myHero:GetSpellData(_E).level >= 1 and myHero:CalcMagicDamage(enemy, damageE)) or 0), ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageR)) or 0)
-
-end 
-
-for i, enemy in ipairs(GetEnemyHeroes()) do
+	if not enemy then return end 
+		return ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageQ)) or 0), ((myHero:GetSpellData(_E).level >= 1 and myHero:CalcMagicDamage(enemy, damageE)) or 0), ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageR)) or 0)
+	end 
+	for i, enemy in ipairs(GetEnemyHeroes()) do
     	enemy.barData = {PercentageOffset = {x = 0, y = 0} }
-end
+	end
 
 function GetEnemyHPBarPos(enemy)
-
-    if not enemy.barData then
-        return
-    end
-
+    if not enemy.barData then return end
     local barPos = GetUnitHPBarPos(enemy)
     local barPosOffset = GetUnitHPBarOffset(enemy)
     local barOffset = Point(enemy.barData.PercentageOffset.x, enemy.barData.PercentageOffset.y)
     local barPosPercentageOffset = Point(enemy.barData.PercentageOffset.x, enemy.barData.PercentageOffset.y)
-
     local BarPosOffsetX = 169
     local BarPosOffsetY = 47
     local CorrectionX = 16
     local CorrectionY = 4
-
     barPos.x = barPos.x + (barPosOffset.x - 0.5 + barPosPercentageOffset.x) * BarPosOffsetX + CorrectionX
     barPos.y = barPos.y + (barPosOffset.y - 0.5 + barPosPercentageOffset.y) * BarPosOffsetY + CorrectionY 
-
     local StartPos = Point(barPos.x, barPos.y)
     local EndPos = Point(barPos.x + 103, barPos.y)
-
     return Point(StartPos.x, StartPos.y), Point(EndPos.x, EndPos.y)
-
 end
 
 function DrawIndicator(enemy)
-local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-
-Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
-
+	local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
+	Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
+	Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+	Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
     local damage = Qdmg + Edmg + Rdmg
     local SPos, EPos = GetEnemyHPBarPos(enemy)
-
     if not SPos then return end
-
     local barwidth = EPos.x - SPos.x
     local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
-
-    DrawText("|", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
+    DrawText("=", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
     DrawText("HP: "..math.floor(enemy.health - damage), 12, math.floor(SPos.x + 25), math.floor(SPos.y - 15), (enemy.health - damage) > 0 and ARGB(255, 0, 255, 0) or  ARGB(255, 255, 0, 0))
 end 
  
 function DrawKillable()
-
-for i = 1, heroManager.iCount, 1 do
-local enemy = heroManager:getHero(i)
-if enemy and ValidTarget(enemy) then
-
-
-if enemy.team ~= myHero.team then 
-if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
-if (myHero:CanUseSpell(Ignite) == READY) then
- 	iDmg = 40 + (20 * myHero.level)
-elseif (myHero:CanUseSpell(Ignite) ~= READY) then
-iDmg = 0
-end
-end
-
-local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-
-
-
-Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
-
-if iDmg > enemy.health then
-                	KillText[i] = 1
-elseif Qdmg > enemy.health then
-KillText[i] = 2
-elseif Qdmg*2 > enemy.health then
-KillText[i] = 3
-elseif Qdmg + iDmg > enemy.health then
-KillText[i] = 4
-elseif Qdmg*2 + iDmg > enemy.health then
-KillText[i] = 5
-elseif Qdmg + Edmg*2 > enemy.health then
-KillText[i] = 6
-elseif Qdmg*2 + Edmg*2 > enemy.health then
-KillText[i] = 7
-elseif Qdmg + Edmg*2 + iDmg > enemy.health then
-KillText[i] = 9
-elseif Qdmg*2 + Edmg*2 + iDmg > enemy.health then
-KillText[i] = 9
-elseif Qdmg + Edmg*2 + Rdmg > enemy.health then
-KillText[i] = 11
-elseif Qdmg*2 + Edmg*2 + Rdmg > enemy.health then
-KillText[i] = 11
-elseif Qdmg*2 + Edmg*2 + Rdmg*3 > enemy.health then
-KillText[i] = 12
-elseif Qdmg + Edmg*2 + Rdmg + iDmg > enemy.health then
-KillText[i] = 13
-elseif Qdmg*2 + Edmg*2 + Rdmg + iDmg > enemy.health then
-KillText[i] = 14
-elseif Qdmg*2 + Edmg*2 + Rdmg*3 + iDmg > enemy.health then
-KillText[i] = 15
-else
-KillText[i] = 16
-end 
-end 
-end 
-end 
+	for i = 1, heroManager.iCount, 1 do
+		local enemy = heroManager:getHero(i)
+		if enemy and ValidTarget(enemy) then
+			if enemy.team ~= myHero.team then 
+				if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+					if (myHero:CanUseSpell(Ignite) == READY) then
+						iDmg = 40 + (20 * myHero.level)
+					elseif (myHero:CanUseSpell(Ignite) ~= READY) then
+						iDmg = 0
+					end
+				end
+				local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
+				Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
+				Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+				Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
+				if iDmg > enemy.health then
+					KillText[i] = 1
+				elseif Qdmg > enemy.health then
+					KillText[i] = 2
+				elseif Qdmg*2 > enemy.health then
+					KillText[i] = 3
+				elseif Qdmg + iDmg > enemy.health then
+					KillText[i] = 4
+				elseif Qdmg*2 + iDmg > enemy.health then
+					KillText[i] = 5
+				elseif Qdmg + Edmg*2 > enemy.health then
+					KillText[i] = 6
+				elseif Qdmg*2 + Edmg*2 > enemy.health then
+					KillText[i] = 7
+				elseif Qdmg + Edmg*2 + iDmg > enemy.health then
+					KillText[i] = 9
+				elseif Qdmg*2 + Edmg*2 + iDmg > enemy.health then
+					KillText[i] = 9
+				elseif Qdmg + Edmg*2 + Rdmg > enemy.health then
+					KillText[i] = 11
+				elseif Qdmg*2 + Edmg*2 + Rdmg > enemy.health then
+					KillText[i] = 11
+				elseif Qdmg*2 + Edmg*2 + Rdmg*3 > enemy.health then
+					KillText[i] = 12
+				elseif Qdmg + Edmg*2 + Rdmg + iDmg > enemy.health then
+					KillText[i] = 13
+				elseif Qdmg*2 + Edmg*2 + Rdmg + iDmg > enemy.health then
+					KillText[i] = 14
+				elseif Qdmg*2 + Edmg*2 + Rdmg*3 + iDmg > enemy.health then
+					KillText[i] = 15
+				else
+					KillText[i] = 16
+				end 
+			end 
+		end 
+	end 
 end
 
 function OnCreateObj(object)
-if object.name == "cryo_FlashFrost_Player_mis.troy" then
-Qm = object
-end
-if object.name == "cryo_storm_green_team.troy" then
-Rm = object
-end
+	if object.name == "cryo_FlashFrost_Player_mis.troy" then
+		Qm = object
+	end
+	if object.name == "cryo_storm_green_team.troy" then
+		Rm = object
+	end
 end
 
 function OnDeleteObj(object)
-if object.name == "cryo_FlashFrost_mis.troy" then
-Qm = nil
-end
-if object.name == "cryo_storm_green_team.troy" then
-Rm = nil
-end
+	if object.name == "cryo_FlashFrost_mis.troy" then
+		Qm = nil
+	end
+	if object.name == "cryo_storm_green_team.troy" then
+		Rm = nil
+	end
 end
 
 function OnDraw()
-if not myHero.dead and not Param.drawing.disablealldrawings then
+	if not myHero.dead and not Param.drawing.disablealldrawings then
+		if myHero:CanUseSpell(_Q) == READY and Param.drawing.spell.Qdraw then 
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(200, 0, 0))
+		end
+		if myHero:CanUseSpell(_W) == READY and Param.drawing.spell.Wdraw then 
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillW.range, RGB(200, 0, 0))
+		end
+		if myHero:CanUseSpell(_E) == READY and Param.drawing.spell.Edraw then 
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, RGB(200, 0, 0))
+		end
+		if myHero:CanUseSpell(_R) == READY and Param.drawing.spell.Rdraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, RGB(200, 0, 0))
+		end
+		if Param.drawing.spell.AAdraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, 660, RGB(200, 0, 0))
+		end
+		if Target ~= nil and ValidTarget(Target) then
+			if Param.drawing.tText then
+				DrawText3D("ACTUAL BITCH",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFFFF) -- Acknowledgments to http://forum.botoflegends.com/user/25371-big-fat-corki/ and his Mark IV script for giving me the idea of the target name.
+			end
+		end
+		if Param.drawing.spell.Qtravel then
+			if Qm ~= nil then
+				local Vec2 = Vector(Qm.pos) + (Vector(myHero.pos) - Vector(Qm.pos)):normalized()
+				DrawCircle(Vec2.x, Vec2.y, Vec2.z, 200, ARGB(255,255, 255,255))
+			end
+		end
+		if Param.drawing.drawKillable then
+			for i = 1, heroManager.iCount do
+				local enemy = heroManager:getHero(i)
+				if enemy and ValidTarget(enemy) then
+					local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
+					local PosX = barPos.x - 35
+					local PosY = barPos.y - 50  
+					DrawText(TextList[KillText[i]], 15, PosX, PosY, ARGB(255,255,204,0))
+				end 
+			end 
+		end 
+		if Param.drawing.drawDamage then 
+			for i, enemy in ipairs(GetEnemyHeroes()) do
+				if enemy and ValidTarget(enemy) then
+					DrawIndicator(enemy)
+				end
+			end
+		end
+	end
 
-if myHero:CanUseSpell(_Q) == READY and Param.drawing.spell.Qdraw then 
-DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(200, 0, 0))
-end
-
-if myHero:CanUseSpell(_W) == READY and Param.drawing.spell.Wdraw then 
-DrawCircle(myHero.x, myHero.y, myHero.z, SkillW.range, RGB(200, 0, 0))
-end
-
-if myHero:CanUseSpell(_E) == READY and Param.drawing.spell.Edraw then 
-DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, RGB(200, 0, 0))
-end
-
-if myHero:CanUseSpell(_R) == READY and Param.drawing.spell.Rdraw then
-DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, RGB(200, 0, 0))
-end
-
-if Param.drawing.spell.AAdraw then
-DrawCircle(myHero.x, myHero.y, myHero.z, 660, RGB(200, 0, 0))
-end
-
-if Target ~= nil and ValidTarget(Target) then
-if Param.drawing.tText then
-DrawText3D("ACTUAL BITCH",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFFFF)
-end
-end
-
-if Param.drawing.spell.Qtravel then
-if Qm ~= nil then
-local Vec2 = Vector(Qm.pos) + (Vector(myHero.pos) - Vector(Qm.pos)):normalized()
-DrawCircle(Vec2.x, Vec2.y, Vec2.z, 200, ARGB(255,255, 255,255))
-end
-end
-
- 	if Param.drawing.drawKillable then
-
- 	for i = 1, heroManager.iCount do
-
- 	local enemy = heroManager:getHero(i)
-
- 	if enemy and ValidTarget(enemy) then
-
- 	local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
-local PosX = barPos.x - 35
-local PosY = barPos.y - 50  
-
-DrawText(TextList[KillText[i]], 15, PosX, PosY, ARGB(255,255,204,0))
-
-end 
-end 
- 	end 
-
- 	if Param.drawing.drawDamage then 
-    	for i, enemy in ipairs(GetEnemyHeroes()) do
-       	if enemy and ValidTarget(enemy) then
-           	DrawIndicator(enemy)
-        	end
-end
- 	end
-end
-
-if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
-if Param.drawing.wallmenu.active then
-for i,group in pairs(wallSpots) do
- 	if Param.drawing.wallmenu.holdwall and Param.drawing.wallmenu.holdshow > 500 then
- 	for x, wallSpot in pairs(group.Locations) do
- 	if GetDistance(wallSpot) < Param.drawing.wallmenu.holdshow then
- 	if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.holdshow then
- 	pouncecolor = 0xFFFFFF
- 	else
- 	pouncecolor = group.color
- 	end
-                    	drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,pouncecolor)
-                     end
- 	end
- 	elseif Param.drawing.wallmenu.showclose then
- 	for x, wallSpot in pairs(group.Locations) do
- 	if GetDistance(wallSpot) <= Param.drawing.wallmenu.showcloserange then
- 	if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.showcloserange then
- 	pouncecolor = 0xFFFFFF
- 	else 
- 	pouncecolor = group.color
- 	end
- 	drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,pouncecolor)
- 	end
- 	end
- 	end
-        end
-    end
-        end
+	if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
+		if Param.drawing.wallmenu.active then
+			for i,group in pairs(wallSpots) do
+				if Param.drawing.wallmenu.holdwall and Param.drawing.wallmenu.holdshow > 500 then
+					for x, wallSpot in pairs(group.Locations) do
+						if GetDistance(wallSpot) < Param.drawing.wallmenu.holdshow then
+							if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.holdshow then
+								color = 0xFFFFFF
+							else
+							color = group.color
+							end
+							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,color)
+						end
+					end
+				elseif Param.drawing.wallmenu.showclose then
+					for x, wallSpot in pairs(group.Locations) do
+						if GetDistance(wallSpot) <= Param.drawing.wallmenu.showcloserange then
+							if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.showcloserange then
+								color = 0xFFFFFF
+							else 
+								color = group.color
+							end
+							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,color)
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 function OnProcessSpell(unit, spell)
-if Param.miscellaneous.Wstop then
-        if isAChampToInterrupt[spell.name] and GetDistanceSqr(unit) <= 715*715 then
-            CastSpell(_W, unit.x, unit.z)
-       	end
-end
-if Param.miscellaneous.Qgapclos then
-    	if unit.team ~= myHero.team then
-        	if isAGapcloserUnitTarget[spell.name] then
-            	if spell.target and spell.target.networkID == myHero.networkID then
-                	CastQ(unit)
-                	CastR(myHero)
-                	CastSpell(_E, unit)
-            	end
-        	end
-
-        	if isAGapcloserUnitNoTarget[spell.name] and GetDistanceSqr(unit) <= 2000*2000 and (spell.target == nil or (spell.target and spell.target.isMe)) then
-                CastQ(unit)
-                CastSpell(_E, unit)
-        	end
-    	end
-    end
+	if Param.miscellaneous.Wstop then
+	    if isAChampToInterrupt[spell.name] and GetDistanceSqr(unit) <= 715*715 then
+	        CastSpell(_W, unit.x, unit.z)
+	    end
+	end
+	if Param.miscellaneous.Qgapclos then
+	    if unit.team ~= myHero.team then
+	        if isAGapcloserUnitTarget[spell.name] then
+	            if spell.target and spell.target.networkID == myHero.networkID then
+	                CastQ(unit)
+	                CastR(myHero)
+	                CastSpell(_E, unit)
+	            end
+	        end
+	        if isAGapcloserUnitNoTarget[spell.name] and GetDistanceSqr(unit) <= 2000*2000 and (spell.target == nil or (spell.target and spell.target.isMe)) then
+	            CastQ(unit)
+	            CastSpell(_E, unit)
+	       	end
+	    end
+	end
 end
 
 function OnGainBuff (unit, buff)
 
-for i = 1, 1 do
-if not Param.miscellaneous.QuickSS.qsswithscript then return end
-if myHero:getBuff(isABuff) then
-if os.clock() - lastQss < 90 then return end
-for SLOT = ITEM_1, ITEM_6 do
-if myHero:GetSpellData(SLOT).name == "QuicksilverSash" then
-if myHero:CanUseSpell(SLOT) == READY then
-DelayAction(function()
-CastSpell(SLOT)
-lastQss = os.clock()
-EnvoiMessage("QSS => Casted.")
-end, Param.miscellaneous.QuickSS.qssdelay/1000)
-end
-end
-end
-end
-end
+	for i = 1, 1 do
+		if not Param.miscellaneous.QuickSS.qsswithscript then return end
+			if myHero:getBuff(isABuff) then
+				if os.clock() - lastQss < 90 then return end
+					for SLOT = ITEM_1, ITEM_6 do
+						if myHero:GetSpellData(SLOT).name == "QuicksilverSash" then
+							if myHero:CanUseSpell(SLOT) == READY then
+								DelayAction(function()
+									CastSpell(SLOT)
+									lastQss = os.clock()
+									EnvoiMessage("QSS => Casted.")
+								end, Param.miscellaneous.QuickSS.qssdelay/1000)
+							end
+						end
+					end
+				--
+			end
+		--
+	end
 end
 
 
 function GenerateTables()
 
-isABuff = {
-[1]=false,
-[2]=false,
-[3]=false,
-[4]=false,
-[5]=true,
-[6]=false,
-[7]=true,
-[8]=true,
-[9]=true,
-[10]=false,
-[11]=false,
-[12]=false,
-[13]=false,
-[14]=false,
-[15]=false,
-[16]=false,
-[17]=false,
-[18]=false,
-[19]=false,
-[20]=true,
-[21]=true,
-[22]=false,
-[23]=true,
-[24]=true,
-[25]=false,
-[26]=false,
-[27]=false,
-[28]=false,
-[29]=true,
-[30]=false,
-[31]=false
-}
+	isABuff = {
+		[1]=false,
+		[2]=false,
+		[3]=false,
+		[4]=false,
+		[5]=true,
+		[6]=false,
+		[7]=true,
+		[8]=true,
+		[9]=true,
+		[10]=false,
+		[11]=false,
+		[12]=false,
+		[13]=false,
+		[14]=false,
+		[15]=false,
+		[16]=false,
+		[17]=false,
+		[18]=false,
+		[19]=false,
+		[20]=true,
+		[21]=true,
+		[22]=false,
+		[23]=true,
+		[24]=true,
+		[25]=false,
+		[26]=false,
+		[27]=false,
+		[28]=false,
+		[29]=true,
+		[30]=false,
+		[31]=false
+	}
 
     isAGapcloserUnitTarget = {
         ['AkaliShadowDance']	= {true, Champ = 'Akali', 	spellKey = 'R'},
@@ -1081,10 +984,10 @@ isABuff = {
 end
 
 function Skills()
-SkillQ = { name = "Flash Frost", range = 1075, delay = 0.250, speed = 850, width = 110, ready = false }
-SkillW = { name = "Crystallize", range = 1000, delay = 0.25, speed = math.huge, width = 100, ready = false }
-SkillE = { name = "Frostbite", range = 650, delay = 0.25, speed = 850, width = nil, ready = false }
-SkillR = { name = "Glacial Storm", range = 625, delay = 0.100, speed = math.huge, width = 350, ready = false }
+	SkillQ = { name = "Flash Frost", range = 1075, delay = 0.250, speed = 850, width = 110, ready = false }
+	SkillW = { name = "Crystallize", range = 1000, delay = 0.25, speed = math.huge, width = 100, ready = false }
+	SkillE = { name = "Frostbite", range = 650, delay = 0.25, speed = 850, width = nil, ready = false }
+	SkillR = { name = "Glacial Storm", range = 625, delay = 0.100, speed = math.huge, width = 350, ready = false }
 end
 
 local priorityTable = {
@@ -1119,7 +1022,7 @@ local priorityTable = {
 function SetPriority(table, hero, priority)
     for i=1, #table, 1 do
     	if hero.charName:find(table[i]) ~= nil then
-            TS_SetHeroPriority(priority, hero.charName)
+        	TS_SetHeroPriority(priority, hero.charName)
         end
     end
 end
@@ -1127,7 +1030,7 @@ end
 function arrangePrioritys()
     for i, enemy in ipairs(GetEnemyHeroes()) do
         SetPriority(priorityTable.AD_Carry, enemy, 1)
-        SetPriority(priorityTable.AP_Carry,       enemy, 2)
+        SetPriority(priorityTable.AP_Carry, enemy, 2)
         SetPriority(priorityTable.Support,  enemy, 3)
         SetPriority(priorityTable.Bruiser,  enemy, 4)
         SetPriority(priorityTable.Tank,     enemy, 5)
@@ -1136,481 +1039,501 @@ end
  
 function PriorityOnLoad()
         if heroManager.iCount < 10 then
-EnvoiMessage("Impossible to Arrange Priority Table.. There is not enough champions...")	
+			EnvoiMessage("Impossible to Arrange Priority Table.. There is not enough champions... (less than 10)")	
         else
-                arrangePrioritys()
+            arrangePrioritys()
         end
 end
 
 function AutoPotions()
-if (Param.miscellaneous.Pots.potswithscript == false) then return end
-if os.clock() - lastPotion < ActualPotTime then return end
-for SLOT = ITEM_1, ITEM_6 do
-if myHero:GetSpellData(SLOT).name == ActualPot then
-if myHero:CanUseSpell(SLOT) == READY and (myHero.health*100)/myHero.maxHealth < Param.miscellaneous.Pots.potatxhp then
-CastSpell(SLOT)	
-EnvoiMessage("1x "..ActualPotName.." => Used.")
-lastPotion = os.clock()	
-end
-end
-end
+	if (Param.miscellaneous.Pots.potswithscript == false) then return end
+		if os.clock() - lastPotion < ActualPotTime then return end
+			for SLOT = ITEM_1, ITEM_6 do
+				if myHero:GetSpellData(SLOT).name == "ItemMiniRegenPotion" or "ItemCrystalFlaskJungle" or "ItemCrystalFlask" or "ItemDarkCrystalFlask" then
+					if myHero:CanUseSpell(SLOT) == READY and (myHero.health*100)/myHero.maxHealth < Param.miscellaneous.Pots.potatxhp then
+						CastSpell(SLOT)
+						EnvoiMessage("1x "..ActualPotName.." => Used.")
+						lastPotion = os.clock()	
+					end
+				end
+			end
+		--
+	--
 end
 
 function  AutoElixirDuSorcier()
-if (Param.miscellaneous.ElixirduSorcier.elixirwithscript == false) then return end
-if(Param.miscellaneous.ElixirduSorcier.elixironlywithcombo == true) and (Param.Combo.comboKey == false) then return end
-if(Param.miscellaneous.ElixirduSorcier.elixirinfight == true) and (myHero.health*100)/myHero.maxHealth > 80 then return end 
-if os.clock() - lastElixir < 180 then return end
-for SLOT = ITEM_1, ITEM_6 do
-if myHero:GetSpellData(SLOT).name == "ElixirOfSorcery" then
-if myHero:CanUseSpell(SLOT) == READY then
-CastSpell(SLOT)
-EnvoiMessage("1x Elixir Of Sorcery => Used.")
-lastElixir = os.clock()
-end
-end
-end
+	if (Param.miscellaneous.ElixirduSorcier.elixirwithscript == false) then return end
+		if(Param.miscellaneous.ElixirduSorcier.elixironlywithcombo == true) and (Param.Combo.comboKey == false) then return end
+			if(Param.miscellaneous.ElixirduSorcier.elixirinfight == true) and (myHero.health*100)/myHero.maxHealth > 80 then return end 
+				if os.clock() - lastElixir < 180 then return end
+					for SLOT = ITEM_1, ITEM_6 do
+						if myHero:GetSpellData(SLOT).name == "ElixirOfSorcery" then
+							if myHero:CanUseSpell(SLOT) == READY then
+								CastSpell(SLOT)
+								EnvoiMessage("1x Elixir Of Sorcery => Used.")
+								lastElixir = os.clock()
+							end
+						end
+					end
+				--
+			--
+		--
+	--
 end
 
 function AutoFrostQuenn()
-if (Param.miscellaneous.ItemSuppBleu.suppbleuwithscript == false) then return end
-if(Param.miscellaneous.ItemSuppBleu.suppbleuchase == true) and not unit ~= nil and GetDistance(unit) <= SkillW.range and not ComboKey  then return end
-if(Param.miscellaneous.ItemSuppBleu.suppbleucombo == true) and (myHero.health*100)/myHero.maxHealth > 90 and not ComboKey then return end 
-if os.clock() - lastFrostQuennCast < 60 then return end
-for SLOT = ITEM_1, ITEM_6 do
-if myHero:GetSpellData(SLOT).name == "ItemWraithCollar" then
-if myHero:CanUseSpell(SLOT) == READY then
-CastSpell(SLOT)
-EnvoiMessage("Frost's Quenn Claim => Casted.")
-lastFrostQuennCast = os.clock()
-end
-end
-end
+	if (Param.miscellaneous.ItemSuppBleu.suppbleuwithscript == false) then return end
+		if(Param.miscellaneous.ItemSuppBleu.suppbleuchase == true) and not unit ~= nil and GetDistance(unit) <= SkillW.range and not ComboKey  then return end
+			if(Param.miscellaneous.ItemSuppBleu.suppbleucombo == true) and (myHero.health*100)/myHero.maxHealth > 90 and not ComboKey then return end 
+				if os.clock() - lastFrostQuennCast < 60 then return end
+					for SLOT = ITEM_1, ITEM_6 do
+						if myHero:GetSpellData(SLOT).name == "ItemWraithCollar" then
+							if myHero:CanUseSpell(SLOT) == READY then
+								CastSpell(SLOT)
+								EnvoiMessage("Frost's Quenn Claim => Casted.")
+								lastFrostQuennCast = os.clock()
+							end
+						end
+					end
+				--
+			--
+		--
+	--
 end
 
 function AutoSeraphin()
-if (Param.miscellaneous.BatonSeraphin.seraphwithscript == false) then return end
-if(Param.miscellaneous.BatonSeraphin.seraphcombo == true) and not ComboKey then return end
-if(myHero.health*100)/myHero.maxHealth > Param.miscellaneous.BatonSeraphin.seraphxlife then return end
-if os.clock() - lastSeraphin < 120 then return end
-for SLOT = ITEM_1, ITEM_6 do
-if myHero:GetSpellData(SLOT).name == "ItemSeraphsEmbrace" then
-if myHero:CanUseSpell(SLOT) == READY then
-DelayAction(function()
-CastSpell(SLOT)
-lastSeraphin = os.clock()
-EnvoiMessage("Seraph's Embrace => Casted.")
-end, Param.miscellaneous.BatonSeraphin.seraphdelay/1000)
-end
-end
-end	
+	if (Param.miscellaneous.BatonSeraphin.seraphwithscript == false) then return end
+		if(Param.miscellaneous.BatonSeraphin.seraphcombo == true) and not ComboKey then return end
+			if(myHero.health*100)/myHero.maxHealth > Param.miscellaneous.BatonSeraphin.seraphxlife then return end
+				if os.clock() - lastSeraphin < 120 then return end
+					for SLOT = ITEM_1, ITEM_6 do
+						if myHero:GetSpellData(SLOT).name == "ItemSeraphsEmbrace" then
+							if myHero:CanUseSpell(SLOT) == READY then
+								DelayAction(function()
+									CastSpell(SLOT)
+									lastSeraphin = os.clock()
+									EnvoiMessage("Seraph's Embrace => Casted.")
+								end, Param.miscellaneous.BatonSeraphin.seraphdelay/1000)
+							end
+						end
+					end
+				--
+			--
+		--
+	--
 end
 
 
 DelayAction(function()EnvoiMessage("Special Note : QSS can be bugged, then, if you got errors, disable QSS usage.")end, 10)
 
+--======START======--
+-- Developers: 
+-- Divine (http://forum.botoflegends.com/user/86308-divine/)
+-- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
+-- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
+--==================--
 if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
-skinsPB = {
-[1] = 0xCA,
-[10] = 0x68,
-[8] = 0xE8,
-[4] = 0xF8,
-[12] = 0xD8,
-[5] = 0xB8,
-[9] = 0xA8,
-[7] = 0x38,
-[3] = 0x0C,
-[11] = 0x28,
-[6] = 0x78,
-[2] = 0x4C,
-};
-skinObjectPos = 6;
-skinHeader = 0x3A;
-dispellHeader = 0xB7;
-skinH = 0x8C;
-skinHPos = 32;
-end;
+	skinsPB = {
+	[1] = 0xCA,
+	[10] = 0x68,
+	[8] = 0xE8,
+	[4] = 0xF8,
+	[12] = 0xD8,
+	[5] = 0xB8,
+	[9] = 0xA8,
+	[7] = 0x38,
+	[3] = 0x0C,
+	[11] = 0x28,
+	[6] = 0x78,
+	[2] = 0x4C,
+	}
+	skinObjectPos = 6
+	skinHeader = 0x3A
+	dispellHeader = 0xB7
+	skinH = 0x8C
+	skinHPos = 32
+end
 
 function SendSkinPacket(mObject, skinPB, networkID)
-if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
-local mP = CLoLPacket(0x3A);
-
-    	mP.vTable = 0xF351B0;
-mP:EncodeF(myHero.networkID);
-
-for I = 1, string.len(mObject) do
-mP:Encode1(string.byte(string.sub(mObject, I, I)));
-end;
-
-for I = 1, (16 - string.len(mObject)) do
-mP:Encode1(0x00);
-end;
-
-mP:Encode4(0x0000000E);
-mP:Encode4(0x0000000F);
-   	mP:Encode2(0x0000);
-
-if (skinPB == nil) then
-mP:Encode4(0x82828282);
-else
-mP:Encode1(skinPB);
-for I = 1, 3 do
-mP:Encode1(skinH);
-end;
-end;
-
-    	mP:Encode4(0x00000000);
-mP:Encode4(0x00000000);
-    	mP:Encode1(0x00);
-
-mP:Hide();
-RecvPacket(mP);
+	if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
+		local mP = CLoLPacket(0x3A)
+		mP.vTable = 0xF351B0;
+		mP:EncodeF(myHero.networkID)
+		for I = 1, string.len(mObject) do
+			mP:Encode1(string.byte(string.sub(mObject, I, I)))
+		end
+		for I = 1, (16 - string.len(mObject)) do
+			mP:Encode1(0x00)
+		end
+		mP:Encode4(0x0000000E)
+		mP:Encode4(0x0000000F)
+		mP:Encode2(0x0000)
+		if (skinPB == nil) then
+			mP:Encode4(0x82828282)
+		else
+			mP:Encode1(skinPB)
+			for I = 1, 3 do
+				mP:Encode1(skinH)
+			end
+		end
+		mP:Encode4(0x00000000)
+		mP:Encode4(0x00000000)
+		mP:Encode1(0x00)
+		mP:Hide()
+		RecvPacket(mP)
+	end
 end
-end;
+
+--=======END========--
+-- Developers: 
+-- Divine (http://forum.botoflegends.com/user/86308-divine/)
+-- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
+-- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
+--==================--
 
 wallSpots = {
-
-worksWell = {
-
-Locations = {
-{ x = 5050.10,y=5,z= 10514.81},
-{ x = 4692,  y = -71,z =10032},
-{ x = 3652,  y = -5, z = 9320},
-{ x = 3116,  y = 50, z = 9268},
-{ x = 2712,  y = 54, z =10044},
-{ x = 2290,  y = 52, z = 9738},
-{ x = 2302,  y = 51, z = 8810},
-{ x = 2650,  y = 51, z = 8220},
-{ x = 2960,  y = 51, z = 7670},
-{ x = 2418,  y = 50, z = 7448},
-{ x = 2692,  y = 52, z = 6962},
-{ x = 2624,  y = 57, z = 6344},
-{ x = 2788,  y = 53, z = 5672},
-{ x = 2398,  y = 52, z = 5284},
-{ x = 1702,  y = 54, z = 5326},
-{ x = 1188,  y = 110, z =4912},
-{ x = 1512,  y = 95, z = 4588},
-{ x = 800,  y = 95, z =  4442},
-{ x = 704,  y = 95, z =  3568},
-{ x = 1202,  y = 95, z = 3962},
-{ x = 1874,  y = 95, z = 3790},
-{ x = 2696,  y = 83, z = 4736},
-{ x = 2806,  y = 95, z = 3660},
-{ x = 3452,  y = 95, z = 3472},
-{ x = 3634,  y = 95, z = 2752},
- 	{ x = 4866,  y = 63, z = 2820},
-{ x = 4146,  y = 95, z = 2936},
-{ x = 4466,  y = 95, z = 2384},
-{ x = 4366,  y = 95, z = 2058},
-{ x = 4130,  y = 95, z = 1808},
-{ x = 3686,  y = 95, z = 1826},
-{ x = 2754,  y = 95, z = 1520},
-{ x = 1950,  y = 95, z = 2010},
-{ x = 840,  y = 95, z =  1754},
-{ x = 690,  y = 109, z = 1280},
-{ x = 1046,  y = 132, z =1036},
-{ x = 1276,  y = 118, z = 712},
-{ x = 1878,  y = 95, z =  956},
-{ x = 1196,  y = 54, z = 5732},
-{ x = 1094,  y = 52, z = 6638},
-{ x = 1542,  y = 52, z = 6298},
-{ x = 1424,  y = 52, z = 6808},
-{ x = 1292,  y = 52, z = 7382},
-{ x = 1860,  y = 51, z = 7708},
-{ x = 1238,  y = 52, z = 8136},
-{ x = 1236,  y = 52, z = 8980},
-{ x = 1866,  y = 52, z = 9566},
-{ x = 1462,  y = 52, z =10414},
-{ x = 1450,  y = 52, z =10790},
-{ x = 974,  y = 52, z = 10606},
-{ x = 1434,  y = 52, z =11536},
-{ x = 2758,  y = 28, z =11958},
-{ x = 3036,  y = -64, z=11614},
-{ x = 3938,  y = -29, z=11342},
-{ x = 3466,  y = -66, z=10778},
-{ x = 3696,  y = -68, z=10252},
-{ x = 4452,  y = 56, z =11806},
-{ x = 4630, y = 56, z = 12456},
-{ x = 3938,  y = 56, z = 12722},
-{ x = 4362,  y = 52, z =13414},
-{ x = 5630,  y = 52, z =12734},
-{ x = 6130,  y = 54, z =12526},
-{ x = 6474,  y = 56, z =12314},
-{ x = 8042,  y = 50, z = 1830},
-{ x = 6914,  y = 49, z = 1640},
-{ x = 6900,  y = 49, z = 1036},
-{ x = 6142,  y = 50, z = 1822},
-{ x = 5212,  y = 52, z = 1892},
-{ x = 5238,  y = 51, z = 2526},
-{ x = 4588,  y = 95, z = 1494},
-{ x = 3916,  y = 95, z = 1214},
-{ x = 4278,  y = 95, z =  784},
-{ x = 3456,  y = 95, z =  774},
-{ x = 4460,  y = 95, z = 1246},
-{ x = 5556,  y = 51, z = 3556},
-{ x = 6036,  y = 49, z = 4232},
-{ x = 6586,  y = 48, z = 4692},
-{ x = 5916,  y = 50, z = 5070},
-{ x = 6270,  y = 48, z = 4842},
-{ x = 6872,  y = 48, z = 4360},
-{ x = 7128,  y = 51, z = 3798},
-{ x = 7404,  y = 52, z = 3074},
-{ x = 7552,  y = 52, z = 2438},
-{ x = 8508,  y = 54, z = 3448},
-{ x = 8836,  y = 53, z = 4034},
-{ x = 9154,  y = 54, z = 3540},
-{ x = 1494,  y = 95, z = 2884},
-{ x = 1052,  y = 95, z = 2292},
-{ x = 5134,  y = 51, z = 3138},
-{ x = 4974,  y = 50, z = 3654},
-{ x = 4684,  y = 50, z = 4030},
-{ x = 4046,  y = 113, z =4156},
-{ x = 3774,  y = 95, z = 3808},
-{ x = 4044,  y = 95, z = 3566},
-{ x = 3476,  y = 95, z = 4136},
-{ x = 3838,  y = 52, z = 4840},
-{ x = 3050,  y = 53, z = 5134},
-{ x = 3150,  y = 51, z = 7226},
-{ x = 3276,  y = 51, z = 6794},
-{ x = 3778,  y = 52, z = 6336},
-{ x = 3992,  y = 52, z = 5986},
-{ x = 4814,  y = 51, z = 6008},
-{ x = 3936,  y = 50, z = 7260},
-{ x = 4754,  y = 51, z = 7516},
-{ x = 5154,  y = 51, z = 7748},
-{ x = 5748,  y = 51, z = 7448},
-{ x = 6140,  y = 51, z = 7102},
-{ x = 4494,  y = -65, z =9556},
-{ x = 2400,  y = 51, z = 9430},
-{ x = 3544,  y = 51, z = 8636},
-{ x = 976,  y = 52, z = 10288},
-{ x = 3296,  y = 51, z = 8124},
-{ x = 3636,  y = 51, z = 8034},
-{ x = 4898,  y = -13, z =8542},
-{ x = 4694,  y = 50, z = 7966},
-{ x = 4484,  y = 50, z = 7218},
-{ x = 4740,  y = 50, z = 6816},
-{ x = 4652,  y = 50, z = 6406},
-{ x = 5124,  y = 50, z = 4958},
-{ x = 4938,  y = 50, z = 4694},
-{ x = 4668,  y = 50, z = 5100},
-{ x = 6048,  y = 50, z = 3564},
-{ x = 6374,  y = 50, z = 3092},
-{ x = 6328,  y = 52, z = 2582},
-{ x = 6134,  y = 52, z = 2308},
-{ x = 6906,  y = 52, z = 2798},
-{ x = 8420,  y = 50, z = 2496},
-{ x = 8902,  y = 49, z = 2402},
-{ x = 10302,  y = 49, z =2458},
-{ x = 10868,  y = 49, z =1936},
-{ x = 9272,  y = 63, z = 1988},
-{ x = 8554,  y = 49, z = 1230},
-{ x = 9984,  y = 51, z = 1252},
-{ x = 10322,  y = 51, z =1058},
-{ x = 10636,  y = 49, z = 962},
-{ x = 12076,  y = 33, z =3016},
-{ x = 13332,  y = 51, z =3158},
-{ x = 13364,  y = 52, z =4466},
-{ x = 12892,  y = 51, z =5266},
-{ x = 12408,  y = 51, z =4938},
-{ x = 11916,  y = 52, z =5080},
-{ x = 11560,  y = 49, z =5878},
-{ x = 11298,  y = 50, z =6170},
-{ x = 9902,  y = -19, z =6264},
-{ x = 8618,  y = -56, z =5584},
-{ x = 7594,  y = 48, z = 4994},
-{ x = 7018,  y = 48, z = 5190},
-{ x = 7104,  y = 52, z = 6286},
-{ x = 6162,  y = 51, z = 6080},
-{ x = 5974,  y = 51, z = 6458},
-{ x = 5748,  y = 51, z = 6288},
-{ x = 6928,  y = 31, z = 7868},
-{ x = 7208,  y = 25, z = 8088},
-{ x = 6574,  y = 24, z = 7606},
-{ x = 6526,  y = -71, z =8318},
-{ x = 6032,  y = -71, z =8690},
-{ x = 6214,  y = -10, z =9272},
-{ x = 6238,  y = 53, z = 9960},
-{ x = 6058,  y = 55, z =10456},
-{ x = 6194,  y = 56, z =11256},
-{ x = 708,  y = 183, z = 644},
-{ x = 5580,  y = 50, z = 1210},
-{ x = 6456,  y = 49, z = 1168},
-{ x = 7708,  y = 49, z = 1196},
-{ x = 9550,  y = 49, z = 2258},
-{ x = 10736,  y = 49, z = 2332},
-{ x = 10426,  y = 49, z = 2912},
-{ x = 10014,  y = 52, z = 3152},
-{ x = 10624,  y = 31, z = 3390},
-{ x = 10988,  y = -48, z = 3514},
-{ x = 11554,  y = -69, z = 3528},
-{ x = 11530,  y = 50, z = 1448},
-{ x = 10378,  y = 50, z = 1492},
-{ x = 10162,  y = -71, z = 4822},
-{ x = 9818,  y = -71, z = 4350},
-{ x = 10164,  y = -62, z = 5396},
-{ x = 8632,  y = 52, z = 4864},
-{ x = 7944,  y = 52, z = 5652},
-{ x = 8450,  y = -71, z = 6478},
-{ x = 7660,  y = -12, z = 6456},
-{ x = 8074,  y = -46, z = 6734},
-{ x = 8372,  y = -37, z = 7008},
-{ x = 8834,  y = 51, z = 7620},
-{ x = 9286,  y = 53, z = 7260},
-{ x = 9768,  y = 51, z = 7136},
-{ x = 10168,  y = 51, z = 6818},
-{ x = 10134,  y = 50, z = 6530},
-{ x = 10092,  y = 51, z = 7402},
-{ x = 10580,  y = 51, z = 7582},
-{ x = 10228,  y = 57, z = 8546},
-{ x = 9944,  y = 50, z = 8923},
-{ x = 10742,  y = 63, z = 8924},
-{ x = 11046,  y = 64, z = 8786},
-{ x = 11046,  y = 60, z = 8450},
-{ x = 11758,  y = 52, z = 7570},
-{ x = 12176,  y = 52, z = 7776},
-{ x = 11562,  y = 52, z = 7978},
-{ x = 12380,  y = 51, z = 7386},
-{ x = 12210,  y = 52, z = 8510},
-{ x = 12018,  y = 51, z = 9206},
-{ x = 11744,  y = 52, z = 9760},
-{ x = 12436,  y = 52, z = 9612},
-{ x = 13036,  y = 52, z = 9566},
-{ x = 12936,  y = 51, z = 7126},
-{ x = 11286,  y = 52, z = 7660},
-{ x = 11876,  y = 51, z = 7172},
-{ x = 11610,  y = 51, z = 6770},
-{ x = 12522,  y = 51, z = 5380},
-{ x = 12582,  y = 54, z = 5936},
-{ x = 12290,  y = 51, z = 6540},
-{ x = 12526,  y = 51, z = 5218},
-{ x = 13858,  y = 53, z = 4354},
-{ x = 13872,  y = 52, z = 4685},
-{ x = 11030,  y = 51, z = 6936},
-{ x = 6880,  y = 52, z = 6958},
-{ x = 6596,  y = 51, z = 6690},
-{ x = 7862,  y = 53, z = 7772},
-{ x = 7368,  y = 54, z = 7286},
-{ x = 7674,  y = 52, z = 8560},
-{ x = 6888,  y = 52, z = 9184},
-{ x = 7186,  y = 53, z = 9852},
-{ x = 7834,  y = 51, z = 9728},
-{ x = 8270,  y = 49, z = 10226},
-{ x = 8906,  y = 50, z = 9800},
-{ x = 8894,  y = 50, z = 11012},
-{ x = 7436,  y = 49, z = 11668},
-{ x = 7100,  y = 54, z = 11528},
-{ x = 7138,  y = 56, z = 10906},
-{ x = 8754,  y = 54, z = 12906},
-{ x = 9596,  y = 52, z = 13000},
-{ x = 9624,  y = 52, z = 12348},
-{ x = 9650,  y = 52, z = 11730},
-{ x = 3102,  y = 52, z = 13282},
-{ x = 4162,  y = 52, z = 13858},
-{ x = 4452,  y = 52, z = 13882},
-{ x = 5960,  y = 52, z = 13620},
-{ x = 6982,  y = 52, z = 13612},
-{ x = 7782,  y = 52, z = 13388},
-{ x = 8082,  y = 52, z = 13396},
-{ x = 7904,  y = 52, z = 13846},
-{ x = 1224,  y = 95, z = 4458},
-{ x = 2162,  y = 95, z = 4376},
-{ x = 2864,  y = 95, z = 4258},
-{ x = 5172,  y = 52, z = 13576},
-{ x = 6776,  y = 55, z = 12978},
-{ x = 6992,  y = 56, z = 12672},
-{ x = 7420,  y = 56, z = 12310},
-{ x = 7810,  y = 56, z = 12078},
-{ x = 8248,  y = 56, z = 12068},
-{ x = 8606,  y = 56, z = 12360},
-{ x = 8510,  y = 55, z = 11780},
-{ x = 8760,  y = 53, z = 11340},
-{ x = 9254,  y = 51, z = 11236},
-{ x = 7952,  y = 50, z = 10488},
-{ x = 7870,  y = 50, z = 10182},
-{ x = 7678,  y = 53, z = 11116},
-{ x = 9068,  y = 54, z = 8618},
-{ x = 8880,  y = 54, z = 8408},
-{ x = 8798,  y = -71, z = 6214},
-{ x = 8182,  y = 52, z = 5176},
-{ x = 11330,  y = -71, z = 4222},
-{ x = 10912,  y = -65, z = 4820},
-{ x = 11222,  y = -2, z = 5594},
-{ x = 11432,  y = 58, z = 8484},
-{ x = 10150,  y = 51, z = 7948},
-{ x = 6624,  y = 53, z = 9566},
-{ x = 7066,  y = 49, z = 1466},
-{ x = 6774,  y = 49, z = 1462},
-{ x = 7834,  y = 52, z = 3372},
-{ x = 7694,  y = 54, z = 3914},
-{ x = 7012,  y = 48, z = 4774},
-{ x = 7530,  y = 52, z = 5936},
-{ x = 5368,  y = -71, z = 8766},
-{ x = 5208,  y = -71, z = 9160},
-{ x = 5358,  y = -71, z = 9472},
-{ x = 5992,  y = 55, z = 10880},
-{ x = 5712,  y = 56, z = 11284},
-{ x = 5064,  y = 56, z = 11562},
-{ x = 3316,  y = -70, z = 11290},
-{ x = 2094,  y = 52, z = 12502},
-{ x = 8712,  y = 50, z = 10450},
-{ x = 8576,  y = 50, z = 9940},
-{ x = 9358,  y = 53, z = 9296},
-{ x = 12558,  y = 51, z = 2446},
-{ x = 12010,  y = 50, z = 1772},
-{ x = 13500,  y = 51, z = 3672},
-{ x = 11774,  y = -70, z = 4092},
-{ x = 13560,  y = 54, z = 6216},
-{ x = 13558,  y = 52, z = 5608},
-{ x = 11784,  y = 52, z = 5630},
-{ x = 10965,  y = 52, z = 10046},
-{ x = 13556,  y = 52, z = 6914},
-{ x = 13604,  y = 52, z = 7480},
-{ x = 13318,  y = 52, z = 8078},
-{ x = 13310,  y = 52, z = 8374},
-{ x = 13856,  y = 52, z = 8158},
-{ x = 13638,  y = 52, z = 9122},
-{ x = 13618,  y = 108, z = 9996},
-{ x = 12092,  y = 82, z = 10142},
-{ x = 13572,  y = 91, z = 10406},
-{ x = 14022,  y = 91, z = 10532},
-{ x = 13614,  y = 91, z = 10934},
-{ x = 13242,  y = 91, z = 10378},
-{ x = 12960,  y = 91, z = 11150},
-{ x = 12542,  y = 91, z = 10534},
-{ x = 12750,  y =91 , z = 12824},
-{ x = 13738,  y = 91, z = 12582},
-{ x = 12526,  y = 91, z = 13834},
-{ x = 13502,  y = 123, z = 14032},
-{ x = 13724,  y = 118, z = 13762},
-{ x = 14016,  y = 119, z = 13534},
-{ x = 14032,  y = 165, z = 14076},
-{ x = 11020,  y = 91, z = 11104},
-{ x = 10734,  y = 97, z = 10780},
-{ x = 9928,  y = 52, z = 11126},
-{ x = 10030,  y = 81, z = 12146},
-{ x = 10320,  y = 96, z = 13642},
-{ x = 9850,  y = 109, z = 13642},
-{ x = 8914,  y = 52, z = 13600},
-{ x = 10834,  y = 91, z = 13644},
-{ x = 12012,  y = 91, z = 11254},
-{ x = 11140,  y = 91, z = 12066},
-{ x = 11046,  y = 91, z = 13026},
-{ x = 11202,  y = 91, z = 14120},
-{ x = 14080,  y = 91, z = 11286},
-{ x = 8222,  y = 52, z = 8092},
-{ x = 9654,  y = 51, z = 9994},
-{ x = 9878,  y = 52, z = 10210},
-{ x = 10138,  y = 52, z = 9800},
-{ x = 11934,  y = 91, z = 10648},
-{ x = 10604,  y = 91, z = 12018},
-{ x = 10402,  y = 91, z = 12716},
-{ x = 10482,  y = 91, z = 14050},
-{ x = 10100,  y = 101, z = 13958},
-{ x = 10132,  y = 100, z = 13388},
-{ x = 10722,  y = 91, z = 11298},
-{ x = 11200,  y = 91, z = 10808},
-},
+	worksWell = {
+		Locations = {
+		-- Walls Spots -- 
+					{ x = 5050.10,y=5,z= 10514.81},
+					{ x = 4692,  y = -71,z =10032},
+					{ x = 3652,  y = -5, z = 9320},
+					{ x = 3116,  y = 50, z = 9268},
+					{ x = 2712,  y = 54, z =10044},
+					{ x = 2290,  y = 52, z = 9738},
+					{ x = 2302,  y = 51, z = 8810},
+					{ x = 2650,  y = 51, z = 8220},
+					{ x = 2960,  y = 51, z = 7670},
+					{ x = 2418,  y = 50, z = 7448},
+					{ x = 2692,  y = 52, z = 6962},
+					{ x = 2624,  y = 57, z = 6344},
+					{ x = 2788,  y = 53, z = 5672},
+					{ x = 2398,  y = 52, z = 5284},
+					{ x = 1702,  y = 54, z = 5326},
+					{ x = 1188,  y = 110, z =4912},
+					{ x = 1512,  y = 95, z = 4588},
+					{ x = 800,  y = 95, z =  4442},
+					{ x = 704,  y = 95, z =  3568},
+					{ x = 1202,  y = 95, z = 3962},
+					{ x = 1874,  y = 95, z = 3790},
+					{ x = 2696,  y = 83, z = 4736},
+					{ x = 2806,  y = 95, z = 3660},
+					{ x = 3452,  y = 95, z = 3472},
+					{ x = 3634,  y = 95, z = 2752},
+					{ x = 4866,  y = 63, z = 2820},
+					{ x = 4146,  y = 95, z = 2936},
+					{ x = 4466,  y = 95, z = 2384},
+					{ x = 4366,  y = 95, z = 2058},
+					{ x = 4130,  y = 95, z = 1808},
+					{ x = 3686,  y = 95, z = 1826},
+					{ x = 2754,  y = 95, z = 1520},
+					{ x = 1950,  y = 95, z = 2010},
+					{ x = 840,  y = 95, z =  1754},
+					{ x = 690,  y = 109, z = 1280},
+					{ x = 1046,  y = 132, z =1036},
+					{ x = 1276,  y = 118, z = 712},
+					{ x = 1878,  y = 95, z =  956},
+					{ x = 1196,  y = 54, z = 5732},
+					{ x = 1094,  y = 52, z = 6638},
+					{ x = 1542,  y = 52, z = 6298},
+					{ x = 1424,  y = 52, z = 6808},
+					{ x = 1292,  y = 52, z = 7382},
+					{ x = 1860,  y = 51, z = 7708},
+					{ x = 1238,  y = 52, z = 8136},
+					{ x = 1236,  y = 52, z = 8980},
+					{ x = 1866,  y = 52, z = 9566},
+					{ x = 1462,  y = 52, z =10414},
+					{ x = 1450,  y = 52, z =10790},
+					{ x = 974,  y = 52, z = 10606},
+					{ x = 1434,  y = 52, z =11536},
+					{ x = 2758,  y = 28, z =11958},
+					{ x = 3036,  y = -64, z=11614},
+					{ x = 3938,  y = -29, z=11342},
+					{ x = 3466,  y = -66, z=10778},
+					{ x = 3696,  y = -68, z=10252},
+					{ x = 4452,  y = 56, z =11806},
+					{ x = 4630, y = 56, z = 12456},
+					{ x = 3938,  y = 56, z = 12722},
+					{ x = 4362,  y = 52, z =13414},
+					{ x = 5630,  y = 52, z =12734},
+					{ x = 6130,  y = 54, z =12526},
+					{ x = 6474,  y = 56, z =12314},
+					{ x = 8042,  y = 50, z = 1830},
+					{ x = 6914,  y = 49, z = 1640},
+					{ x = 6900,  y = 49, z = 1036},
+					{ x = 6142,  y = 50, z = 1822},
+					{ x = 5212,  y = 52, z = 1892},
+					{ x = 5238,  y = 51, z = 2526},
+					{ x = 4588,  y = 95, z = 1494},
+					{ x = 3916,  y = 95, z = 1214},
+					{ x = 4278,  y = 95, z =  784},
+					{ x = 3456,  y = 95, z =  774},
+					{ x = 4460,  y = 95, z = 1246},
+					{ x = 5556,  y = 51, z = 3556},
+					{ x = 6036,  y = 49, z = 4232},
+					{ x = 6586,  y = 48, z = 4692},
+					{ x = 5916,  y = 50, z = 5070},
+					{ x = 6270,  y = 48, z = 4842},
+					{ x = 6872,  y = 48, z = 4360},
+					{ x = 7128,  y = 51, z = 3798},
+					{ x = 7404,  y = 52, z = 3074},
+					{ x = 7552,  y = 52, z = 2438},
+					{ x = 8508,  y = 54, z = 3448},
+					{ x = 8836,  y = 53, z = 4034},
+					{ x = 9154,  y = 54, z = 3540},
+					{ x = 1494,  y = 95, z = 2884},
+					{ x = 1052,  y = 95, z = 2292},
+					{ x = 5134,  y = 51, z = 3138},
+					{ x = 4974,  y = 50, z = 3654},
+					{ x = 4684,  y = 50, z = 4030},
+					{ x = 4046,  y = 113, z =4156},
+					{ x = 3774,  y = 95, z = 3808},
+					{ x = 4044,  y = 95, z = 3566},
+					{ x = 3476,  y = 95, z = 4136},
+					{ x = 3838,  y = 52, z = 4840},
+					{ x = 3050,  y = 53, z = 5134},
+					{ x = 3150,  y = 51, z = 7226},
+					{ x = 3276,  y = 51, z = 6794},
+					{ x = 3778,  y = 52, z = 6336},
+					{ x = 3992,  y = 52, z = 5986},
+					{ x = 4814,  y = 51, z = 6008},
+					{ x = 3936,  y = 50, z = 7260},
+					{ x = 4754,  y = 51, z = 7516},
+					{ x = 5154,  y = 51, z = 7748},
+					{ x = 5748,  y = 51, z = 7448},
+					{ x = 6140,  y = 51, z = 7102},
+					{ x = 4494,  y = -65, z =9556},
+					{ x = 2400,  y = 51, z = 9430},
+					{ x = 3544,  y = 51, z = 8636},
+					{ x = 976,  y = 52, z = 10288},
+					{ x = 3296,  y = 51, z = 8124},
+					{ x = 3636,  y = 51, z = 8034},
+					{ x = 4898,  y = -13, z =8542},
+					{ x = 4694,  y = 50, z = 7966},
+					{ x = 4484,  y = 50, z = 7218},
+					{ x = 4740,  y = 50, z = 6816},
+					{ x = 4652,  y = 50, z = 6406},
+					{ x = 5124,  y = 50, z = 4958},
+					{ x = 4938,  y = 50, z = 4694},
+					{ x = 4668,  y = 50, z = 5100},
+					{ x = 6048,  y = 50, z = 3564},
+					{ x = 6374,  y = 50, z = 3092},
+					{ x = 6328,  y = 52, z = 2582},
+					{ x = 6134,  y = 52, z = 2308},
+					{ x = 6906,  y = 52, z = 2798},
+					{ x = 8420,  y = 50, z = 2496},
+					{ x = 8902,  y = 49, z = 2402},
+					{ x = 10302,  y = 49, z =2458},
+					{ x = 10868,  y = 49, z =1936},
+					{ x = 9272,  y = 63, z = 1988},
+					{ x = 8554,  y = 49, z = 1230},
+					{ x = 9984,  y = 51, z = 1252},
+					{ x = 10322,  y = 51, z =1058},
+					{ x = 10636,  y = 49, z = 962},
+					{ x = 12076,  y = 33, z =3016},
+					{ x = 13332,  y = 51, z =3158},
+					{ x = 13364,  y = 52, z =4466},
+					{ x = 12892,  y = 51, z =5266},
+					{ x = 12408,  y = 51, z =4938},
+					{ x = 11916,  y = 52, z =5080},
+					{ x = 11560,  y = 49, z =5878},
+					{ x = 11298,  y = 50, z =6170},
+					{ x = 9902,  y = -19, z =6264},
+					{ x = 8618,  y = -56, z =5584},
+					{ x = 7594,  y = 48, z = 4994},
+					{ x = 7018,  y = 48, z = 5190},
+					{ x = 7104,  y = 52, z = 6286},
+					{ x = 6162,  y = 51, z = 6080},
+					{ x = 5974,  y = 51, z = 6458},
+					{ x = 5748,  y = 51, z = 6288},
+					{ x = 6928,  y = 31, z = 7868},
+					{ x = 7208,  y = 25, z = 8088},
+					{ x = 6574,  y = 24, z = 7606},
+					{ x = 6526,  y = -71, z =8318},
+					{ x = 6032,  y = -71, z =8690},
+					{ x = 6214,  y = -10, z =9272},
+					{ x = 6238,  y = 53, z = 9960},
+					{ x = 6058,  y = 55, z =10456},
+					{ x = 6194,  y = 56, z =11256},
+					{ x = 708,  y = 183, z = 644},
+					{ x = 5580,  y = 50, z = 1210},
+					{ x = 6456,  y = 49, z = 1168},
+					{ x = 7708,  y = 49, z = 1196},
+					{ x = 9550,  y = 49, z = 2258},
+					{ x = 10736,  y = 49, z = 2332},
+					{ x = 10426,  y = 49, z = 2912},
+					{ x = 10014,  y = 52, z = 3152},
+					{ x = 10624,  y = 31, z = 3390},
+					{ x = 10988,  y = -48, z = 3514},
+					{ x = 11554,  y = -69, z = 3528},
+					{ x = 11530,  y = 50, z = 1448},
+					{ x = 10378,  y = 50, z = 1492},
+					{ x = 10162,  y = -71, z = 4822},
+					{ x = 9818,  y = -71, z = 4350},
+					{ x = 10164,  y = -62, z = 5396},
+					{ x = 8632,  y = 52, z = 4864},
+					{ x = 7944,  y = 52, z = 5652},
+					{ x = 8450,  y = -71, z = 6478},
+					{ x = 7660,  y = -12, z = 6456},
+					{ x = 8074,  y = -46, z = 6734},
+					{ x = 8372,  y = -37, z = 7008},
+					{ x = 8834,  y = 51, z = 7620},
+					{ x = 9286,  y = 53, z = 7260},
+					{ x = 9768,  y = 51, z = 7136},
+					{ x = 10168,  y = 51, z = 6818},
+					{ x = 10134,  y = 50, z = 6530},
+					{ x = 10092,  y = 51, z = 7402},
+					{ x = 10580,  y = 51, z = 7582},
+					{ x = 10228,  y = 57, z = 8546},
+					{ x = 9944,  y = 50, z = 8923},
+					{ x = 10742,  y = 63, z = 8924},
+					{ x = 11046,  y = 64, z = 8786},
+					{ x = 11046,  y = 60, z = 8450},
+					{ x = 11758,  y = 52, z = 7570},
+					{ x = 12176,  y = 52, z = 7776},
+					{ x = 11562,  y = 52, z = 7978},
+					{ x = 12380,  y = 51, z = 7386},
+					{ x = 12210,  y = 52, z = 8510},
+					{ x = 12018,  y = 51, z = 9206},
+					{ x = 11744,  y = 52, z = 9760},
+					{ x = 12436,  y = 52, z = 9612},
+					{ x = 13036,  y = 52, z = 9566},
+					{ x = 12936,  y = 51, z = 7126},
+					{ x = 11286,  y = 52, z = 7660},
+					{ x = 11876,  y = 51, z = 7172},
+					{ x = 11610,  y = 51, z = 6770},
+					{ x = 12522,  y = 51, z = 5380},
+					{ x = 12582,  y = 54, z = 5936},
+					{ x = 12290,  y = 51, z = 6540},
+					{ x = 12526,  y = 51, z = 5218},
+					{ x = 13858,  y = 53, z = 4354},
+					{ x = 13872,  y = 52, z = 4685},
+					{ x = 11030,  y = 51, z = 6936},
+					{ x = 6880,  y = 52, z = 6958},
+					{ x = 6596,  y = 51, z = 6690},
+					{ x = 7862,  y = 53, z = 7772},
+					{ x = 7368,  y = 54, z = 7286},
+					{ x = 7674,  y = 52, z = 8560},
+					{ x = 6888,  y = 52, z = 9184},
+					{ x = 7186,  y = 53, z = 9852},
+					{ x = 7834,  y = 51, z = 9728},
+					{ x = 8270,  y = 49, z = 10226},
+					{ x = 8906,  y = 50, z = 9800},
+					{ x = 8894,  y = 50, z = 11012},
+					{ x = 7436,  y = 49, z = 11668},
+					{ x = 7100,  y = 54, z = 11528},
+					{ x = 7138,  y = 56, z = 10906},
+					{ x = 8754,  y = 54, z = 12906},
+					{ x = 9596,  y = 52, z = 13000},
+					{ x = 9624,  y = 52, z = 12348},
+					{ x = 9650,  y = 52, z = 11730},
+					{ x = 3102,  y = 52, z = 13282},
+					{ x = 4162,  y = 52, z = 13858},
+					{ x = 4452,  y = 52, z = 13882},
+					{ x = 5960,  y = 52, z = 13620},
+					{ x = 6982,  y = 52, z = 13612},
+					{ x = 7782,  y = 52, z = 13388},
+					{ x = 8082,  y = 52, z = 13396},
+					{ x = 7904,  y = 52, z = 13846},
+					{ x = 1224,  y = 95, z = 4458},
+					{ x = 2162,  y = 95, z = 4376},
+					{ x = 2864,  y = 95, z = 4258},
+					{ x = 5172,  y = 52, z = 13576},
+					{ x = 6776,  y = 55, z = 12978},
+					{ x = 6992,  y = 56, z = 12672},
+					{ x = 7420,  y = 56, z = 12310},
+					{ x = 7810,  y = 56, z = 12078},
+					{ x = 8248,  y = 56, z = 12068},
+					{ x = 8606,  y = 56, z = 12360},
+					{ x = 8510,  y = 55, z = 11780},
+					{ x = 8760,  y = 53, z = 11340},
+					{ x = 9254,  y = 51, z = 11236},
+					{ x = 7952,  y = 50, z = 10488},
+					{ x = 7870,  y = 50, z = 10182},
+					{ x = 7678,  y = 53, z = 11116},
+					{ x = 9068,  y = 54, z = 8618},
+					{ x = 8880,  y = 54, z = 8408},
+					{ x = 8798,  y = -71, z = 6214},
+					{ x = 8182,  y = 52, z = 5176},
+					{ x = 11330,  y = -71, z = 4222},
+					{ x = 10912,  y = -65, z = 4820},
+					{ x = 11222,  y = -2, z = 5594},
+					{ x = 11432,  y = 58, z = 8484},
+					{ x = 10150,  y = 51, z = 7948},
+					{ x = 6624,  y = 53, z = 9566},
+					{ x = 7066,  y = 49, z = 1466},
+					{ x = 6774,  y = 49, z = 1462},
+					{ x = 7834,  y = 52, z = 3372},
+					{ x = 7694,  y = 54, z = 3914},
+					{ x = 7012,  y = 48, z = 4774},
+					{ x = 7530,  y = 52, z = 5936},
+					{ x = 5368,  y = -71, z = 8766},
+					{ x = 5208,  y = -71, z = 9160},
+					{ x = 5358,  y = -71, z = 9472},
+					{ x = 5992,  y = 55, z = 10880},
+					{ x = 5712,  y = 56, z = 11284},
+					{ x = 5064,  y = 56, z = 11562},
+					{ x = 3316,  y = -70, z = 11290},
+					{ x = 2094,  y = 52, z = 12502},
+					{ x = 8712,  y = 50, z = 10450},
+					{ x = 8576,  y = 50, z = 9940},
+					{ x = 9358,  y = 53, z = 9296},
+					{ x = 12558,  y = 51, z = 2446},
+					{ x = 12010,  y = 50, z = 1772},
+					{ x = 13500,  y = 51, z = 3672},
+					{ x = 11774,  y = -70, z = 4092},
+					{ x = 13560,  y = 54, z = 6216},
+					{ x = 13558,  y = 52, z = 5608},
+					{ x = 11784,  y = 52, z = 5630},
+					{ x = 10965,  y = 52, z = 10046},
+					{ x = 13556,  y = 52, z = 6914},
+					{ x = 13604,  y = 52, z = 7480},
+					{ x = 13318,  y = 52, z = 8078},
+					{ x = 13310,  y = 52, z = 8374},
+					{ x = 13856,  y = 52, z = 8158},
+					{ x = 13638,  y = 52, z = 9122},
+					{ x = 13618,  y = 108, z = 9996},
+					{ x = 12092,  y = 82, z = 10142},
+					{ x = 13572,  y = 91, z = 10406},
+					{ x = 14022,  y = 91, z = 10532},
+					{ x = 13614,  y = 91, z = 10934},
+					{ x = 13242,  y = 91, z = 10378},
+					{ x = 12960,  y = 91, z = 11150},
+					{ x = 12542,  y = 91, z = 10534},
+					{ x = 12750,  y =91 , z = 12824},
+					{ x = 13738,  y = 91, z = 12582},
+					{ x = 12526,  y = 91, z = 13834},
+					{ x = 13502,  y = 123, z = 14032},
+					{ x = 13724,  y = 118, z = 13762},
+					{ x = 14016,  y = 119, z = 13534},
+					{ x = 14032,  y = 165, z = 14076},
+					{ x = 11020,  y = 91, z = 11104},
+					{ x = 10734,  y = 97, z = 10780},
+					{ x = 9928,  y = 52, z = 11126},
+					{ x = 10030,  y = 81, z = 12146},
+					{ x = 10320,  y = 96, z = 13642},
+					{ x = 9850,  y = 109, z = 13642},
+					{ x = 8914,  y = 52, z = 13600},
+					{ x = 10834,  y = 91, z = 13644},
+					{ x = 12012,  y = 91, z = 11254},
+					{ x = 11140,  y = 91, z = 12066},
+					{ x = 11046,  y = 91, z = 13026},
+					{ x = 11202,  y = 91, z = 14120},
+					{ x = 14080,  y = 91, z = 11286},
+					{ x = 8222,  y = 52, z = 8092},
+					{ x = 9654,  y = 51, z = 9994},
+					{ x = 9878,  y = 52, z = 10210},
+					{ x = 10138,  y = 52, z = 9800},
+					{ x = 11934,  y = 91, z = 10648},
+					{ x = 10604,  y = 91, z = 12018},
+					{ x = 10402,  y = 91, z = 12716},
+					{ x = 10482,  y = 91, z = 14050},
+					{ x = 10100,  y = 101, z = 13958},
+					{ x = 10132,  y = 100, z = 13388},
+					{ x = 10722,  y = 91, z = 11298},
+					{ x = 11200,  y = 91, z = 10808},
+		--Wall Spots
+					},
 
     	color = 0xFFFFFF,
 
