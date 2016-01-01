@@ -26,8 +26,9 @@ end
 function CurrentTimeInMillis()
 	return (os.clock() * 1000);
 end
+
 -- Starting AutoUpdate
-local version = "0.39"
+local version = "0.40"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -45,7 +46,7 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-				DelayAction(function() EnvoiMessage("What's new : 'Will fix auto potion in 0.40, dosen't need to F9x2 anymore, Code cleanup done and removed useless options.")end, 15)
+				DelayAction(function() EnvoiMessage("What's new : 'Auto Potion FIXED! :D.")end, 15)
 			else
 				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
@@ -55,6 +56,7 @@ if AUTOUPDATE then
 	end
 end
 -- End Of AutoUpdate
+
 local ts
 local Qm = nil
 local Rm = nil
@@ -67,7 +69,6 @@ local ActualPotTime = 15
 local lastFrostQuennCast = 0
 local lastSeraphin = 0
 local lastQss = 0
-local QSS = "QuicksilverSash" or "itemmercurial"
 local combostatus = 0
 local harasstatus = 0
 local waveclearstatus = 0
@@ -872,7 +873,7 @@ function OnGainBuff (unit, buff)
 			if myHero:getBuff(isABuff) then
 				if os.clock() - lastQss < 90 then return end
 					for SLOT = ITEM_1, ITEM_6 do
-						if myHero:GetSpellData(SLOT).name == "QuicksilverSash" then
+						if myHero:GetSpellData(SLOT).name == "QuicksilverSash" or "itemmercurial" then
 							if myHero:CanUseSpell(SLOT) == READY then
 								DelayAction(function()
 									CastSpell(SLOT)
@@ -1049,11 +1050,27 @@ function AutoPotions()
 	if (Param.miscellaneous.Pots.potswithscript == false) then return end
 		if os.clock() - lastPotion < ActualPotTime then return end
 			for SLOT = ITEM_1, ITEM_6 do
-				if myHero:GetSpellData(SLOT).name == "ItemMiniRegenPotion" or "ItemCrystalFlaskJungle" or "ItemCrystalFlask" or "ItemDarkCrystalFlask" then
+				if myHero:GetSpellData(SLOT).name == "Health Potion" or "ItemMiniRegenPotion" or "ItemCrystalFlaskJungle" or "ItemCrystalFlask" or "ItemDarkCrystalFlask" then
 					if myHero:CanUseSpell(SLOT) == READY and (myHero.health*100)/myHero.maxHealth < Param.miscellaneous.Pots.potatxhp then
 						CastSpell(SLOT)
-						EnvoiMessage("1x "..ActualPotName.." => Used.")
+						if myHero:GetSpellData(SLOT).name == "RegenerationPotion" then
+							ActualPotName = "Health Potion"
+							ActualPotTime = 15
+						elseif myHero:GetSpellData(SLOT).name == "ItemMiniRegenPotion" then
+							ActualPotName = "Cookie"
+							ActualPotTime = 15
+						elseif myHero:GetSpellData(SLOT).name == "ItemCrystalFlaskJungle" then
+							ActualPotName = "Hunter's Potion"
+							ActualPotTime = 8
+						elseif myHero:GetSpellData(SLOT).name == "ItemCrystalFlask" then
+							ActualPotName = "Refillable Potion"
+							ActualPotTime = 12
+						elseif myHero:GetSpellData(SLOT).name == "ItemDarkCrystalFlask" then
+							ActualPotName = "Corrupting Potion"
+							ActualPotTime = 12
+						end
 						lastPotion = os.clock()	
+						EnvoiMessage("1x "..ActualPotName.." => Used.")
 					end
 				end
 			end
@@ -1070,8 +1087,8 @@ function  AutoElixirDuSorcier()
 						if myHero:GetSpellData(SLOT).name == "ElixirOfSorcery" then
 							if myHero:CanUseSpell(SLOT) == READY then
 								CastSpell(SLOT)
-								EnvoiMessage("1x Elixir Of Sorcery => Used.")
 								lastElixir = os.clock()
+								EnvoiMessage("1x Elixir Of Sorcery => Used.")
 							end
 						end
 					end
@@ -1090,8 +1107,8 @@ function AutoFrostQuenn()
 						if myHero:GetSpellData(SLOT).name == "ItemWraithCollar" then
 							if myHero:CanUseSpell(SLOT) == READY then
 								CastSpell(SLOT)
-								EnvoiMessage("Frost's Quenn Claim => Casted.")
 								lastFrostQuennCast = os.clock()
+								EnvoiMessage("Frost's Quenn Claim => Casted.")
 							end
 						end
 					end
