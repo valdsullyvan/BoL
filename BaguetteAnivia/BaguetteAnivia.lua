@@ -28,7 +28,7 @@ function CurrentTimeInMillis()
 end
 
 -- Starting AutoUpdate
-local version = "0.411"
+local version = "0.42"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -46,7 +46,7 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-				DelayAction(function() EnvoiMessage("What's new : 'New menu.")end, 15)
+				DelayAction(function() EnvoiMessage("What's new : 'New menu, JungleClear and Potions got new logic.")end, 15)
 			else
 				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
@@ -58,14 +58,16 @@ end
 -- End Of AutoUpdate
 
 local ts
-local Qm = nil
-local Rm = nil
+local QMissile = nil
+local RMissile = nil
 local Qdmg, Edmg, Rdmg, iDmg, totalDamage, health, mana, maxHealth, maxMana = 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0
 local TextList = {"Ignite = Kill", "Q = Kill", "DoubleQ = Kill", "Q + Ignite = Kill", "DoubleQ + Ignite = Kill", "Q + FrozenE = Kill", "DoubleQ + FrozenE = Kill", "Q + FrozenE + Ignite = Kill", "DoubleQ + FrozenE + Ignite = Kill", "Q + FrozenE + R for 1s = Kill", "DoubleQ + FrozenE + R for 1s = Kill", "DoubleQ + FrozenE + R for 3s = Kill", "Q + FrozenE + R + Ignite = Kill", "DoubleQ + FrozenE + R + Ignite = Kill", "DoubleQ + FrozenE + R for 3s + Ignite = Kill", "Not Killable"}
 local KillText = {}
 local lastElixir = 0
 local lastPotion = 0
 local ActualPotTime = 15
+local ActualPotName = "None"
+local ActualPotData = "None"
 local mods = "None"
 local lastFrostQuennCast = 0
 local lastSeraphin = 0
@@ -309,16 +311,16 @@ function KillSteal()
 		Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
 		Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
 		Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
-		if GetDistance(unit) < 750 then
+		if GetDistance(unit) < 1000 then
 			if Param.KillSteal.KillStealON then
 				if health <= Qdmg and Param.KillSteal.UseQ and myHero:CanUseSpell(_Q) == READY and ValidTarget(unit) then
-					CastQ(unit)
+					LogicQ(unit)
 				end
 				if health <= Edmg and Param.KillSteal.UseE and myHero:CanUseSpell(_E) == READY and ValidTarget(unit) then
 					CastSpell(_E, unit)
 				end
 				if health <= Rdmg and Param.KillSteal.UseR and myHero:CanUseSpell(_R) == READY and ValidTarget(unit) then
-					CastR(unit)
+					LogicR(unit)
 				end
 				if not ComboKey then
 					if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
@@ -368,13 +370,13 @@ function OnTick()
 			end
 		end
 		KillSteal()
-		if Qm ~= nil then
+		if QMissile ~= nil then
 			DetectQ()
 		end
 		if Param.miscellaneous.ManualR then
-			if Rm ~= nil then
+			if RMissile ~= nil then
 				if not ValidR() then
-					if not JungleClearKey or LaneClearKey or WaveClearKey then
+					if not JungleClearKey and not LaneClearKey and not WaveClearKey then
 						CastSpell(_R) 
 					end
 				end
@@ -428,11 +430,11 @@ end
 function WdansR(unit)
 	if Param.miscellaneous.WdansR then
 		if unit and unit.type == myHero.type and unit.team ~= myHero.team then
-			if unit.hasMovePath and unit.path.count > 1 and Rm and myHero:CanUseSpell(_W) == READY then
+			if unit.hasMovePath and unit.path.count > 1 and RMissile and myHero:CanUseSpell(_W) == READY then
 			local path = unit.path:Path(2)
-				if GetDistance(path, Rm) > 210 and GetDistance(unit, Rm) < 175  then
+				if GetDistance(path, RMissile) > 210 and GetDistance(unit, RMissile) < 175  then
 				local p1 = Vector(unit) + (Vector(path) - Vector(unit)):normalized() * 0.6 * unit.ms
-					if GetDistance(p1) < 1000 and GetDistance(Rm, p1) > 150 and GetDistance(Rm, p1) < 250 and GetDistance(unit, path) > GetDistance(unit, p1) then
+					if GetDistance(p1) < 1000 and GetDistance(RMissile, p1) > 150 and GetDistance(RMissile, p1) < 250 and GetDistance(unit, path) > GetDistance(unit, p1) then
 						CastSpell(_W, p1.x, p1.z)
 					end
 				end
@@ -453,13 +455,13 @@ end
 function Combo(unit)
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
 		if Param.Combo.UseQ then 
-			CastQ(unit)
+			LogicQ(unit)
 		end	
 		if Param.Combo.UseE then 
-			CastE(unit)
+			LogicE(unit)
 		end	
 		if Param.Combo.UseR then 
-			CastR(unit)
+			LogicR(unit)
 		end	
 	end
 end
@@ -468,13 +470,13 @@ function Harass(unit)
 	ts:update()
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
 		if(myHero:CanUseSpell(_Q) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100 ) and ts.target ~= nil and Param.Harass.UseQ ) then 
-	  		CastQ(unit)
+	  		LogicQ(unit)
 		end
 		if(myHero:CanUseSpell(_E) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100 ) and ts.target ~= nil and Param.Harass.UseE ) then 
-	 		CastE(unit)
+	 		LogicE(unit)
 		end
 		if(myHero:CanUseSpell(_R) == READY and (myHero.mana / myHero.maxMana > Param.Harass.manamanager /100) and ts.target ~= nil and Param.Harass.UseR ) then
-			CastR(unit)
+			LogicR(unit)
 		end
 	end
 end
@@ -509,13 +511,13 @@ function LaneClear()
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil then
 				if Param.Clear.LaneClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
-					CastQ(minion)
+					LogicQ(minion)
 				end
 				if Param.Clear.LaneClear.UseE and GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
-					CastE(minion)
+					LogicE(minion)
 				end
 				if Param.Clear.LaneClear.UseR and GetDistance(minion) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
-					CastR(minion)
+					LogicR(minion)
 				end
 			end
 		end
@@ -529,13 +531,13 @@ function WaveClear()
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) then
 				if GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and (minion.maxHealth >= canonheal) then
-					CastQ(minion)
+					LogicQ(minion)
 				end
 				if GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY and (minion.maxHealth >= canonheal) then
-					CastE(minion)
+					CastSpell(_E, minion)
 				end
 				if GetDistance(minion) <= SkillR.range and myHero:CanUseSpell(_R) == READY and (minion.maxHealth >= canonheal) then
-					CastR(minion)
+					LogicR(minion)
 				end 
 			end
 		end
@@ -547,19 +549,22 @@ function JungleClear()
 	if not ManaJungleClear() then
 		for i, jungleMinion in pairs(jungleMinions.objects) do
 			if jungleMinion ~= nil then
-				if Param.Clear.JungleClear then
+				if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
 					CastSpell(_E, jungleMinion)
 				end
-				if Param.Clear.JungleClear then 
-					CastR(jungleMinion)
+				if Param.Clear.JungleClear.UseR and GetDistance(jungleMinion) <= SkillR.range and myHero:CanUseSpell(_R) == READY then 
+					LogicR(jungleMinion)
+				end
+				if Param.Clear.JungleClear.UseQ and GetDistance(jungleMinion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+					LogicQ(jungleMinion)
 				end
 			end
 		end
 	end
 end
 
-function CastQ(unit)
-	if Qm ~=nil then return end
+function LogicQ(unit)
+	if QMissile ~=nil then return end
 	if unit ~= nil and GetDistance(unit) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false)
 		if HitChance >= 2 then
@@ -568,7 +573,7 @@ function CastQ(unit)
 	end
 end
 
-function CastW(unit)
+function LogicW(unit)
 	if unit ~= nil and GetDistance(unit) <= SkillW.range and myHero:CanUseSpell(_W) == READY then
 	CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillW.delay, SkillW.width, SkillW.range, SkillW.speed, myHero, false)
 		if HitChance >= 2 then
@@ -577,7 +582,7 @@ function CastW(unit)
 	end
 end
 
-function CastE(unit)
+function LogicE(unit)
 	if Param.miscellaneous.EGel then
 		if TargetHaveBuff("chilled", unit) then
 			if myHero:CanUseSpell(_E) == READY then
@@ -591,9 +596,9 @@ function CastE(unit)
 	end
 end
 
-function CastR(unit)
-	if Rm ~= nil then return end
-		if JungleClearKey and RM ~= nil then return end
+function LogicR(unit)
+	if RMissile ~= nil then return end
+		if JungleClearKey and RMissile ~= nil then return end
 			if unit ~= nil and GetDistance(unit) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
 				CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false)
 				if HitChance >= 2 then
@@ -614,8 +619,8 @@ function DetectQ()
 	end
 	if LaneClearKey then 
 		for i, minion in ipairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion.visible and Qm and not minion.dead then
-				if GetDistance(minion, Qm) <= 200 then
+			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
+				if GetDistance(minion, QMissile) <= 200 then
 					CastSpell(_Q)
 				end
 			end
@@ -623,16 +628,16 @@ function DetectQ()
 	end
 	if WaveClearKey then 
 		for i, minion in ipairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion.visible and Qm and not minion.dead then
-				if (minion.maxHealth >= ((CurrentTimeInMillis()/6000)+700)) and GetDistance(minion, Qm) <= QZone then
+			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
+				if (minion.maxHealth >= ((CurrentTimeInMillis()/6000)+700)) and GetDistance(minion, QMissile) <= QZone then
 					CastSpell(_Q)
 				end
 			end
 		end
 	end
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if ValidTarget(enemy) and enemy.visible and Qm and not enemy.dead then
-			if GetDistance(enemy, Qm) <= QZone then
+		if ValidTarget(enemy) and enemy.visible and QMissile and not enemy.dead then
+			if GetDistance(enemy, QMissile) <= QZone then
 				CastSpell(_Q)
 			end
 		end
@@ -644,7 +649,7 @@ function ValidR()
 	for i = 1, heroManager.iCount, 1 do
 		local hero = heroManager:GetHero(i)
 		if hero.team ~= myHero.team and ValidTarget(hero) then
-			if GetDistance(hero, Rm) < 500 then
+			if GetDistance(hero, RMissile) < 500 then
 				TargetCount = TargetCount + 1
 			end
 		end
@@ -752,19 +757,19 @@ end
 
 function OnCreateObj(object)
 	if object.name == "cryo_FlashFrost_Player_mis.troy" then
-		Qm = object
+		QMissile = object
 	end
 	if object.name == "cryo_storm_green_team.troy" then
-		Rm = object
+		RMissile = object
 	end
 end
 
 function OnDeleteObj(object)
 	if object.name == "cryo_FlashFrost_mis.troy" then
-		Qm = nil
+		QMissile = nil
 	end
 	if object.name == "cryo_storm_green_team.troy" then
-		Rm = nil
+		RMissile = nil
 	end
 end
 
@@ -791,8 +796,8 @@ function OnDraw()
 			end
 		end
 		if Param.drawing.spell.Qtravel then
-			if Qm ~= nil then
-				local Vec2 = Vector(Qm.pos) + (Vector(myHero.pos) - Vector(Qm.pos)):normalized()
+			if QMissile ~= nil then
+				local Vec2 = Vector(QMissile.pos) + (Vector(myHero.pos) - Vector(QMissile.pos)):normalized()
 				DrawCircle(Vec2.x, Vec2.y, Vec2.z, 200, ARGB(255,255, 255,255))
 			end
 		end
@@ -857,13 +862,13 @@ function OnProcessSpell(unit, spell)
 	    if unit.team ~= myHero.team then
 	        if isAGapcloserUnitTarget[spell.name] then
 	            if spell.target and spell.target.networkID == myHero.networkID then
-	                CastQ(unit)
-	                CastR(myHero)
+	                LogicQ(unit)
+	                LogicR(myHero)
 	                CastSpell(_E, unit)
 	            end
 	        end
 	        if isAGapcloserUnitNoTarget[spell.name] and GetDistanceSqr(unit) <= 2000*2000 and (spell.target == nil or (spell.target and spell.target.isMe)) then
-	            CastQ(unit)
+	            LogicQ(unit)
 	            CastSpell(_E, unit)
 	       	end
 	    end
@@ -1054,32 +1059,48 @@ function AutoPotions()
 	if (Param.miscellaneous.Pots.potswithscript == false) then return end
 		if os.clock() - lastPotion < ActualPotTime then return end
 			for SLOT = ITEM_1, ITEM_6 do
-				if myHero:GetSpellData(SLOT).name == "Health Potion" or "ItemMiniRegenPotion" or "ItemCrystalFlaskJungle" or "ItemCrystalFlask" or "ItemDarkCrystalFlask" then
-					if myHero:CanUseSpell(SLOT) == READY and (myHero.health*100)/myHero.maxHealth < Param.miscellaneous.Pots.potatxhp then
-						CastSpell(SLOT)
-						if myHero:GetSpellData(SLOT).name == "RegenerationPotion" then
-							ActualPotName = "Health Potion"
-							ActualPotTime = 15
-						elseif myHero:GetSpellData(SLOT).name == "ItemMiniRegenPotion" then
-							ActualPotName = "Cookie"
-							ActualPotTime = 15
-						elseif myHero:GetSpellData(SLOT).name == "ItemCrystalFlaskJungle" then
-							ActualPotName = "Hunter's Potion"
-							ActualPotTime = 8
-						elseif myHero:GetSpellData(SLOT).name == "ItemCrystalFlask" then
-							ActualPotName = "Refillable Potion"
-							ActualPotTime = 12
-						elseif myHero:GetSpellData(SLOT).name == "ItemDarkCrystalFlask" then
-							ActualPotName = "Corrupting Potion"
-							ActualPotTime = 12
-						end
-						lastPotion = os.clock()	
-						EnvoiMessage("1x "..ActualPotName.." => Used.")
-					end
+				if myHero:GetSpellData(SLOT).name == "RegenerationPotion" then
+					ActualPotName = "Health Potion"
+					ActualPotTime = 15
+					ActualPotData = "RegenerationPotion"
+					Usepot()
+				elseif myHero:GetSpellData(SLOT).name == "ItemMiniRegenPotion" then
+					ActualPotName = "Cookie"
+					ActualPotTime = 15
+					ActualPotData = "ItemMiniRegenPotion"
+					Usepot()
+				elseif myHero:GetSpellData(SLOT).name == "ItemCrystalFlaskJungle" then
+					ActualPotName = "Hunter's Potion"
+					ActualPotTime = 8
+					ActualPotData = "ItemCrystalFlaskJungle"
+					Usepot()
+				elseif myHero:GetSpellData(SLOT).name == "ItemCrystalFlask" then
+					ActualPotName = "Refillable Potion"
+					ActualPotTime = 12
+					ActualPotData = "ItemCrystalFlask"
+					Usepot()
+				elseif myHero:GetSpellData(SLOT).name == "ItemDarkCrystalFlask" then
+					ActualPotName = "Corrupting Potion"
+					ActualPotTime = 12
+					ActualPotData = "ItemDarkCrystalFlask"
+					Usepot()
+				else 
 				end
 			end
 		--
 	--
+end
+
+function Usepot()
+	for SLOT = ITEM_1, ITEM_6 do
+		if myHero:GetSpellData(SLOT).name == ActualPotData then
+			if myHero:CanUseSpell(SLOT) == READY and (myHero.health*100)/myHero.maxHealth < Param.miscellaneous.Pots.potatxhp then
+				CastSpell(SLOT)
+				lastPotion = os.clock()	
+				EnvoiMessage("1x "..ActualPotName.." => Used.")
+			end
+		end
+	end
 end
 
 function  AutoElixirDuSorcier()
