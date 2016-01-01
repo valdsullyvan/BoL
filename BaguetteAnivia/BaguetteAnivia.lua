@@ -29,7 +29,7 @@ if not charNames[myHero.charName] then return end
 			return (os.clock() * 1000);
 		end
 
-		local version = "0.26"
+		local version = "0.27"
 		local author = "spyk"
 		local SCRIPT_NAME = "BaguetteAnivia"
 		local AUTOUPDATE = true
