@@ -7,7 +7,7 @@
 
 	Github link : https://github.com/spyk1/BoL/blob/master/BaguetteAnivia/BaguetteAnivia.lua
 
-	Forum Thread : http://forum.botoflegends.com/topic/87964-beta-baguette-anivia/
+	Forum Thread : 
 
 ]]--
 
@@ -31,7 +31,7 @@ if not charNames[myHero.charName] then return end
 
 		local version = "0.26"
 		local author = "spyk"
-		local SCRIPT_NAME = "Baguette Anivia"
+		local SCRIPT_NAME = "BaguetteAnivia"
 		local AUTOUPDATE = true
 		local UPDATE_HOST = "raw.githubusercontent.com"
 		local UPDATE_PATH = "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.lua".."?rand="..math.random(1,10000)
@@ -181,7 +181,7 @@ if not charNames[myHero.charName] then return end
 						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to Divine", SCRIPT_PARAM_LIST, 0, {}) end
 						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to PvPSuite", SCRIPT_PARAM_LIST, 0, {}) end
 						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "for p_skinChanger", SCRIPT_PARAM_LIST, 0, {}) end
-					Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"}) end
+					Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
 					Param.miscellaneous:addParam("Qgapclos", "Use gapcloser?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
