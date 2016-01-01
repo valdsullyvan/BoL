@@ -29,7 +29,7 @@ if not charNames[myHero.charName] then return end
 			return (os.clock() * 1000);
 		end
 
-		local version = "0.28"
+		local version = "0.29"
 		local author = "spyk"
 		local SCRIPT_NAME = "BaguetteAnivia"
 		local AUTOUPDATE = true
@@ -121,7 +121,7 @@ if not charNames[myHero.charName] then return end
 			Param:addSubMenu("Clear To Win!","Clear")
 				Param.Clear:addSubMenu("WaveClear to WIN!", "WaveClear")
 					Param.Clear.WaveClear:addParam("wavecleartoggle", "Toggle WaveClear?", SCRIPT_PARAM_ONKEYTOGGLE, false, 111)
-					Param.Clear.WaveClear:addParam("waveclearkey", "Key to WaveClear :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("B"))
+					Param.Clear.WaveClear:addParam("waveclearkey", "Key to WaveClear :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 					Param.Clear.WaveClear:addParam("manamanager", "Required Mana to WaveClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 					Param.Clear.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 					Param.Clear.WaveClear:addParam("UseE", "Use (E) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
@@ -129,7 +129,7 @@ if not charNames[myHero.charName] then return end
 					Param.Clear.WaveClear:addParam("UseAA", "Use Auto Attacks in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 				Param.Clear:addSubMenu("LaneClear to Farm.", "LaneClear")
 					Param.Clear.LaneClear:addParam("lanecleartoggle", "Toggle LaneClear?", SCRIPT_PARAM_ONKEYTOGGLE, false, 106)
-					Param.Clear.LaneClear:addParam("laneclearkey", "Key to LaneClear :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+					Param.Clear.LaneClear:addParam("laneclearkey", "Key to LaneClear :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
 					Param.Clear.LaneClear:addParam("manamanager", "Required Mana to LaneClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 					Param.Clear.LaneClear:addParam("UseQ", "Use (Q) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, false )
 					Param.Clear.LaneClear:addParam("UseE", "Use (E) Spell in LaneClear?", SCRIPT_PARAM_ONOFF, true)
@@ -137,7 +137,7 @@ if not charNames[myHero.charName] then return end
 					Param.Clear.LaneClear:addParam("UseAA", "Use Auto Attacks in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
 				Param.Clear:addSubMenu("JungleClear", "JungleClear")
 					Param.Clear.JungleClear:addParam("junglecleartoggle", "Toggle JungleClear?", SCRIPT_PARAM_ONKEYTOGGLE, false, 109)
-					Param.Clear.JungleClear:addParam("jungleclearkey", "Key to JungleClear :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("N"))
+					Param.Clear.JungleClear:addParam("jungleclearkey", "Key to JungleClear :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 					Param.Clear.JungleClear:addParam("manamanager", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 					Param.Clear.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
 					Param.Clear.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear?", SCRIPT_PARAM_ONOFF, true)
@@ -171,12 +171,12 @@ if not charNames[myHero.charName] then return end
 						Param.miscellaneous.ElixirduSorcier:addParam("elixirinfight", "Use Exilir of Sorcery in fight?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addSubMenu("Potions and Flasks", "Pots")
 						Param.miscellaneous.Pots:addParam("potswithscript", "Use potions with this script?", SCRIPT_PARAM_ONOFF, true)
-						Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 70, 0, 100)
+						Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
 						Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
 						Param.miscellaneous.Pots:addParam("potselect", "Select you'r potion : (Need F9)", SCRIPT_PARAM_LIST, 1, {"Health Potion", "Cookie", "Hunter's Potion", "Refillable Potion", "Corrupting Potion"})
 					if VIP_USER then Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchanger") end
 						if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
-						if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, false) end
+						if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
 						if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
 						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to Divine", SCRIPT_PARAM_LIST, 0, {}) end
 						if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to PvPSuite", SCRIPT_PARAM_LIST, 0, {}) end
@@ -186,8 +186,8 @@ if not charNames[myHero.charName] then return end
 					Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
 					Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-					Param.miscellaneous:addParam("ManualR","Automaticly disable R if no ennemy in?", SCRIPT_PARAM_ONOFF , false)
-			Param:addSubMenu("Draws or.. fps stealers!", "drawing")
+					Param.miscellaneous:addParam("ManualR","Automaticly disable R if no ennemy in?", SCRIPT_PARAM_ONOFF , true)
+			Param:addSubMenu("Drawing", "drawing")
 				Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
 				Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
 				Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
@@ -201,11 +201,11 @@ if not charNames[myHero.charName] then return end
 					Param.drawing.spell:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
 				Param.drawing:addSubMenu("About AutoWall", "wallmenu")
 					Param.drawing.wallmenu:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
-					Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle radius : ", SCRIPT_PARAM_SLICE, 0, 0, 200, 0)
+					Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle radius : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
 					Param.drawing.wallmenu:addParam("holdwall", "Press : To show WallsCasts ", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
-					Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 0, 0, 20000, 0)
+					Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
 					Param.drawing.wallmenu:addParam("showclose", "Show close WallsCasts?", SCRIPT_PARAM_ONOFF, true)
-					Param.drawing.wallmenu:addParam("showcloserange", "Which range is close?", SCRIPT_PARAM_SLICE, 0, 0, 5000, 0)
+					Param.drawing.wallmenu:addParam("showcloserange", "Which range is close?", SCRIPT_PARAM_SLICE, 1000, 0, 5000, 0)
 						
 			if (not Param.miscellaneous.skinchanger['saveSkin']) then
 				Param.miscellaneous.skinchanger['changeSkin'] = false;
@@ -252,7 +252,7 @@ if not charNames[myHero.charName] then return end
 
 		function OnUnload()
 			EnvoiMessage("Unloaded.")
-			EnvoiMessage("There is no bird anymore between us... Cyao!")
+			EnvoiMessage("There is no bird anymore between us... Ciao!")
 
 			if (Param.miscellaneous.skinchanger['changeSkin']) then
 			SendSkinPacket(myHero.charName, nil, myHero.networkID);
@@ -267,7 +267,7 @@ if not charNames[myHero.charName] then return end
 		
 			if _G.Reborn_Initialised then
 			elseif _G.Reborn_Loaded then
-				DelayAction(function()EnvoiMessage("This script was created by a really strange brain, you should check the forum thread for the settings. Hihii :)")end, 5)
+				DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 				DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 				EnvoiMessage("Loaded SAC:R")
 			else
@@ -480,15 +480,17 @@ if not charNames[myHero.charName] then return end
 					AutoPotions()
 				end
 
-				if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
-					for i,group in pairs(wallSpots) do
-		 				for x, wallSpot in pairs(group.Locations) do
-			 				if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.radius and GetDistance(wallSpot) <= 1000 then
-		                       CastSpell(_W, wallSpot.x, wallSpot.z)
-		                    end                                    
-		     			end
-		            end
-		        end
+				if not Param.drawing.disablealldrawings then
+					if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
+						for i,group in pairs(wallSpots) do
+			 				for x, wallSpot in pairs(group.Locations) do
+				 				if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.radius and GetDistance(wallSpot) <= 1000 then
+			                       CastSpell(_W, wallSpot.x, wallSpot.z)
+			                    end                                    
+			     			end
+			            end
+			        end
+			    end
 
 	        if Param.drawing.wallmenu.holdwall then
 	       
@@ -740,7 +742,7 @@ if not charNames[myHero.charName] then return end
 				return
 			end
 			
-			if Param.Clear.jungleclearkey and RM ~= nil then
+			if JungleClearKey and RM ~= nil then
 				return
 			end
 
