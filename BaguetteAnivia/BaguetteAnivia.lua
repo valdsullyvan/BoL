@@ -28,7 +28,7 @@ function CurrentTimeInMillis()
 end
 
 -- Starting AutoUpdate
-local version = "0.41"
+local version = "0.411"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -46,9 +46,9 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-				DelayAction(function() EnvoiMessage("What's new : 'Menu Switcher.")end, 15)
+				DelayAction(function() EnvoiMessage("What's new : 'New menu.")end, 15)
 			else
-				DelayAction(function() EnvoiMessage("Hello, GOD. You got the latest version! :) ("..ServerVersion..")") end, 3)
+				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
 		end
 	else
