@@ -28,7 +28,7 @@ function CurrentTimeInMillis()
 end
 
 -- Starting AutoUpdate
-local version = "0.40"
+local version = "0.41"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -48,7 +48,7 @@ if AUTOUPDATE then
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
 				DelayAction(function() EnvoiMessage("What's new : 'Auto Potion FIXED! :D.")end, 15)
 			else
-				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
+				DelayAction(function() EnvoiMessage("Hello, GOD. You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
 		end
 	else
@@ -66,6 +66,7 @@ local KillText = {}
 local lastElixir = 0
 local lastPotion = 0
 local ActualPotTime = 15
+local mods = "None"
 local lastFrostQuennCast = 0
 local lastSeraphin = 0
 local lastQss = 0
@@ -103,13 +104,14 @@ function OnLoad()
 	--
 	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
 		Param:permaShow("n4")
+	Param:addParam("n5", "Current Mode :", SCRIPT_PARAM_LIST, 1, {" None", " Combo", " Harass", " LaneClear", " WaveClear", " JungleClear"})
+		Param:permaShow("n5")
 	--
 	Param:addSubMenu("SBTW!","Combo")
 		Param.Combo:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
 		Param.Combo:addParam("UseE", "Use (E) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
 		Param.Combo:addParam("UseR", "Use (R) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
-		Param.Combo:permaShow("comboKey")
 	--
 	Param:addSubMenu("Harass To Win!","Harass")
 		Param.Harass:addParam("Harasskey", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
@@ -117,7 +119,6 @@ function OnLoad()
 		Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
 		Param.Harass:addParam("UseE", "Use (E) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
 		Param.Harass:addParam("UseR", "Use (R) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
-		Param.Harass:permaShow("Harasskey")
 	--
 	Param:addSubMenu("Clear To Win!","Clear")
 		Param.Clear:addSubMenu("WaveClear to WIN!", "WaveClear")
@@ -126,8 +127,6 @@ function OnLoad()
 			Param.Clear.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 			Param.Clear.WaveClear:addParam("UseE", "Use (E) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 			Param.Clear.WaveClear:addParam("UseR", "Use (R) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
-			Param.Clear.WaveClear:addParam("UseAA", "Use Auto Attacks in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
-			Param.Clear.WaveClear:permaShow("waveclearkey")
 	------
 		Param.Clear:addSubMenu("LaneClear to Farm.", "LaneClear")
 			Param.Clear.LaneClear:addParam("laneclearkey", "LaneClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
@@ -135,8 +134,6 @@ function OnLoad()
 			Param.Clear.LaneClear:addParam("UseQ", "Use (Q) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, false )
 			Param.Clear.LaneClear:addParam("UseE", "Use (E) Spell in LaneClear?", SCRIPT_PARAM_ONOFF, true)
 			Param.Clear.LaneClear:addParam("UseR", "Use (R) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
-			Param.Clear.LaneClear:addParam("UseAA", "Use Auto Attacks in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
-			Param.Clear.LaneClear:permaShow("laneclearkey")
 	------
 		Param.Clear:addSubMenu("JungleClear", "JungleClear")
 			Param.Clear.JungleClear:addParam("jungleclearkey", "JungleClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
@@ -144,8 +141,6 @@ function OnLoad()
 			Param.Clear.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
 			Param.Clear.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear?", SCRIPT_PARAM_ONOFF, true)
 			Param.Clear.JungleClear:addParam("UseR", "Use (R) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
-			Param.Clear.JungleClear:addParam("UseAA", "Use Auto Attacks in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
-			Param.Clear.JungleClear:permaShow("jungleclearkey")
 	--
 	Param:addSubMenu("KillSteal To Win!", "KillSteal")
 		Param.KillSteal:addParam("KillStealON", "Enable KillSteal to Win?" , SCRIPT_PARAM_ONOFF, true)
@@ -192,12 +187,12 @@ function OnLoad()
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 		--
-		Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
-		Param.miscellaneous:addParam("Qgapclos", "Use gapcloser?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("QError", "Set (QDiameter) on (Normally = 200) :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
+		Param.miscellaneous:addParam("Qgapclos", "Use GapCloser?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no enemy in?", SCRIPT_PARAM_ONOFF , true)
+		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in?", SCRIPT_PARAM_ONOFF , true)
 	--
 	Param:addSubMenu("Drawing", "drawing")
 		Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
@@ -216,7 +211,7 @@ function OnLoad()
 		Param.drawing:addSubMenu("About AutoWall", "wallmenu")
 			Param.drawing.wallmenu:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
 			Param.drawing.wallmenu:permaShow("active")
-			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle radius : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
+			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle diameter : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
 			Param.drawing.wallmenu:permaShow("radius")
 			Param.drawing.wallmenu:addParam("holdwall", "Press : To show WallsCasts ", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
 			Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
@@ -248,7 +243,6 @@ function CustomLoad()
 	GenerateTables()
 	if _G.Reborn_Initialised then
 	elseif _G.Reborn_Loaded then
-		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 		EnvoiMessage("Loaded SAC:R")
 	else
@@ -266,7 +260,6 @@ function CustomLoad()
 function LoadOrb()
 
 	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then	
-		DelayAction(function()EnvoiMessage("I've made some settings not easy to understand, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
 		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 		require("SxOrbWalk")
 		EnvoiMessage("Loaded SxOrbWalk")
@@ -352,19 +345,26 @@ function OnTick()
 		WaveClearKey = Param.Clear.WaveClear.waveclearkey
 		if ComboKey then 
 			Combo(Target)
+			Param.n5 = 2
+
 		end
+
 		if not ComboKey then
 			if HarassKey then
 				Harass(Target)
+				Param.n5 = 3
 			end	
 			if LaneClearKey then
 				LaneClear()
+				Param.n5 = 4
 			end
 			if WaveClearKey then
 				WaveClear()
+				Param.n5 = 5
 			end
 			if JungleClearKey then
 				JungleClear()
+				Param.n5 = 6
 			end
 		end
 		KillSteal()
@@ -414,6 +414,10 @@ function OnTick()
 				SendSkinPacket(myHero.charName, nil, myHero.networkID)
 				lastSkin = 0
 			end
+		end
+
+		if Param.n5 ~= 1 and not ComboKey and not HarassKey and not LaneClearKey and not JungleClearKey and not WaveClearKey then
+			Param.n5 = 1
 		end
 end
 
@@ -1141,7 +1145,7 @@ function AutoSeraphin()
 end
 
 
-DelayAction(function()EnvoiMessage("Special Note : QSS can be bugged, then, if you got errors, disable QSS usage.")end, 10)
+--DelayAction(function()EnvoiMessage("Special Note : QSS can be bugged, then, if you got errors, disable QSS usage.")end, 10)
 
 --======START======--
 -- Developers: 
