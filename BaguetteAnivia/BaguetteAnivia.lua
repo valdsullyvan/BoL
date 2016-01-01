@@ -20,16 +20,14 @@ local charNames = {
 if not charNames[myHero.charName] then return end
 
 function EnvoiMessage(msg)
-
-   	 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteAnivia]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
-
+	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteAnivia]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
 
 function CurrentTimeInMillis()
-return (os.clock() * 1000);
+	return (os.clock() * 1000);
 end
 
-local version = "0.33"
+local version = "0.34"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -39,21 +37,21 @@ local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
 if AUTOUPDATE then
-local ServerData = GetWebResult(UPDATE_HOST, "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.version")
-if ServerData then
-ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
-if ServerVersion then
-if tonumber(version) < ServerVersion then
-EnvoiMessage("New version available "..ServerVersion)
-EnvoiMessage(">>Updating, please don't press F9<<")
-DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-else
-DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
-end
-end
-else
-EnvoiMessage("Error downloading version info")
-end
+	local ServerData = GetWebResult(UPDATE_HOST, "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.version")
+	if ServerData then
+		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		if ServerVersion then
+			if tonumber(version) < ServerVersion then
+				EnvoiMessage("New version available "..ServerVersion)
+				EnvoiMessage(">>Updating, please don't press F9<<")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+			else
+				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
+			end
+		end
+	else
+		EnvoiMessage("Error downloading version info")
+	end
 end
 
 local ts
@@ -99,420 +97,349 @@ local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 function OnLoad()
 
-print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [TheBirdReloaded]</b></font> <font color=\"#ffffff\">by spyk</font>")
+	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [TheBirdReloaded]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
- 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
 
-Param = scriptConfig("[Baguette] Anivia", "BaguetteAnivia")
-Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
-Param:permaShow("n4")
-Param:addSubMenu("SBTW!","Combo")
-Param.Combo:addParam("combotoggle", "Combo Mode Toggle :", SCRIPT_PARAM_ONKEYTOGGLE, false, 18)
-Param.Combo:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
-Param.Combo:addParam("UseE", "Use (E) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
-Param.Combo:addParam("UseR", "Use (R) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
-Param.Combo:permaShow("comboKey")
-Param.Combo:permaShow("combotoggle")
-Param:addSubMenu("Harass To Win!","Harass")
-Param.Harass:addParam("Harasstoggle", "Harass Mode Toggle :", SCRIPT_PARAM_ONKEYTOGGLE, false, 107)
-Param.Harass:addParam("Harasskey", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
-Param.Harass:addParam("manamanager", "Required Mana to Harass :", SCRIPT_PARAM_SLICE, 50, 0, 100)
-Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
-Param.Harass:addParam("UseE", "Use (E) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
-Param.Harass:addParam("UseR", "Use (R) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
-Param.Harass:permaShow("Harasskey")
-Param.Harass:permaShow("Harasstoggle")
-Param:addSubMenu("Clear To Win!","Clear")
-Param.Clear:addSubMenu("WaveClear to WIN!", "WaveClear")
-Param.Clear.WaveClear:addParam("wavecleartoggle", "WaveClear Mode Toggle", SCRIPT_PARAM_ONKEYTOGGLE, false, 111)
-Param.Clear.WaveClear:addParam("waveclearkey", "WaveClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
-Param.Clear.WaveClear:addParam("manamanager", "Required Mana to WaveClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
-Param.Clear.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.WaveClear:addParam("UseE", "Use (E) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.WaveClear:addParam("UseR", "Use (R) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.WaveClear:addParam("UseAA", "Use Auto Attacks in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.WaveClear:permaShow("waveclearkey")
-Param.Clear.WaveClear:permaShow("wavecleartoggle")
-Param.Clear:addSubMenu("LaneClear to Farm.", "LaneClear")
-Param.Clear.LaneClear:addParam("lanecleartoggle", "LaneClear Mode Toggle :", SCRIPT_PARAM_ONKEYTOGGLE, false, 106)
-Param.Clear.LaneClear:addParam("laneclearkey", "LaneClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
-Param.Clear.LaneClear:addParam("manamanager", "Required Mana to LaneClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
-Param.Clear.LaneClear:addParam("UseQ", "Use (Q) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, false )
-Param.Clear.LaneClear:addParam("UseE", "Use (E) Spell in LaneClear?", SCRIPT_PARAM_ONOFF, true)
-Param.Clear.LaneClear:addParam("UseR", "Use (R) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.LaneClear:addParam("UseAA", "Use Auto Attacks in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.LaneClear:permaShow("laneclearkey")
-Param.Clear.LaneClear:permaShow("lanecleartoggle")
-Param.Clear:addSubMenu("JungleClear", "JungleClear")
-Param.Clear.JungleClear:addParam("junglecleartoggle", "JungleClear Mode Toggle?", SCRIPT_PARAM_ONKEYTOGGLE, false, 109)
-Param.Clear.JungleClear:addParam("jungleclearkey", "JungleClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
-Param.Clear.JungleClear:addParam("manamanager", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
-Param.Clear.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear?", SCRIPT_PARAM_ONOFF, true)
-Param.Clear.JungleClear:addParam("UseR", "Use (R) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.JungleClear:addParam("UseAA", "Use Auto Attacks in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
-Param.Clear.JungleClear:permaShow("jungleclearkey")
-Param.Clear.JungleClear:permaShow("junglecleartoggle")
-Param:addSubMenu("KillSteal To Win!", "KillSteal")
-Param.KillSteal:addParam("KillStealON", "Enable KillSteal to Win?" , SCRIPT_PARAM_ONOFF, true)
-Param.KillSteal:addParam("UseQ", "Use (Q) Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true)
-Param.KillSteal:addParam("UseE", "Use (E) Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true)
-Param.KillSteal:addParam("UseR", "Use (R) Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true)
-if Ignite then Param.KillSteal:addParam("UseIgnite", "Use (Ignite) Summoner Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true) end
-Param:addSubMenu("Miscellaneous because Swag!", "miscellaneous")
-Param.miscellaneous:addSubMenu("Quick Silver Slash", "QuickSS")
-Param.miscellaneous.QuickSS:addParam("qsswithscript", "Use Qss with that Script?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.QuickSS:addParam("qssoncc", "Use Qss whenever?", SCRIPT_PARAM_ONOFF, false)
-Param.miscellaneous.QuickSS:addParam("qssonlyincombo", "Use Qss on HardCC in ComboMode only", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.QuickSS:addParam("qssdelay", "Humanizer (ms) :", SCRIPT_PARAM_SLICE, 0, 0, 5000, 0)
-Param.miscellaneous:addSubMenu("Seraph's Embrace", "BatonSeraphin")
-Param.miscellaneous.BatonSeraphin:addParam("seraphwithscript", "Use Seraph's Embrace with that Script?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.BatonSeraphin:addParam("seraphxlife", "Use Seraph's at X > life?", SCRIPT_PARAM_SLICE, 20, 0, 100)
-Param.miscellaneous.BatonSeraphin:addParam("seraphcombo", "Use Only Seraph's in ComboMode?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.BatonSeraphin:addParam("seraphdelay", "Humanizer (ms) :", SCRIPT_PARAM_SLICE, 0, 0, 5000, 0)
-Param.miscellaneous:addSubMenu("Frost's Quenn Claim", "ItemSuppBleu")
-Param.miscellaneous.ItemSuppBleu:addParam("suppbleuwithscript", "Use Frost's Quenn with that Script?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.ItemSuppBleu:addParam("suppbleuchase", "Use Frost's Quenn only on a chase?", SCRIPT_PARAM_ONOFF, false)
-Param.miscellaneous.ItemSuppBleu:addParam("suppbleucombo", "Use Frost's Quenn in ComboMode/Teamfight?", SCRIPT_PARAM_ONOFF, true)
---Param.miscellaneous.ItemSuppBleu:addParam("suppbleugolds", "Use passive of Frost's Quenn?", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("Y"))
-Param.miscellaneous:addSubMenu("Exilir of Sorcery", "ElixirduSorcier")
-Param.miscellaneous.ElixirduSorcier:addParam("elixirwithscript", "Use Exilir of Sorcery with that script?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.ElixirduSorcier:addParam("elixironlywithcombo", "Use Elixir Only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.ElixirduSorcier:addParam("elixirinfight", "Use Exilir of Sorcery in fight?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous:addSubMenu("Potions and Flasks", "Pots")
-Param.miscellaneous.Pots:addParam("potswithscript", "Use potions with this script?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
-Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous.Pots:addParam("potselect", "Select you'r potion : (Need F9)", SCRIPT_PARAM_LIST, 1, {"Health Potion", "Cookie", "Hunter's Potion", "Refillable Potion", "Corrupting Potion"})
-if VIP_USER then Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchanger") end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
-Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
-Param.miscellaneous:addParam("Qgapclos", "Use gapcloser?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-Param.miscellaneous:addParam("ManualR","Automaticly disable R if no enemy in?", SCRIPT_PARAM_ONOFF , true)
-Param:addSubMenu("Drawing", "drawing")
-Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
-Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
- 	Param.drawing:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing:addSubMenu("Charactere Draws","spell")
-Param.drawing.spell:addParam("Qdraw","Display (Q) Spell draw?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing.spell:addParam("Qtravel", "Draw Q travelling?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing.spell:addParam("Wdraw","Display (W) Spell draw?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing.spell:addParam("Edraw","Display (E) Spell draw?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing.spell:addParam("Rdraw","Display (R) Spell draw?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing.spell:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing:addSubMenu("About AutoWall", "wallmenu")
-Param.drawing.wallmenu:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
-Param.drawing.wallmenu:permaShow("active")
-Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle radius : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
-Param.drawing.wallmenu:permaShow("radius")
-Param.drawing.wallmenu:addParam("holdwall", "Press : To show WallsCasts ", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
-Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
-Param.drawing.wallmenu:addParam("showclose", "Show close WallsCasts?", SCRIPT_PARAM_ONOFF, true)
-Param.drawing.wallmenu:addParam("showcloserange", "Which range is close?", SCRIPT_PARAM_SLICE, 1000, 0, 5000, 0)
+	Param = scriptConfig("[Baguette] Anivia", "BaguetteAnivia")
 
-if (not Param.miscellaneous.skinchanger['saveSkin']) then
-Param.miscellaneous.skinchanger['changeSkin'] = false;
-Param.miscellaneous.skinchanger['selectedSkin'] = 1;
-elseif (Param.miscellaneous.skinchanger['changeSkin']) then
-SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID);
-end;
+	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
+		Param:permaShow("n4")
+	--
+	Param:addSubMenu("SBTW!","Combo")
+		Param.Combo:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
+		Param.Combo:addParam("UseE", "Use (E) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
+		Param.Combo:addParam("UseR", "Use (R) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
+		Param.Combo:permaShow("comboKey")
+	--
+	Param:addSubMenu("Harass To Win!","Harass")
+		Param.Harass:addParam("Harasskey", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
+		Param.Harass:addParam("manamanager", "Required Mana to Harass :", SCRIPT_PARAM_SLICE, 50, 0, 100)
+		Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
+		Param.Harass:addParam("UseE", "Use (E) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
+		Param.Harass:addParam("UseR", "Use (R) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
+		Param.Harass:permaShow("Harasskey")
+	--
+	Param:addSubMenu("Clear To Win!","Clear")
+		Param.Clear:addSubMenu("WaveClear to WIN!", "WaveClear")
+			Param.Clear.WaveClear:addParam("waveclearkey", "WaveClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+			Param.Clear.WaveClear:addParam("manamanager", "Required Mana to WaveClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			Param.Clear.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.WaveClear:addParam("UseE", "Use (E) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.WaveClear:addParam("UseR", "Use (R) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.WaveClear:addParam("UseAA", "Use Auto Attacks in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.WaveClear:permaShow("waveclearkey")
+	------
+		Param.Clear:addSubMenu("LaneClear to Farm.", "LaneClear")
+			Param.Clear.LaneClear:addParam("laneclearkey", "LaneClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
+			Param.Clear.LaneClear:addParam("manamanager", "Required Mana to LaneClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			Param.Clear.LaneClear:addParam("UseQ", "Use (Q) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, false )
+			Param.Clear.LaneClear:addParam("UseE", "Use (E) Spell in LaneClear?", SCRIPT_PARAM_ONOFF, true)
+			Param.Clear.LaneClear:addParam("UseR", "Use (R) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.LaneClear:addParam("UseAA", "Use Auto Attacks in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.LaneClear:permaShow("laneclearkey")
+	------
+		Param.Clear:addSubMenu("JungleClear", "JungleClear")
+			Param.Clear.JungleClear:addParam("jungleclearkey", "JungleClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+			Param.Clear.JungleClear:addParam("manamanager", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			Param.Clear.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear?", SCRIPT_PARAM_ONOFF, true)
+			Param.Clear.JungleClear:addParam("UseR", "Use (R) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.JungleClear:addParam("UseAA", "Use Auto Attacks in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
+			Param.Clear.JungleClear:permaShow("jungleclearkey")
+	--
+	Param:addSubMenu("KillSteal To Win!", "KillSteal")
+		Param.KillSteal:addParam("KillStealON", "Enable KillSteal to Win?" , SCRIPT_PARAM_ONOFF, true)
+		Param.KillSteal:addParam("UseQ", "Use (Q) Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true)
+		Param.KillSteal:addParam("UseE", "Use (E) Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true)
+		Param.KillSteal:addParam("UseR", "Use (R) Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true)
+		if Ignite then Param.KillSteal:addParam("UseIgnite", "Use (Ignite) Summoner Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true) end
+	--
+	Param:addSubMenu("Miscellaneous because Swag!", "miscellaneous")
+	------
+		Param.miscellaneous:addSubMenu("Quick Silver Slash", "QuickSS")
+			Param.miscellaneous.QuickSS:addParam("qsswithscript", "Use Qss with that Script?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.QuickSS:addParam("qssoncc", "Use Qss whenever?", SCRIPT_PARAM_ONOFF, false)
+			Param.miscellaneous.QuickSS:addParam("qssonlyincombo", "Use Qss on HardCC in ComboMode only", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.QuickSS:addParam("qssdelay", "Humanizer (ms) :", SCRIPT_PARAM_SLICE, 0, 0, 5000, 0)
+		--
+		Param.miscellaneous:addSubMenu("Seraph's Embrace", "BatonSeraphin")
+			Param.miscellaneous.BatonSeraphin:addParam("seraphwithscript", "Use Seraph's Embrace with that Script?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.BatonSeraphin:addParam("seraphxlife", "Use Seraph's at X > life?", SCRIPT_PARAM_SLICE, 20, 0, 100)
+			Param.miscellaneous.BatonSeraphin:addParam("seraphcombo", "Use Only Seraph's in ComboMode?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.BatonSeraphin:addParam("seraphdelay", "Humanizer (ms) :", SCRIPT_PARAM_SLICE, 0, 0, 5000, 0)
+		--
+		Param.miscellaneous:addSubMenu("Frost's Quenn Claim", "ItemSuppBleu")
+			Param.miscellaneous.ItemSuppBleu:addParam("suppbleuwithscript", "Use Frost's Quenn with that Script?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.ItemSuppBleu:addParam("suppbleuchase", "Use Frost's Quenn only on a chase?", SCRIPT_PARAM_ONOFF, false)
+			Param.miscellaneous.ItemSuppBleu:addParam("suppbleucombo", "Use Frost's Quenn in ComboMode/Teamfight?", SCRIPT_PARAM_ONOFF, true)
+			--Param.miscellaneous.ItemSuppBleu:addParam("suppbleugolds", "Use passive of Frost's Quenn?", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("Y"))
+		--
+		Param.miscellaneous:addSubMenu("Exilir of Sorcery", "ElixirduSorcier")
+			Param.miscellaneous.ElixirduSorcier:addParam("elixirwithscript", "Use Exilir of Sorcery with that script?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.ElixirduSorcier:addParam("elixironlywithcombo", "Use Elixir Only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.ElixirduSorcier:addParam("elixirinfight", "Use Exilir of Sorcery in fight?", SCRIPT_PARAM_ONOFF, true)
+		--
+		Param.miscellaneous:addSubMenu("Potions and Flasks", "Pots")
+			Param.miscellaneous.Pots:addParam("potswithscript", "Use potions with this script?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
+			Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.Pots:addParam("potselect", "Select you'r potion : (Need F9)", SCRIPT_PARAM_LIST, 1, {"Health Potion", "Cookie", "Hunter's Potion", "Refillable Potion", "Corrupting Potion"})
+		--
+		if VIP_USER then Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchanger") end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
+		--
+		Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
+		Param.miscellaneous:addParam("Qgapclos", "Use gapcloser?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no enemy in?", SCRIPT_PARAM_ONOFF , true)
+	--
+	Param:addSubMenu("Drawing", "drawing")
+		Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
+		Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
+		Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
+		Param.drawing:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
+		--
+		Param.drawing:addSubMenu("Charactere Draws","spell")
+			Param.drawing.spell:addParam("Qdraw","Display (Q) Spell draw?", SCRIPT_PARAM_ONOFF, true)
+			Param.drawing.spell:addParam("Qtravel", "Draw Q travelling?", SCRIPT_PARAM_ONOFF, true)
+			Param.drawing.spell:addParam("Wdraw","Display (W) Spell draw?", SCRIPT_PARAM_ONOFF, true)
+			Param.drawing.spell:addParam("Edraw","Display (E) Spell draw?", SCRIPT_PARAM_ONOFF, true)
+			Param.drawing.spell:addParam("Rdraw","Display (R) Spell draw?", SCRIPT_PARAM_ONOFF, true)
+			Param.drawing.spell:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
+		--
+		Param.drawing:addSubMenu("About AutoWall", "wallmenu")
+			Param.drawing.wallmenu:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
+			Param.drawing.wallmenu:permaShow("active")
+			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle radius : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
+			Param.drawing.wallmenu:permaShow("radius")
+			Param.drawing.wallmenu:addParam("holdwall", "Press : To show WallsCasts ", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
+			Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
+			Param.drawing.wallmenu:addParam("showclose", "Show close WallsCasts?", SCRIPT_PARAM_ONOFF, true)
+			Param.drawing.wallmenu:addParam("showcloserange", "Which range is close?", SCRIPT_PARAM_SLICE, 1000, 0, 5000, 0)
 
-CustomLoad()
+	if (not Param.miscellaneous.skinchanger['saveSkin']) then
+		Param.miscellaneous.skinchanger['changeSkin'] = false
+		Param.miscellaneous.skinchanger['selectedSkin'] = 1
+	elseif (Param.miscellaneous.skinchanger['changeSkin']) then
+		SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+	end
 
-if Param.miscellaneous.Pots.potselect == 1 then
+	CustomLoad()
 
-ActualPot = "RegenerationPotion"
-ActualPotName = "Health Potion"
-ActualPotTime = 15
+	if Param.miscellaneous.Pots.potselect == 1 then
+		ActualPot = "RegenerationPotion"
+		ActualPotName = "Health Potion"
+		ActualPotTime = 15
+	elseif Param.miscellaneous.Pots.potselect == 2 then
+		ActualPot = "ItemMiniRegenPotion"
+		ActualPotName = "Cookie"
+		ActualPotTime = 15
+	elseif Param.miscellaneous.Pots.potselect == 3 then
 
-elseif Param.miscellaneous.Pots.potselect == 2 then
-
-ActualPot = "ItemMiniRegenPotion"
-ActualPotName = "Cookie"
-ActualPotTime = 15
-
-elseif Param.miscellaneous.Pots.potselect == 3 then
-
-ActualPot = "ItemCrystalFlaskJungle"
-ActualPotName = "Hunter's Potion"
-ActualPotTime = 8
-
-elseif Param.miscellaneous.Pots.potselect == 4 then
-
-ActualPot = "ItemCrystalFlask"
-ActualPotName = "Refillable Potion"
-ActualPotTime = 12
-
-elseif Param.miscellaneous.Pots.potselect == 5 then
-
-ActualPot = "ItemDarkCrystalFlask"
-ActualPotName = "Corrupting Potion"
-ActualPotTime = 12
-
-end
-
+		ActualPot = "ItemCrystalFlaskJungle"
+		ActualPotName = "Hunter's Potion"
+		ActualPotTime = 8
+	elseif Param.miscellaneous.Pots.potselect == 4 then
+		ActualPot = "ItemCrystalFlask"
+		ActualPotName = "Refillable Potion"
+		ActualPotTime = 12
+	elseif Param.miscellaneous.Pots.potselect == 5 then
+		ActualPot = "ItemDarkCrystalFlask"
+		ActualPotName = "Corrupting Potion"
+		ActualPotTime = 12
+	end
 end
 
 function OnUnload()
-EnvoiMessage("Unloaded.")
-EnvoiMessage("There is no bird anymore between us... Ciao!")
-
-if (Param.miscellaneous.skinchanger['changeSkin']) then
-SendSkinPacket(myHero.charName, nil, myHero.networkID);
-end
-
+	EnvoiMessage("Unloaded.")
+	EnvoiMessage("There is no bird anymore between us... Ciao!")
+	if (Param.miscellaneous.skinchanger['changeSkin']) then
+		SendSkinPacket(myHero.charName, nil, myHero.networkID);
+	end
 end
 
 function CustomLoad()
-CheckVPred()
-Skills()	
-GenerateTables()
+	CheckVPred()
+	Skills()	
+	GenerateTables()
+	if _G.Reborn_Initialised then
+	elseif _G.Reborn_Loaded then
+		DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
+		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
+		EnvoiMessage("Loaded SAC:R")
+	else
+   		LoadOrb()
+	end
 
-if _G.Reborn_Initialised then
-elseif _G.Reborn_Loaded then
-DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
-DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
-EnvoiMessage("Loaded SAC:R")
-else
-   	LoadOrb()
-end
-
-enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
-jungleMinions = minionManager(MINION_JUNGLE, 700, myHero, MINION_SORT_MAXHEALTH_DEC)
-ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
-ts.name = "Anivia"
-Param:addTS(ts)
-PriorityOnLoad()
- 	 end
+	enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
+	jungleMinions = minionManager(MINION_JUNGLE, 700, myHero, MINION_SORT_MAXHEALTH_DEC)
+	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
+	ts.name = "Anivia"
+	Param:addTS(ts)
+	PriorityOnLoad()
+ end
   
 function LoadOrb()
 
-if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then	
-DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
-DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
-
-require("SxOrbWalk")
-
-EnvoiMessage("Loaded SxOrbWalk")
-
-Param:addSubMenu("SxOrbWalk", "SXMenu")
-SxOrb:LoadToMenu(Param.SXMenu)
-else
-
-local ToUpdate = {}
-
-    	ToUpdate.Version = 1
-   	 	ToUpdate.UseHttps = true
-    	ToUpdate.Host = "raw.githubusercontent.com"
-   	 	ToUpdate.VersionPath = "/Superx321/BoL/master/common/SxOrbWalk.Version"
-   	 	ToUpdate.ScriptPath =  "/Superx321/BoL/master/common/SxOrbWalk.lua"
-    	ToUpdate.SavePath = LIB_PATH.."/SxOrbWalk.lua"
-   	ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". </b></font>") end
-    	ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
-    	ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-   	 	ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
-   	ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
-end
+	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then	
+		DelayAction(function()EnvoiMessage("I've made some not easy to understand options, you should check the forum thread for the settings, and maybe, to share you'r own?")end, 5)
+		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
+		require("SxOrbWalk")
+		EnvoiMessage("Loaded SxOrbWalk")
+		Param:addSubMenu("SxOrbWalk", "SXMenu")
+		SxOrb:LoadToMenu(Param.SXMenu)
+	else
+		local ToUpdate = {}
+		    ToUpdate.Version = 1
+		   	ToUpdate.UseHttps = true
+		    ToUpdate.Host = "raw.githubusercontent.com"
+		   	ToUpdate.VersionPath = "/Superx321/BoL/master/common/SxOrbWalk.Version"
+		   	ToUpdate.ScriptPath =  "/Superx321/BoL/master/common/SxOrbWalk.lua"
+		    ToUpdate.SavePath = LIB_PATH.."/SxOrbWalk.lua"
+		   	ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". </b></font>") end
+		    ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
+		    ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
+		   	ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
+		   	ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+	end
 end
 
 function CheckVPred()
-if FileExist(LIB_PATH .. "/VPrediction.lua") then
-require("VPrediction")
-
-EnvoiMessage("Loaded VPred")
-
-VP = VPrediction()
-else
-
-local ToUpdate = {}
-
-ToUpdate.Version = 0.0
-ToUpdate.UseHttps = true
-ToUpdate.Name = "VPrediction"
-ToUpdate.Host = "raw.githubusercontent.com"
-ToUpdate.VersionPath = "/SidaBoL/Scripts/master/Common/VPrediction.version"
-ToUpdate.ScriptPath =  "/SidaBoL/Scripts/master/Common/VPrediction.lua"
-ToUpdate.SavePath = LIB_PATH.."/VPrediction.lua"
-ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
-ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
-ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
-ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
-end
+	if FileExist(LIB_PATH .. "/VPrediction.lua") then
+		require("VPrediction")
+		EnvoiMessage("Loaded VPred")
+		VP = VPrediction()
+	else
+		local ToUpdate = {}
+		ToUpdate.Version = 0.0
+		ToUpdate.UseHttps = true
+		ToUpdate.Name = "VPrediction"
+		ToUpdate.Host = "raw.githubusercontent.com"
+		ToUpdate.VersionPath = "/SidaBoL/Scripts/master/Common/VPrediction.version"
+		ToUpdate.ScriptPath =  "/SidaBoL/Scripts/master/Common/VPrediction.lua"
+		ToUpdate.SavePath = LIB_PATH.."/VPrediction.lua"
+		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
+		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
+		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
+		ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
+		ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+	end
 end
 
 function KillSteal()
-for _, unit in pairs(GetEnemyHeroes()) do
-
-health = unit.health
-Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
-
-if GetDistance(unit) < 750 then
-
-if Param.KillSteal.KillStealON then
-
-if health <= Qdmg and Param.KillSteal.UseQ and myHero:CanUseSpell(_Q) == READY and ValidTarget(unit) then
-CastQ(unit)
-end
-
-if health <= Edmg and Param.KillSteal.UseE and myHero:CanUseSpell(_E) == READY and ValidTarget(unit) then
-CastSpell(_E, unit)
-end
-
-if health <= Rdmg and Param.KillSteal.UseR and myHero:CanUseSpell(_R) == READY and ValidTarget(unit) then
-CastR(unit)
-end
-if not ComboKey then
-if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
-if health <= 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
-CastSpell(Ignite, unit)
-end
-end
-end
-end
-end
-end
+	for _, unit in pairs(GetEnemyHeroes()) do
+		health = unit.health
+		Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
+		Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+		Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
+		if GetDistance(unit) < 750 then
+			if Param.KillSteal.KillStealON then
+				if health <= Qdmg and Param.KillSteal.UseQ and myHero:CanUseSpell(_Q) == READY and ValidTarget(unit) then
+					CastQ(unit)
+				end
+				if health <= Edmg and Param.KillSteal.UseE and myHero:CanUseSpell(_E) == READY and ValidTarget(unit) then
+					CastSpell(_E, unit)
+				end
+				if health <= Rdmg and Param.KillSteal.UseR and myHero:CanUseSpell(_R) == READY and ValidTarget(unit) then
+					CastR(unit)
+				end
+				if not ComboKey then
+					if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+						if health <= 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
+							CastSpell(Ignite, unit)
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 function OnTick()
-
-if myHero.dead then return end
-
-ts:update()
-
-Target = GetCustomTarget()
-
-WdansR(Target)
-
-ComboKey = Param.Combo.comboKey or Param.Combo.combotoggle
-HarassKey = Param.Harass.Harasskey or Param.Harass.Harasstoggle
-LaneClearKey = Param.Clear.LaneClear.laneclearkey or Param.Clear.LaneClear.lanecleartoggle
-JungleClearKey = Param.Clear.JungleClear.jungleclearkey or Param.Clear.JungleClear.junglecleartoggle
-WaveClearKey = Param.Clear.WaveClear.waveclearkey or Param.Clear.WaveClear.wavecleartoggle
-if ComboKey then 
-
-Combo(Target)
-
-if Param.Combo.combotoggle and combostatus == 0 then
-EnvoiMessage("ComboMode Toggle [ON]")
-combostatus = 1
-end
-
-end
-
-if not ComboKey then
-
-if HarassKey then
-
-Harass(Target)
-
-
-end	
-
-if LaneClearKey then
-
-LaneClear()
-
-end
-
-if WaveClearKey then
-
-WaveClear()
-
-
-end
-
-if JungleClearKey then
-
-JungleClear()
-
-
-end
-
-end
-
-KillSteal()
-
-if Qm ~= nil then
-
-DetectQ()
-
-end
-
-if Param.miscellaneous.ManualR then
-
-if Rm ~= nil then
-
-if not ValidR() then 
-
-if not Param.Clear.JungleClear.jungleclearkey or Param.Clear.LaneClear.laneclearkey then
-
-CastSpell(_R) 
-
-end
-end
-end
-
-end
-
-DrawKillable()
-
-AutoSeraphin()
-AutoFrostQuenn()
-AutoElixirDuSorcier()
-if Param.miscellaneous.Pots.potonlywithcombo and ComboKey then 
-AutoPotions()
-end
-
-if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
-if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
-for i,group in pairs(wallSpots) do
- 	for x, wallSpot in pairs(group.Locations) do
- 	if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.radius and GetDistance(wallSpot) <= 1000 then
-                       CastSpell(_W, wallSpot.x, wallSpot.z)
-                    end                                    
-     	end
-            end
-        end
-    end
-
-        if Param.drawing.wallmenu.holdwall then
-       
-                        drawWallSpots = true
-       
-        elseif Param.drawing.wallmenu.holdwall == false then
-       
-                        drawWallSpots = false
-       
-        end
-
-
-
-
-if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
-lastTimeTickCalled = CurrentTimeInMillis();
-if (Param.miscellaneous.skinchanger['changeSkin']) then
-if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
-lastSkin = Param.miscellaneous.skinchanger['selectedSkin'];
-SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID);
-end;
-elseif (lastSkin ~= 0) then
-SendSkinPacket(myHero.charName, nil, myHero.networkID);
-lastSkin = 0;
-end;
-end;
+	if myHero.dead then return end
+		ts:update()
+		Target = GetCustomTarget()
+		WdansR(Target)
+		-- Creating Key 
+		ComboKey = Param.Combo.comboKey or Param.Combo.combotoggle
+		HarassKey = Param.Harass.Harasskey or Param.Harass.Harasstoggle
+		LaneClearKey = Param.Clear.LaneClear.laneclearkey or Param.Clear.LaneClear.lanecleartoggle
+		JungleClearKey = Param.Clear.JungleClear.jungleclearkey or Param.Clear.JungleClear.junglecleartoggle
+		WaveClearKey = Param.Clear.WaveClear.waveclearkey or Param.Clear.WaveClear.wavecleartoggle
+		if ComboKey then 
+			Combo(Target)
+		end
+		if not ComboKey then
+			if HarassKey then
+				Harass(Target)
+			end	
+			if LaneClearKey then
+				LaneClear()
+			end
+			if WaveClearKey then
+				WaveClear()
+			end
+			if JungleClearKey then
+				JungleClear()
+			end
+		end
+		KillSteal()
+		if Qm ~= nil then
+			DetectQ()
+		end
+		if Param.miscellaneous.ManualR then
+			if Rm ~= nil then
+				if not ValidR() then
+					if not Param.Clear.JungleClear.jungleclearkey or Param.Clear.LaneClear.laneclearkey then
+						CastSpell(_R) 
+					end
+				end
+			end
+		end
+		DrawKillable()
+		AutoSeraphin()
+		AutoFrostQuenn()
+		AutoElixirDuSorcier()
+		if Param.miscellaneous.Pots.potonlywithcombo and ComboKey then 
+			AutoPotions()
+		end
+		if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
+			if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
+				for i,group in pairs(wallSpots) do
+	 				for x, wallSpot in pairs(group.Locations) do
+	 					if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.radius and GetDistance(wallSpot) <= 1000 then
+	                       CastSpell(_W, wallSpot.x, wallSpot.z)
+	                    end                                    
+	     			end
+	            end
+	        end
+	    end
+	    if Param.drawing.wallmenu.holdwall then
+	       	drawWallSpots = true
+	    elseif Param.drawing.wallmenu.holdwall == false then
+	    	drawWallSpots = false
+	    end
+		if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
+			lastTimeTickCalled = CurrentTimeInMillis()
+			if (Param.miscellaneous.skinchanger['changeSkin']) then
+				if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
+					lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
+					SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+				end
+			elseif (lastSkin ~= 0) then
+				SendSkinPacket(myHero.charName, nil, myHero.networkID)
+				lastSkin = 0
+			end
+		end
 end
 
 function drawCircles(x,y,z,color)
