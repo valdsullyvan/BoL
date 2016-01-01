@@ -7,7 +7,7 @@ BaguetteAnivia.lua
 
 Github link : https://github.com/spyk1/BoL/blob/master/BaguetteAnivia/BaguetteAnivia.lua
 
-Forum Thread : 
+Forum Thread : http://forum.botoflegends.com/topic/87964-beta-baguette-anivia/
 
 ]]--
 
@@ -21,7 +21,7 @@ if not charNames[myHero.charName] then return end
 
 function EnvoiMessage(msg)
 
-   	 	PrintChat("<font color="#e74c3c"><b>[BaguetteAnivia]</b></font> <font color="#ffffff">" .. msg .. "</font>")
+   	 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteAnivia]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 
 end
 
@@ -29,7 +29,7 @@ function CurrentTimeInMillis()
 return (os.clock() * 1000);
 end
 
-local version = "0.32"
+local version = "0.33"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -99,50 +99,61 @@ local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 function OnLoad()
 
-print("<font color="#ffffff">Loading</font><font color="#e74c3c"><b> [TheBirdReloaded]</b></font> <font color="#ffffff">by spyk</font>")
+print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [TheBirdReloaded]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
  	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
 
 Param = scriptConfig("[Baguette] Anivia", "BaguetteAnivia")
-
+Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
+Param:permaShow("n4")
 Param:addSubMenu("SBTW!","Combo")
-Param.Combo:addParam("combotoggle", "Key To WIN without HANDS!", SCRIPT_PARAM_ONKEYTOGGLE, false, 18)
-Param.Combo:addParam("comboKey", "Key to Win : ", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+Param.Combo:addParam("combotoggle", "Combo Mode Toggle :", SCRIPT_PARAM_ONKEYTOGGLE, false, 18)
+Param.Combo:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
 Param.Combo:addParam("UseE", "Use (E) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
 Param.Combo:addParam("UseR", "Use (R) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true )
+Param.Combo:permaShow("comboKey")
+Param.Combo:permaShow("combotoggle")
 Param:addSubMenu("Harass To Win!","Harass")
-Param.Harass:addParam("Harasstoggle", "Toggle Harass Mode?", SCRIPT_PARAM_ONKEYTOGGLE, false, 107)
-Param.Harass:addParam("Harasskey", "Key to Harass :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
+Param.Harass:addParam("Harasstoggle", "Harass Mode Toggle :", SCRIPT_PARAM_ONKEYTOGGLE, false, 107)
+Param.Harass:addParam("Harasskey", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
 Param.Harass:addParam("manamanager", "Required Mana to Harass :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
 Param.Harass:addParam("UseE", "Use (E) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
 Param.Harass:addParam("UseR", "Use (R) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true )
+Param.Harass:permaShow("Harasskey")
+Param.Harass:permaShow("Harasstoggle")
 Param:addSubMenu("Clear To Win!","Clear")
 Param.Clear:addSubMenu("WaveClear to WIN!", "WaveClear")
-Param.Clear.WaveClear:addParam("wavecleartoggle", "Toggle WaveClear?", SCRIPT_PARAM_ONKEYTOGGLE, false, 111)
-Param.Clear.WaveClear:addParam("waveclearkey", "Key to WaveClear :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+Param.Clear.WaveClear:addParam("wavecleartoggle", "WaveClear Mode Toggle", SCRIPT_PARAM_ONKEYTOGGLE, false, 111)
+Param.Clear.WaveClear:addParam("waveclearkey", "WaveClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 Param.Clear.WaveClear:addParam("manamanager", "Required Mana to WaveClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 Param.Clear.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 Param.Clear.WaveClear:addParam("UseE", "Use (E) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 Param.Clear.WaveClear:addParam("UseR", "Use (R) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 Param.Clear.WaveClear:addParam("UseAA", "Use Auto Attacks in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
+Param.Clear.WaveClear:permaShow("waveclearkey")
+Param.Clear.WaveClear:permaShow("wavecleartoggle")
 Param.Clear:addSubMenu("LaneClear to Farm.", "LaneClear")
-Param.Clear.LaneClear:addParam("lanecleartoggle", "Toggle LaneClear?", SCRIPT_PARAM_ONKEYTOGGLE, false, 106)
-Param.Clear.LaneClear:addParam("laneclearkey", "Key to LaneClear :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
+Param.Clear.LaneClear:addParam("lanecleartoggle", "LaneClear Mode Toggle :", SCRIPT_PARAM_ONKEYTOGGLE, false, 106)
+Param.Clear.LaneClear:addParam("laneclearkey", "LaneClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
 Param.Clear.LaneClear:addParam("manamanager", "Required Mana to LaneClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 Param.Clear.LaneClear:addParam("UseQ", "Use (Q) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, false )
 Param.Clear.LaneClear:addParam("UseE", "Use (E) Spell in LaneClear?", SCRIPT_PARAM_ONOFF, true)
 Param.Clear.LaneClear:addParam("UseR", "Use (R) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
 Param.Clear.LaneClear:addParam("UseAA", "Use Auto Attacks in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
+Param.Clear.LaneClear:permaShow("laneclearkey")
+Param.Clear.LaneClear:permaShow("lanecleartoggle")
 Param.Clear:addSubMenu("JungleClear", "JungleClear")
-Param.Clear.JungleClear:addParam("junglecleartoggle", "Toggle JungleClear?", SCRIPT_PARAM_ONKEYTOGGLE, false, 109)
-Param.Clear.JungleClear:addParam("jungleclearkey", "Key to JungleClear :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+Param.Clear.JungleClear:addParam("junglecleartoggle", "JungleClear Mode Toggle?", SCRIPT_PARAM_ONKEYTOGGLE, false, 109)
+Param.Clear.JungleClear:addParam("jungleclearkey", "JungleClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 Param.Clear.JungleClear:addParam("manamanager", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 Param.Clear.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
 Param.Clear.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear?", SCRIPT_PARAM_ONOFF, true)
 Param.Clear.JungleClear:addParam("UseR", "Use (R) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
 Param.Clear.JungleClear:addParam("UseAA", "Use Auto Attacks in JungleClear?" , SCRIPT_PARAM_ONOFF, true )
+Param.Clear.JungleClear:permaShow("jungleclearkey")
+Param.Clear.JungleClear:permaShow("junglecleartoggle")
 Param:addSubMenu("KillSteal To Win!", "KillSteal")
 Param.KillSteal:addParam("KillStealON", "Enable KillSteal to Win?" , SCRIPT_PARAM_ONOFF, true)
 Param.KillSteal:addParam("UseQ", "Use (Q) Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true)
@@ -178,9 +189,9 @@ if VIP_USER then Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchange
 if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
 if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
 if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to Divine", SCRIPT_PARAM_LIST, 0, {}) end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "CREDIT to PvPSuite", SCRIPT_PARAM_LIST, 0, {}) end
-if VIP_USER then Param.miscellaneous.skinchanger:addParam("n", "for p_skinChanger", SCRIPT_PARAM_LIST, 0, {}) end
+if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
+if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
+if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 Param.miscellaneous:addParam("QError", "Set (Q) Spell Active on :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
 Param.miscellaneous:addParam("Qgapclos", "Use gapcloser?", SCRIPT_PARAM_ONOFF, true)
 Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
@@ -201,7 +212,9 @@ Param.drawing.spell:addParam("Rdraw","Display (R) Spell draw?", SCRIPT_PARAM_ONO
 Param.drawing.spell:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
 Param.drawing:addSubMenu("About AutoWall", "wallmenu")
 Param.drawing.wallmenu:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
+Param.drawing.wallmenu:permaShow("active")
 Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle radius : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
+Param.drawing.wallmenu:permaShow("radius")
 Param.drawing.wallmenu:addParam("holdwall", "Press : To show WallsCasts ", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
 Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
 Param.drawing.wallmenu:addParam("showclose", "Show close WallsCasts?", SCRIPT_PARAM_ONOFF, true)
@@ -304,10 +317,10 @@ local ToUpdate = {}
    	 	ToUpdate.VersionPath = "/Superx321/BoL/master/common/SxOrbWalk.Version"
    	 	ToUpdate.ScriptPath =  "/Superx321/BoL/master/common/SxOrbWalk.lua"
     	ToUpdate.SavePath = LIB_PATH.."/SxOrbWalk.lua"
-   	ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color="#FF794C"><b>SxOrbWalk: </b></font> <font color="#FFDFBF">Updated to "..NewVersion..". </b></font>") end
-    	ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color="#FF794C"><b>SxOrbWalk: </b></font> <font color="#FFDFBF">No Updates Found</b></font>") end
-    	ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color="#FF794C"><b>SxOrbWalk: </b></font> <font color="#FFDFBF">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-   	 	ToUpdate.CallbackError = function(NewVersion) print("<font color="#FF794C"><b>SxOrbWalk: </b></font> <font color="#FFDFBF">Error while Downloading. Please try again.</b></font>") end
+   	ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". </b></font>") end
+    	ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
+    	ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
+   	 	ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
    	ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
 end
 end
@@ -330,10 +343,10 @@ ToUpdate.Host = "raw.githubusercontent.com"
 ToUpdate.VersionPath = "/SidaBoL/Scripts/master/Common/VPrediction.version"
 ToUpdate.ScriptPath =  "/SidaBoL/Scripts/master/Common/VPrediction.lua"
 ToUpdate.SavePath = LIB_PATH.."/VPrediction.lua"
-ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color="#FF794C"><b>" .. ToUpdate.Name .. ": </b></font> <font color="#FFDFBF">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
-ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color="#FF794C"><b>" .. ToUpdate.Name .. ": </b></font> <font color="#FFDFBF">No Updates Found</b></font>") end
-ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color="#FF794C"><b>" .. ToUpdate.Name .. ": </b></font> <font color="#FFDFBF">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-ToUpdate.CallbackError = function(NewVersion) print("<font color="#FF794C"><b>" .. ToUpdate.Name .. ": </b></font> <font color="#FFDFBF">Error while Downloading. Please try again.</b></font>") end
+ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
+ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
+ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
+ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
 ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
 end
 end
@@ -405,10 +418,6 @@ if HarassKey then
 
 Harass(Target)
 
-if Param.Harass.Harasstoggle and harasstatus == 0 then
-EnvoiMessage("Harass Toggle [ON]")
-harasstatus = 1
-end
 
 end	
 
@@ -416,21 +425,12 @@ if LaneClearKey then
 
 LaneClear()
 
-if Param.Clear.LaneClear.lanecleartoggle and lanecleartatus == 0 then
-EnvoiMessage("LaneClear Toggle [ON]")
-lanecleartatus = 1
-end
-
 end
 
 if WaveClearKey then
 
 WaveClear()
 
-if Param.Clear.WaveClear.wavecleartoggle and waveclearstatus == 0 then
-EnvoiMessage("WaveClear Toggle [ON]")
-waveclearstatus = 1
-end
 
 end
 
@@ -438,10 +438,6 @@ if JungleClearKey then
 
 JungleClear()
 
-if Param.Clear.JungleClear.junglecleartoggle and jungleclearstatus == 0 then
-EnvoiMessage("JungleClear Toggle [ON]")
-jungleclearstatus = 1
-end
 
 end
 
@@ -503,33 +499,7 @@ for i,group in pairs(wallSpots) do
         end
 
 
-if combostatus == 1 or harasstatus == 1 or waveclearstatus == 1 or lanecleartatus == 1 or jungleclearstatus == 1 then
 
-if combostatus == 1 and Param.Combo.combotoggle == false then
-combostatus = 0 
-EnvoiMessage("ComboMode Toggle [OFF]")
-end
-
-if harasstatus == 1 and Param.Harass.Harasstoggle == false then
-harasstatus = 0 
-EnvoiMessage("Harass Toggle [OFF]")
-end
-
-if waveclearstatus == 1 and Param.Clear.WaveClear.wavecleartoggle == false then
-waveclearstatus = 0 
-EnvoiMessage("WaveClear Toggle [OFF]")
-end
-
-if lanecleartatus == 1 and Param.Clear.LaneClear.lanecleartoggle == false then
-lanecleartatus = 0 
-EnvoiMessage("LaneClear Toggle [OFF]")
-end
-
-if jungleclearstatus == 1 and Param.Clear.JungleClear.junglecleartoggle == false then
-jungleclearstatus = 0 
-EnvoiMessage("JungleClear Toggle [OFF]")
-end
-end
 
 if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
 lastTimeTickCalled = CurrentTimeInMillis();
