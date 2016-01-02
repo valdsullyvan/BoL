@@ -28,7 +28,7 @@ function CurrentTimeInMillis()
 end
 
 -- Starting AutoUpdate
-local version = "0.42"
+local version = "0.43"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -68,6 +68,9 @@ local lastPotion = 0
 local ActualPotTime = 15
 local ActualPotName = "None"
 local ActualPotData = "None"
+local lastTP = 0
+local ActualTPTime = 0
+local upoeuf = 1
 local mods = "None"
 local lastFrostQuennCast = 0
 local lastSeraphin = 0
@@ -101,6 +104,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonerteleport") then Teleport = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerteleport") then Teleport = SUMMONER_2 end
 	--
 	Param = scriptConfig("[Baguette] Anivia", "BaguetteAnivia")
 	--
@@ -129,14 +133,14 @@ function OnLoad()
 			Param.Clear.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 			Param.Clear.WaveClear:addParam("UseE", "Use (E) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
 			Param.Clear.WaveClear:addParam("UseR", "Use (R) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true )
-	------
+		--
 		Param.Clear:addSubMenu("LaneClear to Farm.", "LaneClear")
 			Param.Clear.LaneClear:addParam("laneclearkey", "LaneClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
 			Param.Clear.LaneClear:addParam("manamanager", "Required Mana to LaneClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 			Param.Clear.LaneClear:addParam("UseQ", "Use (Q) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, false )
 			Param.Clear.LaneClear:addParam("UseE", "Use (E) Spell in LaneClear?", SCRIPT_PARAM_ONOFF, true)
 			Param.Clear.LaneClear:addParam("UseR", "Use (R) Spell in LaneClear?" , SCRIPT_PARAM_ONOFF, true )
-	------
+		--
 		Param.Clear:addSubMenu("JungleClear", "JungleClear")
 			Param.Clear.JungleClear:addParam("jungleclearkey", "JungleClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 			Param.Clear.JungleClear:addParam("manamanager", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
@@ -152,7 +156,7 @@ function OnLoad()
 		if Ignite then Param.KillSteal:addParam("UseIgnite", "Use (Ignite) Summoner Spell to KillSteal?", SCRIPT_PARAM_ONOFF, true) end
 	--
 	Param:addSubMenu("Miscellaneous because Swag!", "miscellaneous")
-	------
+		--
 		Param.miscellaneous:addSubMenu("Quick Silver Slash", "QuickSS")
 			Param.miscellaneous.QuickSS:addParam("qsswithscript", "Use Qss with that Script?", SCRIPT_PARAM_ONOFF, true)
 			Param.miscellaneous.QuickSS:addParam("qssoncc", "Use Qss whenever?", SCRIPT_PARAM_ONOFF, false)
@@ -189,12 +193,18 @@ function OnLoad()
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 		--
-		Param.miscellaneous:addParam("QError", "Set (QDiameter) on (Normally = 200) :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
+		Param.miscellaneous:addParam("QError", "Set (Q) Diameter on (Normally = 200) :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
 		Param.miscellaneous:addParam("Qgapclos", "Use GapCloser?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in?", SCRIPT_PARAM_ONOFF , true)
+	--
+	Param:addSubMenu("Exploits", "exploits")
+		if Teleport then Param.exploits:addSubMenu("Egg Teleport", "egg") end
+		if Teleport then Param.exploits.egg:addParam("active", "Enable Egg Teleport Exploit?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N")) end
+		if Teleport then Param.exploits.egg:addParam("eggatxhp", "At how many %HP it will cast TP?", SCRIPT_PARAM_SLICE, 25, 0, 100) end
+		if Teleport then Param.exploits.egg:permaShow("active") end
 	--
 	Param:addSubMenu("Drawing", "drawing")
 		Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
@@ -213,7 +223,7 @@ function OnLoad()
 		Param.drawing:addSubMenu("About AutoWall", "wallmenu")
 			Param.drawing.wallmenu:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
 			Param.drawing.wallmenu:permaShow("active")
-			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle diameter : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
+			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle Diameter : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
 			Param.drawing.wallmenu:permaShow("radius")
 			Param.drawing.wallmenu:addParam("holdwall", "Press : To show WallsCasts ", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
 			Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
@@ -348,9 +358,8 @@ function OnTick()
 		if ComboKey then 
 			Combo(Target)
 			Param.n5 = 2
-
 		end
-
+		--Combo Switcher PermaShow
 		if not ComboKey then
 			if HarassKey then
 				Harass(Target)
@@ -381,6 +390,9 @@ function OnTick()
 					end
 				end
 			end
+		end
+		if Param.exploits.egg.active then 
+			AutoEggTp() 
 		end
 		DrawKillable()
 		AutoSeraphin()
@@ -876,7 +888,6 @@ function OnProcessSpell(unit, spell)
 end
 
 function OnGainBuff (unit, buff)
-
 	for i = 1, 1 do
 		if not Param.miscellaneous.QuickSS.qsswithscript then return end
 			if myHero:getBuff(isABuff) then
@@ -895,6 +906,17 @@ function OnGainBuff (unit, buff)
 				--
 			end
 		--
+	end
+end
+
+function OnRemoveBuff(unit, buff)
+	if unit and unit.valid and unit.isMe and buff and buff.name == "rebirthcooldown" then
+		upoeuf = 1
+		EnvoiMessage("Rebirth [(Passive)] is now UP")
+	end
+	if unit and unit.valid and unit.isMe and buff and buff.name == "rebirth" then
+		upoeuf = 0
+		EnvoiMessage("Rebirth [(Passive)] is now DOWN")
 	end
 end
 
@@ -1163,6 +1185,32 @@ function AutoSeraphin()
 			--
 		--
 	--
+end
+
+function AutoEggTp()
+	if upoeuf == 1 then
+		if Param.exploits.egg.active then
+			if (myHero.health*100)/myHero.maxHealth < Param.exploits.egg.eggatxhp then
+				if os.clock() - lastTP < ActualTPTime then return end
+					local turrets = GetTurrets()
+					local targetTurret = nil
+					for _, turret in pairs(turrets) do
+		       	 		if turret ~= nil and turret.team == player.team then
+			   	 			if targetTurret == nil then targetTurret = turret.object end
+		           				if turret.object.attackSpeed == 9 then
+			       					targetTurret = turret.object
+			    				end
+		        			end
+		    			end
+					if targetTurret ~= nil then
+						ActualTPTime = 300
+						lastTP = os.clock()
+						CastSpell(SUMMONER_2, targetTurret)
+		       	 	end 
+		       	--
+		    end
+		end
+	end
 end
 
 
