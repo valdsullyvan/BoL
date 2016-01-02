@@ -28,7 +28,7 @@ function CurrentTimeInMillis()
 end
 
 -- Starting AutoUpdate
-local version = "0.43"
+local version = "0.431"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -866,8 +866,10 @@ end
 
 function OnProcessSpell(unit, spell)
 	if Param.miscellaneous.Wstop then
-	    if isAChampToInterrupt[spell.name] and GetDistanceSqr(unit) <= 715*715 then
-	        CastSpell(_W, unit.x, unit.z)
+		if unit.team ~= myHero.team then
+	   	 	if isAChampToInterrupt[spell.name] and GetDistanceSqr(unit) <= 715*715 then
+	       	 	CastSpell(_W, unit.x, unit.z)
+	    	end
 	    end
 	end
 	if Param.miscellaneous.Qgapclos then
