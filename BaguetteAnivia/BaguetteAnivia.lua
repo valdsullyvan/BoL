@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.4386"
+local version = "0.4385"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -270,14 +270,14 @@ function OnLoad()
 	--
 	Param:addSubMenu("", "nil")
 	--
-	Param:addSubMenu("Prediction", "prediction")
-		Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
-		Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
+	-- Param:addSubMenu("Prediction", "prediction")
+	-- 	Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
+	-- 	Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
 	--
 	Param:addSubMenu("", "nil")
 	--
