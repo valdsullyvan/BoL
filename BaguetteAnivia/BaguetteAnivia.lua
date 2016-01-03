@@ -28,7 +28,7 @@ function CurrentTimeInMillis()
 end
 
 -- Starting AutoUpdate
-local version = "0.434"
+local version = "0.438"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -236,12 +236,13 @@ function OnLoad()
 		--
 	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
 		Param:permaShow("n4")
-
-	if (not Param.miscellaneous.skinchanger['saveSkin']) then
-		Param.miscellaneous.skinchanger['changeSkin'] = false
-		Param.miscellaneous.skinchanger['selectedSkin'] = 1
-	elseif (Param.miscellaneous.skinchanger['changeSkin']) then
-		SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+	if VIP_USER then
+		if (not Param.miscellaneous.skinchanger['saveSkin']) then
+			Param.miscellaneous.skinchanger['changeSkin'] = false
+			Param.miscellaneous.skinchanger['selectedSkin'] = 1
+		elseif (Param.miscellaneous.skinchanger['changeSkin']) then
+			SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+		end
 	end
 	
 	CustomLoad()
@@ -251,8 +252,10 @@ end
 function OnUnload()
 	EnvoiMessage("Unloaded.")
 	EnvoiMessage("There is no bird anymore between us... Ciao!")
-	if (Param.miscellaneous.skinchanger['changeSkin']) then
-		SendSkinPacket(myHero.charName, nil, myHero.networkID);
+	if VIP_USER then
+		if (Param.miscellaneous.skinchanger['changeSkin']) then
+			SendSkinPacket(myHero.charName, nil, myHero.networkID);
+		end
 	end
 end
 
@@ -426,22 +429,25 @@ function OnTick()
 	    elseif Param.drawing.wallmenu.holdwall == false then
 	    	drawWallSpots = false
 	    end
-		if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
-			lastTimeTickCalled = CurrentTimeInMillis()
-			if (Param.miscellaneous.skinchanger['changeSkin']) then
-				if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
-					lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
-					SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+	    if VIP_USER then 
+			if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
+				lastTimeTickCalled = CurrentTimeInMillis()
+				if (Param.miscellaneous.skinchanger['changeSkin']) then
+					if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
+						lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
+						SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+					end
+				elseif (lastSkin ~= 0) then
+					SendSkinPacket(myHero.charName, nil, myHero.networkID)
+					lastSkin = 0
 				end
-			elseif (lastSkin ~= 0) then
-				SendSkinPacket(myHero.charName, nil, myHero.networkID)
-				lastSkin = 0
+			end
+
+			if Param.n5 ~= 1 and not ComboKey and not HarassKey and not LaneClearKey and not JungleClearKey and not WaveClearKey then
+				Param.n5 = 1
 			end
 		end
-
-		if Param.n5 ~= 1 and not ComboKey and not HarassKey and not LaneClearKey and not JungleClearKey and not WaveClearKey then
-			Param.n5 = 1
-		end
+	--
 end
 
 function drawCircles(x,y,z,color)
