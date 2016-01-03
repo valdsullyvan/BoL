@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.4385"
+local version = "0.4386"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -105,7 +105,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Every orbwalkers supported.")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'New auto-update.")end, 15)
 		whatsnew = 0
 	end
 	--
@@ -270,16 +270,16 @@ function OnLoad()
 	--
 	Param:addSubMenu("", "nil")
 	--
-	-- Param:addSubMenu("Prediction", "prediction")
-	-- 	Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
-	-- 	Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
-	-- --
-	-- Param:addSubMenu("", "nil")
+	Param:addSubMenu("Prediction", "prediction")
+		Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
+		Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
+	--
+	Param:addSubMenu("", "nil")
 	--
 	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
 	Param:permaShow("n4")
@@ -321,6 +321,7 @@ function CustomLoad()
 		EnvoiMessage("BigFat OrbWalker loading..")
 		LoadBFOrb()
 	elseif Param.orbwalker.n1 == 4 then
+		local neo = 1
 		EnvoiMessage("Nebelwolfi's Orb Walker loading..")
 		LoadNEBOrb()
 	end
@@ -387,7 +388,9 @@ function LoadNEBOrb()
 				LoadNEBOrb()
 			end)
 		else
-			LoadNEBOrb()
+			if neo == 1 then
+				LoadNEBOrb()
+			end
 		end
 	end
 
