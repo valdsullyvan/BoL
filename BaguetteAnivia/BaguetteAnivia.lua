@@ -69,24 +69,39 @@ local damageQ = 30 * myHero:GetSpellData(_Q).level + 30 + .5 * myHero.ap
 local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
-function OnLoad()
--- Starting AutoUpdate
-    local whatsnew = 0
+--- Starting AutoUpdate
+local version = "0.4381"
+local author = "spyk"
+local SCRIPT_NAME = "BaguetteAnivia"
+local AUTOUPDATE = true
+local UPDATE_HOST = "raw.githubusercontent.com"
+local UPDATE_PATH = "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.lua".."?rand="..math.random(1,10000)
+local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+local whatsnew = 0
 
-    local ToUpdate = {}
-    ToUpdate.Version = 0.4381
-    ToUpdate.UseHttps = true
-    ToUpdate.Host = "raw.githubusercontent.com"
-    ToUpdate.VersionPath = "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.version"
-    ToUpdate.ScriptPath =  "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.lua"
-    ToUpdate.SavePath = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
-    ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) EnvoiMessage("Successfully updated. ("..ToUpdate.Version.." => "..NewVersion.."), press F9 twice to load the updated version.") end
-    ToUpdate.CallbackNoUpdate = function(OldVersion) EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ToUpdate.Version..") Have a good game!") end
-    ToUpdate.CallbackNewVersion = function(NewVersion) EnvoiMessage("New version available "..NewVersion) end
-    ToUpdate.CallbackError = function(NewVersion) EnvoiMessage("Error while downloading info") end
-    ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
--- End Of AutoUpdate
---
+if AUTOUPDATE then
+	local ServerData = GetWebResult(UPDATE_HOST, "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.version")
+	if ServerData then
+		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		if ServerVersion then
+			if tonumber(version) < ServerVersion then
+				EnvoiMessage("New version available "..ServerVersion)
+				EnvoiMessage(">>Updating, please don't press F9<<")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+				whatsnew = 1
+			else
+				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
+			end
+		end
+		else
+			EnvoiMessage("Error downloading version info")
+	end
+end
+ --- End Of AutoUpdate
+
+function OnLoad()
+	--
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
@@ -97,10 +112,36 @@ function OnLoad()
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerteleport") then Teleport = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerteleport") then Teleport = SUMMONER_2 end
 	--
-	Param = scriptConfig("[Baguette] Anivia", "BaguetteAnivia")
+	Param = scriptConfig("[Baguette] Anivia", "BaguetteAniva")
+	--
+	-- Param:addSubMenu("Mode", "mode")
+	-- 	Param.mode:addParam("n1", "Mode :", SCRIPT_PARAM_LIST, 1, {"Novice", "Expert"}) if Param.mode.n1 == 1 then local menu = 2 elseif Param.mode.n1 == 2 then local menu = 1 end
+	-- 	Param.mode:addParam("n2", "If you want to change mode,", SCRIPT_PARAM_INFO, "")
+	-- 	Param.mode:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+	--
+	--Param:addSubMenu("", "nil")
 	--
 	Param:addParam("n5", "Current Mode :", SCRIPT_PARAM_LIST, 1, {" None", " Combo", " Harass", " LaneClear", " WaveClear", " JungleClear"})
 		Param:permaShow("n5")
+	--
+	-- if Param.mode.n1 == 1 then
+	-- --
+	-- Param:addSubMenu("Keys", "keybind")
+	-- Param.keybind:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+	-- Param.keybind:addParam("Harasskey", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
+	-- Param.keybind:addParam("wavejungleclearkey", "Wave/Jungle Clear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+	-- Param.keybind:addParam("laneclearkey", "LaneClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
+	-- if Teleport then Param.keybind:addParam("eggactive", "Enable Egg Teleport Exploit?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N")) end
+	-- Param.keybind:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
+	-- Param.keybind:permaShow("active")
+	-- if VIP_USER then Param:addSubMenu("", "nil") end
+	-- if VIP_USER then Param:addSubMenu("Skin Changer", "skinchanger") end
+	-- if VIP_USER then Param.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
+	-- if VIP_USER then Param.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
+	-- if VIP_USER then Param.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
+	-- if VIP_USER then Param.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
+	-- if VIP_USER then Param.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
+	-- if VIP_USER then Param.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 	--
 	Param:addSubMenu("SBTW!","Combo")
 		Param.Combo:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
@@ -183,17 +224,18 @@ function OnLoad()
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 		--
 		Param.miscellaneous:addParam("QError", "Set (Q) Diameter on (Normally = 200) :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
-		Param.miscellaneous:addParam("Qgapclos", "Use GapCloser?", SCRIPT_PARAM_ONOFF, true)
-		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
-		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
-		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in?", SCRIPT_PARAM_ONOFF , true)
-	--
-	Param:addSubMenu("Exploits", "exploits")
-		if Teleport then Param.exploits:addSubMenu("Egg Teleport", "egg") end
-		if Teleport then Param.exploits.egg:addParam("active", "Enable Egg Teleport Exploit?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N")) end
-		if Teleport then Param.exploits.egg:addParam("eggatxhp", "At how many %HP it will cast TP?", SCRIPT_PARAM_SLICE, 25, 0, 100) end
-		if Teleport then Param.exploits.egg:permaShow("active") end
+			Param.miscellaneous:addParam("Qgapclos", "Use GapCloser?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in?", SCRIPT_PARAM_ONOFF , true)
+			Param.miscellaneous:permaShow("ManualR")
+		--
+		Param:addSubMenu("Exploits", "exploits")
+			if Teleport then Param.exploits:addSubMenu("Egg Teleport", "egg") end
+			if Teleport then Param.exploits.egg:addParam("eggactive", "Enable Egg Teleport Exploit?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N")) end
+			if Teleport then Param.exploits.egg:addParam("eggatxhp", "At how many %HP it will cast TP?", SCRIPT_PARAM_SLICE, 25, 0, 100) end
+			if Teleport then Param.exploits.egg:permaShow("eggactive") end
 	--
 	Param:addSubMenu("Drawing", "drawing")
 		Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
@@ -218,9 +260,32 @@ function OnLoad()
 			Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
 			Param.drawing.wallmenu:addParam("showclose", "Show close WallsCasts?", SCRIPT_PARAM_ONOFF, true)
 			Param.drawing.wallmenu:addParam("showcloserange", "Which range is close?", SCRIPT_PARAM_SLICE, 1000, 0, 5000, 0)
-		--
-	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..ToUpdate.Version.."")
-		Param:permaShow("n4")
+	--end
+	Param:addSubMenu("", "nil")
+	--
+	Param:addSubMenu("OrbWalker", "orbwalker")
+		Param.orbwalker:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 1, {"SxOrbWalk", "BigFat OrbWalker", "Nebelwolfi's Orb Walker"})
+		Param.orbwalker:addParam("n2", "If you want to change OrbWalker,", SCRIPT_PARAM_INFO, "")
+		Param.orbwalker:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+		Param.orbwalker:addParam("nil", "", SCRIPT_PARAM_INFO, "")
+		Param.orbwalker:addParam("n4", "SAC:R Is automaticly detected.", SCRIPT_PARAM_INFO, "")
+	--
+	Param:addSubMenu("", "nil")
+	--
+	Param:addSubMenu("Prediction", "prediction")
+		Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
+		Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
+	--
+	Param:addSubMenu("", "nil")
+	--
+	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
+	Param:permaShow("n4")
+
 	if VIP_USER then
 		if (not Param.miscellaneous.skinchanger['saveSkin']) then
 			Param.miscellaneous.skinchanger['changeSkin'] = false
