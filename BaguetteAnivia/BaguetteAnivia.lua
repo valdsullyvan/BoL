@@ -28,7 +28,7 @@ function CurrentTimeInMillis()
 end
 
 -- Starting AutoUpdate
-local version = "0.433"
+local version = "0.434"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -36,6 +36,7 @@ local UPDATE_HOST = "raw.githubusercontent.com"
 local UPDATE_PATH = "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+local whatsnew = 0
 
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/spyk1/BoL/master/BaguetteAnivia/BaguetteAnivia.version")
@@ -46,7 +47,7 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-				DelayAction(function() EnvoiMessage("What's new : 'Fixed egg exploit teleport on key D and not F.")end, 15)
+				whatsnew = 1
 			else
 				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
@@ -103,13 +104,16 @@ function OnLoad()
 --
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
+	if whatsnew == 1 then
+		DelayAction(function() EnvoiMessage("What's new : 'Fixed egg exploit teleport on key D and not F.")end, 15)
+		whatsnew = 0
+	end
+	--
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerteleport") then Teleport = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerteleport") then Teleport = SUMMONER_2 end
 	--
 	Param = scriptConfig("[Baguette] Anivia", "BaguetteAnivia")
 	--
-	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
-		Param:permaShow("n4")
 	Param:addParam("n5", "Current Mode :", SCRIPT_PARAM_LIST, 1, {" None", " Combo", " Harass", " LaneClear", " WaveClear", " JungleClear"})
 		Param:permaShow("n5")
 	--
@@ -229,6 +233,9 @@ function OnLoad()
 			Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
 			Param.drawing.wallmenu:addParam("showclose", "Show close WallsCasts?", SCRIPT_PARAM_ONOFF, true)
 			Param.drawing.wallmenu:addParam("showcloserange", "Which range is close?", SCRIPT_PARAM_SLICE, 1000, 0, 5000, 0)
+		--
+	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
+		Param:permaShow("n4")
 
 	if (not Param.miscellaneous.skinchanger['saveSkin']) then
 		Param.miscellaneous.skinchanger['changeSkin'] = false
