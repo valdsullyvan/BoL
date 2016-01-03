@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.4381"
+local version = "0.4385"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -105,7 +105,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Auto-update.")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'Every orbwalkers supported.")end, 15)
 		whatsnew = 0
 	end
 	--
@@ -264,24 +264,22 @@ function OnLoad()
 	Param:addSubMenu("", "nil")
 	--
 	Param:addSubMenu("OrbWalker", "orbwalker")
-		Param.orbwalker:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 1, {"SxOrbWalk", "BigFat OrbWalker", "Nebelwolfi's Orb Walker"})
+		Param.orbwalker:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 1, {"SxOrbWalk", "SAC:R", "BigFat OrbWalker", "Nebelwolfi's Orb Walker"})
 		Param.orbwalker:addParam("n2", "If you want to change OrbWalker,", SCRIPT_PARAM_INFO, "")
 		Param.orbwalker:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
-		Param.orbwalker:addParam("nil", "", SCRIPT_PARAM_INFO, "")
-		Param.orbwalker:addParam("n4", "SAC:R Is automaticly detected.", SCRIPT_PARAM_INFO, "")
 	--
 	Param:addSubMenu("", "nil")
 	--
-	Param:addSubMenu("Prediction", "prediction")
-		Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
-		Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
-		Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
-	--
-	Param:addSubMenu("", "nil")
+	-- Param:addSubMenu("Prediction", "prediction")
+	-- 	Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
+	-- 	Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
+	-- 	Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
+	-- --
+	-- Param:addSubMenu("", "nil")
 	--
 	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
 	Param:permaShow("n4")
@@ -313,26 +311,33 @@ function CustomLoad()
 	CheckVPred()
 	Skills()	
 	GenerateTables()
-	if _G.Reborn_Initialised then
-	elseif _G.Reborn_Loaded then
-		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
-		EnvoiMessage("Loaded SAC:R")
-	else
-   		LoadOrb()
+	if Param.orbwalker.n1 == 1 then
+		EnvoiMessage("SxOrbWalk loading..")
+		LoadSXOrb()
+	elseif Param.orbwalker.n1 == 2 then
+		EnvoiMessage("SAC:R loading..")
+		LoadSACR()
+	elseif Param.orbwalker.n1 == 3 then
+		EnvoiMessage("BigFat OrbWalker loading..")
+		LoadBFOrb()
+	elseif Param.orbwalker.n1 == 4 then
+		EnvoiMessage("Nebelwolfi's Orb Walker loading..")
+		LoadNEBOrb()
 	end
-
 	enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
 	jungleMinions = minionManager(MINION_JUNGLE, 700, myHero, MINION_SORT_MAXHEALTH_DEC)
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
 	ts.name = "Anivia"
 	Param:addTS(ts)
 	PriorityOnLoad()
+	DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
  end
-  
-function LoadOrb()
 
-	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then	
-		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
+
+  
+function LoadSXOrb()
+
+	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
 		require("SxOrbWalk")
 		EnvoiMessage("Loaded SxOrbWalk")
 		Param:addSubMenu("SxOrbWalk", "SXMenu")
@@ -351,6 +356,49 @@ function LoadOrb()
 		   	ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
 		   	ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
 	end
+end
+
+function LoadBFOrb()
+	local LibPath = LIB_PATH.."Big Fat Orbwalker.lua"
+	local ScriptPath = SCRIPT_PATH.."Big Fat Orbwalker.lua"
+	if not (FileExist(ScriptPath) and _G["BigFatOrb_Loaded"] == true) then
+			local Host = "raw.github.com"
+			local Path = "/BigFatNidalee/BoL-Releases/master/LimitedAccess/Big Fat Orbwalker.lua?rand="..math.random(1,10000)
+			DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+		require "Big Fat Orbwalker"
+	end
+end
+
+function LoadNEBOrb()
+		if not _G.NebelwolfisOrbWalkerLoaded then
+			require "Nebelwolfi's Orb Walker"
+			NebelwolfisOrbWalkerClass()
+		end
+	end
+	if not FileExist(LIB_PATH.."Nebelwolfi's Orb Walker.lua") then
+		DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
+			LoadNEBOrb()
+		end)
+	else
+		local f = io.open(LIB_PATH.."Nebelwolfi's Orb Walker.lua")
+		f = f:read("*all")
+		if f:sub(1,4) == "func" then
+			DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
+				LoadNEBOrb()
+			end)
+		else
+			LoadNEBOrb()
+		end
+	end
+
+function LoadSACR()
+	if _G.Reborn_Initialised then
+	elseif _G.Reborn_Loaded then
+		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
+		EnvoiMessage("Loaded SAC:R")
+	else
+		DelayAction(function()EnvoiMessage("Failed to Load SAC:R")end, 7)
+	end 
 end
 
 function CheckVPred()
