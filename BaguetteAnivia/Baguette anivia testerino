@@ -776,9 +776,10 @@ function LogicQ(unit)
 				CastSpell(_Q, CastPosition.x, CastPosition.z)
 			end
 		elseif Param.prediction.n1 == 2 then
-			local SkillShotQ = SkillsShot(SkillQ.speed, SkillQ.range, SkillQ.width, "DelayLine", SkillQ.delay, math.huge)
-			if State == SkillShotQ.STATUS.SUCCESS_HIT then
-				CastSpell(_Q, Position.x, Position.z)
+			local skillshotQ = LineSS(SkillQ.speed, SkillQ.range, SkillQ.width, SkillQ.delay, math.huge)
+			local skillshotQ = dp:bindSS("AniviaQ",skillshotQ,50)
+			local status,hitPos,perc = dp:predict("AniviaQ",target)
+		  	if hitPos then CastSpell(_Q,hitPos.x,hitPos.z) end
 			end
 		elseif Param.prediction.n1 == 3 then
   			local QPos, QHitChance = HPred:GetPredict(HP_Q, unit, myHero)
