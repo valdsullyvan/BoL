@@ -776,7 +776,7 @@ function LogicQ(unit)
 				CastSpell(_Q, CastPosition.x, CastPosition.z)
 			end
 		elseif Param.prediction.n1 == 2 then
-			local SkillShotQ = FlashFrost(SkillQ.speed, SkillQ.range, SkillQ.width, "DelayLine", SkillQ.delay, math.huge)
+			local SkillShotQ = SkillsShot(SkillQ.speed, SkillQ.range, SkillQ.width, "DelayLine", SkillQ.delay, math.huge)
 			if State == SkillShotQ.STATUS.SUCCESS_HIT then
 				CastSpell(_Q, Position.x, Position.z)
 			end
