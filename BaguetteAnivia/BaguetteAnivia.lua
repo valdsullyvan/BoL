@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.4385"
+local version = "0.4386"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
