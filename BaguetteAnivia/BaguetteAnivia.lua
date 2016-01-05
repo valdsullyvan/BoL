@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.4386"
+local version = "0.4387"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -264,9 +264,11 @@ function OnLoad()
 	Param:addSubMenu("", "nil")
 	--
 	Param:addSubMenu("OrbWalker", "orbwalker")
-		Param.orbwalker:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 1, {"SxOrbWalk", "SAC:R", "BigFat OrbWalker", "Nebelwolfi's Orb Walker"})
+		Param.orbwalker:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 1, {"SxOrbWalk","BigFat OrbWalker", "Nebelwolfi's Orb Walker"})
 		Param.orbwalker:addParam("n2", "If you want to change OrbWalker,", SCRIPT_PARAM_INFO, "")
 		Param.orbwalker:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+		Param.orbwalker:addParam("n4", "", SCRIPT_PARAM_INFO, "")
+		Param.orbwalker:addParam("n5", "SAC:R is automaticly loaded(enable in BoLStudio)", SCRIPT_PARAM_INFO, "")
 	--
 	Param:addSubMenu("", "nil")
 	--
@@ -311,12 +313,11 @@ function CustomLoad()
 	CheckVPred()
 	Skills()	
 	GenerateTables()
-	if Param.orbwalker.n1 == 1 then
+	if _G.Reborn_Loaded ~= nil then
+   		LoadSACR()
+	elseif Param.orbwalker.n1 == 1 then
 		EnvoiMessage("SxOrbWalk loading..")
 		LoadSXOrb()
-	elseif Param.orbwalker.n1 == 2 then
-		EnvoiMessage("SAC:R loading..")
-		LoadSACR()
 	elseif Param.orbwalker.n1 == 3 then
 		EnvoiMessage("BigFat OrbWalker loading..")
 		LoadBFOrb()
