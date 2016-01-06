@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.4387"
+local version = "0.4388"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -105,7 +105,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Loading SAC as default is you got SAC.'")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'Upgraded HP to egg exploit, preds are coming soon!.'")end, 15)
 		whatsnew = 0
 	end
 	--
