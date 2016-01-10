@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.4388"
+local version = "0.44"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -105,7 +105,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Upgraded HP to egg exploit, preds are coming soon!.'")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'Prediction included! But.. Sorry about DPrediction for the moment.")end, 15)
 		whatsnew = 0
 	end
 	--
@@ -271,16 +271,16 @@ function OnLoad()
 		Param.orbwalker:addParam("n5", "SAC:R is automaticly loaded(enable in BoLStudio)", SCRIPT_PARAM_INFO, "")
 	--
 	Param:addSubMenu("", "nil")
-	--
-	-- Param:addSubMenu("Prediction", "prediction")
-	-- 	Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DPrediction", "HPrediction", "SPrediction", "BigFat Vanga"})
-	-- 	Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
-	-- 	Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
-	--
+	
+	Param:addSubMenu("Prediction", "prediction")
+		Param.prediction:addParam("n1", "Prediction :", SCRIPT_PARAM_LIST, 1, {"VPrediction", "HPrediction", "SPrediction"})
+		Param.prediction:addParam("n2", "If you want to change Prediction,", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("nil", "", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n4", "Basicly, the best way is VPrediction.", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n5", "Only if you like another prediction,", SCRIPT_PARAM_INFO, "")
+		Param.prediction:addParam("n6", "then, I agree Keepo", SCRIPT_PARAM_INFO, "")
+	
 	Param:addSubMenu("", "nil")
 	--
 	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
@@ -310,22 +310,37 @@ function OnUnload()
 end
 
 function CustomLoad()
-	CheckVPred()
+	-- Prediction Loading [START]
+	if Param.prediction.n1 == 1 then
+		EnvoiMessage("VPrediction loading..")
+		LoadVPred()
+	elseif Param.prediction.n1 == 2 then
+		EnvoiMessage("HPrediction loading..")
+		LoadHPred()
+	elseif Param.prediction.n1 == 3 then
+		EnvoiMessage("SPrediction loading..")
+		LoadSPred()
+	else
+		EnvoiMessage("No prediction loaded.")
+	end
+	-- Prediction Loading [END]
 	Skills()	
 	GenerateTables()
+	-- Orbwalker loading [START]
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
 	elseif Param.orbwalker.n1 == 1 then
 		EnvoiMessage("SxOrbWalk loading..")
 		LoadSXOrb()
-	elseif Param.orbwalker.n1 == 3 then
+	elseif Param.orbwalker.n1 == 2 then
 		EnvoiMessage("BigFat OrbWalker loading..")
 		LoadBFOrb()
-	elseif Param.orbwalker.n1 == 4 then
+	elseif Param.orbwalker.n1 == 3 then
 		local neo = 1
 		EnvoiMessage("Nebelwolfi's Orb Walker loading..")
 		LoadNEBOrb()
 	end
+	-- Orbwalker loading [END]
 	enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
 	jungleMinions = minionManager(MINION_JUNGLE, 700, myHero, MINION_SORT_MAXHEALTH_DEC)
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
@@ -405,10 +420,10 @@ function LoadSACR()
 	end 
 end
 
-function CheckVPred()
+function LoadVPred()
 	if FileExist(LIB_PATH .. "/VPrediction.lua") then
 		require("VPrediction")
-		EnvoiMessage("Loaded VPred")
+		EnvoiMessage("Succesfully loaded VPred")
 		VP = VPrediction()
 	else
 		local ToUpdate = {}
@@ -419,6 +434,54 @@ function CheckVPred()
 		ToUpdate.VersionPath = "/SidaBoL/Scripts/master/Common/VPrediction.version"
 		ToUpdate.ScriptPath =  "/SidaBoL/Scripts/master/Common/VPrediction.lua"
 		ToUpdate.SavePath = LIB_PATH.."/VPrediction.lua"
+		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
+		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
+		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
+		ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
+		ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+	end
+end
+
+function LoadHPred()
+	if FileExist(LIB_PATH .. "/HPrediction.lua") then
+		require("HPrediction")
+		EnvoiMessage("Succesfully loaded HPred")
+		HPred = HPrediction()
+		HP_Q = HPSkillshot({type = "DelayLine", delay = 0.250, range = 1075, width = 110, speed = 850})
+		HP_W = HPSkillshot({type = "DelayLine", delay = 0.25, range = 1000, width = 100, speed = math.huge})
+		HP_R = HPSkillshot({type = "DelayLine", delay = 0.100, range = 625, width = 350, speed = math.huge})
+		UseHP = true
+	else
+		local ToUpdate = {}
+		ToUpdate.Version = 3
+		ToUpdate.UseHttps = true
+		ToUpdate.Name = "HPrediction"
+		ToUpdate.Host = "raw.githubusercontent.com"
+		ToUpdate.VersionPath = "/BolHTTF/BoL/master/HTTF/Common/HPrediction.version"
+		ToUpdate.ScriptPath =  "/BolHTTF/BoL/master/HTTF/Common/HPrediction.lua"
+		ToUpdate.SavePath = LIB_PATH.."/HPrediction.lua"
+		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
+		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
+		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
+		ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
+		ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+	end
+end
+
+function LoadSPred()
+	if FileExist(LIB_PATH .. "/SPrediction.lua") then
+		require("SPrediction")
+		EnvoiMessage("Succesfully loaded SPred")
+		SP = SPrediction()
+	else
+		local ToUpdate = {}
+		ToUpdate.Version = 3
+		ToUpdate.UseHttps = true
+		ToUpdate.Name = "SPrediction"
+		ToUpdate.Host = "raw.githubusercontent.com"
+		ToUpdate.VersionPath = "/nebelwolfi/BoL/master/Common/SPrediction.version"
+		ToUpdate.ScriptPath =  "/nebelwolfi/BoL/master/Common/SPrediction.lua"
+		ToUpdate.SavePath = LIB_PATH.."/SPrediction.lua"
 		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
 		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
 		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
@@ -461,17 +524,20 @@ function OnTick()
 		ts:update()
 		Target = GetCustomTarget()
 		WdansR(Target)
-		-- Creating Key 
+
+		-- Creating Key [START]
 		ComboKey = Param.Combo.comboKey
 		HarassKey = Param.Harass.Harasskey
 		LaneClearKey = Param.Clear.LaneClear.laneclearkey
 		JungleClearKey = Param.Clear.JungleClear.jungleclearkey
 		WaveClearKey = Param.Clear.WaveClear.waveclearkey
+		-- Creating Key [END]
+
+		--Combo Switcher PermaShow [START]
 		if ComboKey then 
 			Combo(Target)
 			Param.n5 = 2
 		end
-		--Combo Switcher PermaShow
 		if not ComboKey then
 			if HarassKey then
 				Harass(Target)
@@ -490,6 +556,8 @@ function OnTick()
 				Param.n5 = 6
 			end
 		end
+		--Combo Switcher PermaShow [END]
+
 		KillSteal()
 		if QMissile ~= nil then
 			DetectQ()
@@ -695,30 +763,65 @@ end
 function LogicQ(unit)
 	if QMissile ~=nil then return end
 	if unit ~= nil and GetDistance(unit) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
-		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false)
-		if HitChance >= 2 then
-			CastSpell(_Q, CastPosition.x, CastPosition.z)
+		if Param.prediction.n1 == 1 then
+			CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false)
+			if HitChance >= 2 then
+				CastSpell(_Q, CastPosition.x, CastPosition.z)
+			end
+		elseif Param.prediction.n1 == 2 then
+  			local CastPosition, HitChance = HPred:GetPredict(HP_Q, unit, myHero)
+  			if HitChance > 0 then
+    			CastSpell(_Q, CastPosition.x, CastPosition.z)
+  			end
+		elseif Param.prediction.n1 == 3 then
+			CastPosition, HitChance, PredPos = SP:Predict(unit, SkillQ.range, SkillQ.speed, SkillQ.delay, SkillQ.width, false, myHero)
+            if HitChance >= 1 then
+                CastSpell(_Q, unit)
+            end
 		end
 	end
 end
 
 function LogicW(unit)
 	if unit ~= nil and GetDistance(unit) <= SkillW.range and myHero:CanUseSpell(_W) == READY then
-	CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillW.delay, SkillW.width, SkillW.range, SkillW.speed, myHero, false)
-		if HitChance >= 2 then
-			CastSpell(_W, CastPosition.x, CastPosition.z)
+		if Param.prediction.n1 == 1 then
+			CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillW.delay, SkillW.width, SkillW.range, SkillW.speed, myHero, false)
+			if HitChance >= 2 then
+				CastSpell(_W, CastPosition.x, CastPosition.z)
+			end
+		elseif Param.prediction.n1 == 2 then
+ 		local Position, HitChance = HPred:GetPredict(HP_W, unit, myHero)
+  		if HitChance > 0 then
+    		CastSpell(_W, Position.x, Position.z)
+  		end
+		elseif Param.prediction.n1 == 3 then
+			Position, Chance, PredPos = SP:Predict(SkillW, myHero, unit)
+            if Chance >= 1 then
+            	CastSpell(_W, Position.x, Position.y)
+            end
 		end
 	end
 end
 
 function LogicE(unit)
+	if JungleClearKey then
+		if TargetHaveBuff("chilled", unit) then
+			if myHero:CanUseSpell(_E) == READY then
+				CastSpell(_E, unit)
+			end
+		elseif myHero:CanUseSpell(_R) == READY then
+			CastSpell(_E, unit)
+		elseif unit.health < damageE then
+			CastSpell(_E, unit)
+		end
+	end
 	if Param.miscellaneous.EGel then
 		if TargetHaveBuff("chilled", unit) then
 			if myHero:CanUseSpell(_E) == READY then
 				CastSpell(_E, unit)
 			end
 		end
-	else
+	elseif not Param.miscellaneous.EGel then
 		if myHero:CanUseSpell(_E) == READY then
 			CastSpell(_E, unit)
 		end
@@ -729,9 +832,21 @@ function LogicR(unit)
 	if RMissile ~= nil then return end
 		if JungleClearKey and RMissile ~= nil then return end
 			if unit ~= nil and GetDistance(unit) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
-				CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false)
-				if HitChance >= 2 then
-					CastSpell(_R, CastPosition.x, CastPosition.z)
+				if Param.prediction.n1 == 1 then
+					CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false)
+					if HitChance >= 2 then
+						CastSpell(_R, CastPosition.x, CastPosition.z)
+					end
+				elseif Param.prediction.n1 == 2 then
+  				local CastPosition, HitChance = HPred:GetPredict(HP_R, unit, myHero)
+  				if HitChance > 0 then
+    				CastSpell(_R, CastPosition.x, CastPosition.z)
+  				end
+				elseif Param.prediction.n1 == 3 then
+					CastPosition, HitChance, PredPos = SP:Predict(unit, SkillR.range, SkillR.speed, SkillR.delay, SkillR.width, false, myHero)
+            		if HitChance >= 0 then
+                		CastSpell(_R, CastPosition.x, CastPosition.z)
+            		end
 				end
 			end
 		--
@@ -749,7 +864,16 @@ function DetectQ()
 	if LaneClearKey then 
 		for i, minion in ipairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
-				if GetDistance(minion, QMissile) <= 200 then
+				if GetDistance(minion, QMissile) <= QZone then
+					CastSpell(_Q)
+				end
+			end
+		end
+	end
+	if JungleClearKey then 
+		for i, minion in ipairs(enemyMinions.objects) do
+			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
+				if GetDistance(minion, QMissile) <= QZone then
 					CastSpell(_Q)
 				end
 			end
