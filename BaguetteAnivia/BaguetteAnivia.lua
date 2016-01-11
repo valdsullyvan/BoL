@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.44"
+local version = "0.45"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -105,7 +105,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Prediction included! But.. Sorry about DPrediction for the moment.")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'AutoLvlSpell, Eggexploit working again, Ignite again.")end, 15)
 		whatsnew = 0
 	end
 	--
@@ -215,27 +215,39 @@ function OnLoad()
 			Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
 			Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
 		--
-		if VIP_USER then Param.miscellaneous:addSubMenu("Change Skin Here!", "skinchanger") end
+		if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "skinchanger") end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
 			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 		--
+		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Lvl Spell", "levelspell") end
+			if VIP_USER then Param.miscellaneous.levelspell:addParam("EnableAutoLvlSpell", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.levelspell:addParam("ComboAutoLvlSpell", "Choose you'r Auto Level Spell Combo", SCRIPT_PARAM_LIST, 2, {"Q > E > W > E (Max E)", "Q > E > E > W (Max E)"}) end
+			if VIP_USER then Param.miscellaneous.levelspell:addParam("n1", "", SCRIPT_PARAM_INFO,"") end
+			if VIP_USER then Param.miscellaneous.levelspell:addParam("n2", "Press F9 twice if you change Level Spell Combo.", SCRIPT_PARAM_INFO,"") end
+			if VIP_USER then Param.miscellaneous.levelspell:addParam("n3", "If you need more Combo, go on forum and tell me which.", SCRIPT_PARAM_INFO,"") end
+			if VIP_USER then Last_LevelSpell = 0 end
+		--
 		Param.miscellaneous:addParam("QError", "Set (Q) Diameter on (Normally = 200) :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
-			Param.miscellaneous:addParam("Qgapclos", "Use GapCloser?", SCRIPT_PARAM_ONOFF, true)
-			Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
-			Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
-			Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-			Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in?", SCRIPT_PARAM_ONOFF , true)
-			Param.miscellaneous:permaShow("ManualR")
+		Param.miscellaneous:addParam("Qgapclos", "Use GapCloser?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
+		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in?", SCRIPT_PARAM_ONOFF , true)
+		Param.miscellaneous:permaShow("ManualR")
 		--
 		Param:addSubMenu("Exploits", "exploits")
 			if Teleport then Param.exploits:addSubMenu("Egg Teleport", "egg") end
 			if Teleport then Param.exploits.egg:addParam("eggactive", "Enable Egg Teleport Exploit?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N")) end
 			if Teleport then Param.exploits.egg:addParam("eggatxhp", "At how many %HP it will cast TP?", SCRIPT_PARAM_SLICE, 25, 0, 100) end
 			if Teleport then Param.exploits.egg:permaShow("eggactive") end
+			if Teleport then Param.exploits.egg:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
+			if Teleport then Param.exploits.egg:addParam("n1", "Carefull, it's an bug you can be banned,", SCRIPT_PARAM_INFO,"") end
+			if Teleport then Param.exploits.egg:addParam("n2", "if you use it too many times in the same game.", SCRIPT_PARAM_INFO,"") end
 	--
 	Param:addSubMenu("Drawing", "drawing")
 		Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
@@ -294,7 +306,7 @@ function OnLoad()
 			SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
 		end
 	end
-	
+
 	CustomLoad()
 
 end
@@ -310,6 +322,13 @@ function OnUnload()
 end
 
 function CustomLoad()
+	if VIP_USER then
+		if Param.miscellaneous.levelspell.ComboAutoLvlSpell == 1 then
+			levelSequence =  { 1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
+		elseif Param.miscellaneous.levelspell.ComboAutoLvlSpell == 2 then			
+			levelSequence =  { 1,3,3,2,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
+		else return end
+	end
 	-- Prediction Loading [START]
 	if Param.prediction.n1 == 1 then
 		EnvoiMessage("VPrediction loading..")
@@ -507,11 +526,9 @@ function KillSteal()
 				if health <= Rdmg and Param.KillSteal.UseR and myHero:CanUseSpell(_R) == READY and ValidTarget(unit) then
 					LogicR(unit)
 				end
-				if not ComboKey then
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
-						if health <= 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
-							CastSpell(Ignite, unit)
-						end
+				if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+					if health <= 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
+						CastSpell(Ignite, unit)
 					end
 				end
 			end
@@ -559,9 +576,11 @@ function OnTick()
 		--Combo Switcher PermaShow [END]
 
 		KillSteal()
+
 		if QMissile ~= nil then
 			DetectQ()
 		end
+
 		if Param.miscellaneous.ManualR then
 			if RMissile ~= nil then
 				if not ValidR() then
@@ -571,15 +590,16 @@ function OnTick()
 				end
 			end
 		end
-		if Teleport then 
-			if Param.exploits.egg.active then 
-				AutoEggTp()
-			end 
+
+		if Param.exploits.egg.eggactive then 
+			AutoEggTp()
 		end
+
 		DrawKillable()
 		AutoSeraphin()
 		AutoFrostQuenn()
 		AutoElixirDuSorcier()
+		AutoLvlSpell()
 		if Param.miscellaneous.Pots.potonlywithcombo and ComboKey then 
 			AutoPotions()
 		end
@@ -747,7 +767,7 @@ function JungleClear()
 		for i, jungleMinion in pairs(jungleMinions.objects) do
 			if jungleMinion ~= nil then
 				if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
-					CastSpell(_E, jungleMinion)
+					LogicE(jungleMinion)
 				end
 				if Param.Clear.JungleClear.UseR and GetDistance(jungleMinion) <= SkillR.range and myHero:CanUseSpell(_R) == READY then 
 					LogicR(jungleMinion)
@@ -861,16 +881,7 @@ function DetectQ()
 	elseif Param.miscellaneous.QError == 3 then
 		QZone = 190
 	end
-	if LaneClearKey then 
-		for i, minion in ipairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
-				if GetDistance(minion, QMissile) <= QZone then
-					CastSpell(_Q)
-				end
-			end
-		end
-	end
-	if JungleClearKey then 
+	if LaneClearKey or JungleClearKey then 
 		for i, minion in ipairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
 				if GetDistance(minion, QMissile) <= QZone then
@@ -1432,7 +1443,7 @@ end
 
 function AutoEggTp()
 	if upoeuf == 1 then
-		if Param.exploits.egg.active then
+		if Param.exploits.egg.eggactive then
 			if (myHero.health*100)/myHero.maxHealth < Param.exploits.egg.eggatxhp then
 				if os.clock() - lastTP < ActualTPTime then return end
 					local turrets = GetTurrets()
@@ -1455,6 +1466,36 @@ function AutoEggTp()
 		end
 	end
 end
+
+-- Auto Level Spell + Packets [START]
+function AutoLvlSpell()
+ 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+    	autoLevelSetSequence(levelSequence)
+    	Last_LevelSpell = os.clock()
+  	end
+end
+
+_G.LevelSpell = function(id)
+	if GetGameVersion():sub(1,10) == "5.24.0.249" then
+		local offsets = { 
+		[_Q] = 0x1E,
+		[_W] = 0xD3,
+		[_E] = 0x3A,
+		[_R] = 0xA8,
+		}
+		local p = CLoLPacket(0x00B6)
+		p.vTable = 0xFE3124
+		p:EncodeF(myHero.networkID)
+		p:Encode1(0xC1)
+		p:Encode1(offsets[id])
+		for i = 1, 4 do p:Encode1(0x63) end
+		for i = 1, 4 do p:Encode1(0xC5) end
+		for i = 1, 4 do p:Encode1(0x6A) end
+		for i = 1, 4 do p:Encode1(0x00) end
+		SendPacket(p)
+	end
+end
+-- Auto Level Spell + Packets [END]
 
 
 --DelayAction(function()EnvoiMessage("Special Note : QSS can be bugged, then, if you got errors, disable QSS usage.")end, 10)
