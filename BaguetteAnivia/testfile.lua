@@ -105,7 +105,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'AutoLvlSpell")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'AutoLvlSpell, Eggexploit working again, Ignite again.")end, 15)
 		whatsnew = 0
 	end
 	--
