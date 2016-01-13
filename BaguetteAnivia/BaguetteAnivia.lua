@@ -70,7 +70,7 @@ local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 
 --- Starting AutoUpdate
-local version = "0.45"
+local version = "0.451"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -105,7 +105,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'AutoLvlSpell, Eggexploit working again, Ignite again.")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'Fixed egg exploit spam.")end, 15)
 		whatsnew = 0
 	end
 	--
@@ -590,9 +590,10 @@ function OnTick()
 				end
 			end
 		end
-
-		if Param.exploits.egg.eggactive then 
-			AutoEggTp()
+		if Teleport then
+			if Param.exploits.egg.eggactive then 
+				AutoEggTp()
+			end
 		end
 
 		DrawKillable()
