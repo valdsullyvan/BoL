@@ -33,44 +33,33 @@ local RMissile = nil
 local Qdmg, Edmg, Rdmg, iDmg, totalDamage, health, mana, maxHealth, maxMana = 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0
 local TextList = {"Ignite = Kill", "Q = Kill", "DoubleQ = Kill", "Q + Ignite = Kill", "DoubleQ + Ignite = Kill", "Q + FrozenE = Kill", "DoubleQ + FrozenE = Kill", "Q + FrozenE + Ignite = Kill", "DoubleQ + FrozenE + Ignite = Kill", "Q + FrozenE + R for 1s = Kill", "DoubleQ + FrozenE + R for 1s = Kill", "DoubleQ + FrozenE + R for 3s = Kill", "Q + FrozenE + R + Ignite = Kill", "DoubleQ + FrozenE + R + Ignite = Kill", "DoubleQ + FrozenE + R for 3s + Ignite = Kill", "Not Killable"}
 local KillText = {}
-local lastElixir = 0
+local mods = "None"
+local damageQ = 30 * myHero:GetSpellData(_Q).level + 30 + .5 * myHero.ap
+local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
+local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 local lastPotion = 0
 local ActualPotTime = 15
 local ActualPotName = "None"
 local ActualPotData = "None"
-local lastTP = 0
-local ActualTPTime = 0
-local upoeuf = 1
-local mods = "None"
 local lastFrostQuennCast = 0
 local lastSeraphin = 0
 local lastQss = 0
-local combostatus = 0
-local harasstatus = 0
-local waveclearstatus = 0
-local lanecleartatus = 0
-local jungleclearstatus = 0
-local QZone = 0
-local showLocationsInRange = 0
-local showClose = true
-local showCloseRange = 0
-local drawWallSpots = true
-local MinionNumber = 0
-local skinsPB = {};
-local skinObjectPos = nil;
-local skinHeader = nil;
-local dispellHeader = nil;
-local skinH = nil;
-local skinHPos = nil;
-local theMenu = nil;
-local lastTimeTickCalled = 0;
-local lastSkin = 0;
-local damageQ = 30 * myHero:GetSpellData(_Q).level + 30 + .5 * myHero.ap
-local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
-local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
+local lastElixir = 0
+local lastTP = 0
+local ActualTPTime = 0
+local upoeuf = 1
+-- local skinsPB = {};
+-- local skinObjectPos = nil;
+-- local skinHeader = nil;
+-- local dispellHeader = nil;
+-- local skinH = nil;
+-- local skinHPos = nil;
+-- local theMenu = nil;
+-- local lastTimeTickCalled = 0;
+-- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.451"
+local version = "0.46"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -105,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Fixed egg exploit spam.")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'Code now clean, New Wall Casting with right click and permaShow, fixed AutoLvlSpell.")end, 15)
 		whatsnew = 0
 	end
 	--
@@ -114,34 +103,8 @@ function OnLoad()
 	--
 	Param = scriptConfig("[Baguette] Anivia", "BaguetteAniva")
 	--
-	-- Param:addSubMenu("Mode", "mode")
-	-- 	Param.mode:addParam("n1", "Mode :", SCRIPT_PARAM_LIST, 1, {"Novice", "Expert"}) if Param.mode.n1 == 1 then local menu = 2 elseif Param.mode.n1 == 2 then local menu = 1 end
-	-- 	Param.mode:addParam("n2", "If you want to change mode,", SCRIPT_PARAM_INFO, "")
-	-- 	Param.mode:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
-	--
-	--Param:addSubMenu("", "nil")
-	--
 	Param:addParam("n5", "Current Mode :", SCRIPT_PARAM_LIST, 1, {" None", " Combo", " Harass", " LaneClear", " WaveClear", " JungleClear"})
 		Param:permaShow("n5")
-	--
-	-- if Param.mode.n1 == 1 then
-	-- --
-	-- Param:addSubMenu("Keys", "keybind")
-	-- Param.keybind:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-	-- Param.keybind:addParam("Harasskey", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
-	-- Param.keybind:addParam("wavejungleclearkey", "Wave/Jungle Clear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
-	-- Param.keybind:addParam("laneclearkey", "LaneClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
-	-- if Teleport then Param.keybind:addParam("eggactive", "Enable Egg Teleport Exploit?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N")) end
-	-- Param.keybind:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
-	-- Param.keybind:permaShow("active")
-	-- if VIP_USER then Param:addSubMenu("", "nil") end
-	-- if VIP_USER then Param:addSubMenu("Skin Changer", "skinchanger") end
-	-- if VIP_USER then Param.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
-	-- if VIP_USER then Param.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
-	-- if VIP_USER then Param.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
-	-- if VIP_USER then Param.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
-	-- if VIP_USER then Param.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
-	-- if VIP_USER then Param.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 	--
 	Param:addSubMenu("SBTW!","Combo")
 		Param.Combo:addParam("comboKey", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
@@ -203,7 +166,6 @@ function OnLoad()
 			Param.miscellaneous.ItemSuppBleu:addParam("suppbleuwithscript", "Use Frost's Quenn with that Script?", SCRIPT_PARAM_ONOFF, true)
 			Param.miscellaneous.ItemSuppBleu:addParam("suppbleuchase", "Use Frost's Quenn only on a chase?", SCRIPT_PARAM_ONOFF, false)
 			Param.miscellaneous.ItemSuppBleu:addParam("suppbleucombo", "Use Frost's Quenn in ComboMode/Teamfight?", SCRIPT_PARAM_ONOFF, true)
-			--Param.miscellaneous.ItemSuppBleu:addParam("suppbleugolds", "Use passive of Frost's Quenn?", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("Y"))
 		--
 		Param.miscellaneous:addSubMenu("Exilir of Sorcery", "ElixirduSorcier")
 			Param.miscellaneous.ElixirduSorcier:addParam("elixirwithscript", "Use Exilir of Sorcery with that script?", SCRIPT_PARAM_ONOFF, true)
@@ -215,14 +177,14 @@ function OnLoad()
 			Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
 			Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
 		--
-		if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "skinchanger") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
+		--if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "skinchanger") end
+			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
+			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
+			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
+			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
+			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
+			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
+			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 		--
 		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Lvl Spell", "levelspell") end
 			if VIP_USER then Param.miscellaneous.levelspell:addParam("EnableAutoLvlSpell", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
@@ -268,10 +230,6 @@ function OnLoad()
 			Param.drawing.wallmenu:permaShow("active")
 			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle Diameter : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
 			Param.drawing.wallmenu:permaShow("radius")
-			Param.drawing.wallmenu:addParam("holdwall", "Press : To show WallsCasts ", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
-			Param.drawing.wallmenu:addParam("holdshow", "Which Range on Hold?", SCRIPT_PARAM_SLICE, 5000, 0, 20000, 0)
-			Param.drawing.wallmenu:addParam("showclose", "Show close WallsCasts?", SCRIPT_PARAM_ONOFF, true)
-			Param.drawing.wallmenu:addParam("showcloserange", "Which range is close?", SCRIPT_PARAM_SLICE, 1000, 0, 5000, 0)
 	--end
 	Param:addSubMenu("", "nil")
 	--
@@ -298,15 +256,6 @@ function OnLoad()
 	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
 	Param:permaShow("n4")
 
-	if VIP_USER then
-		if (not Param.miscellaneous.skinchanger['saveSkin']) then
-			Param.miscellaneous.skinchanger['changeSkin'] = false
-			Param.miscellaneous.skinchanger['selectedSkin'] = 1
-		elseif (Param.miscellaneous.skinchanger['changeSkin']) then
-			SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
-		end
-	end
-
 	CustomLoad()
 
 end
@@ -314,22 +263,51 @@ end
 function OnUnload()
 	EnvoiMessage("Unloaded.")
 	EnvoiMessage("There is no bird anymore between us... Ciao!")
-	if VIP_USER then
-		if (Param.miscellaneous.skinchanger['changeSkin']) then
-			SendSkinPacket(myHero.charName, nil, myHero.networkID);
-		end
-	end
+	-- if VIP_USER then
+	-- 	if (Param.miscellaneous.skinchanger['changeSkin']) then
+	-- 		SendSkinPacket(myHero.charName, nil, myHero.networkID);
+	-- 	end
+	-- end
 end
 
 function CustomLoad()
+	local combostatus = 0
+	local harasstatus = 0
+	local waveclearstatus = 0
+	local lanecleartatus = 0
+	local jungleclearstatus = 0
+	local showLocationsInRange = 0
+	local showClose = true
+	local showCloseRange = 0
+	local drawWallSpots = true
+	local MinionNumber = 0
+
 	if VIP_USER then
-		if Param.miscellaneous.levelspell.ComboAutoLvlSpell == 1 then
-			levelSequence =  { 1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
-		elseif Param.miscellaneous.levelspell.ComboAutoLvlSpell == 2 then			
-			levelSequence =  { 1,3,3,2,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
-		else return end
+		AutoLvlSpellCombo()
 	end
-	-- Prediction Loading [START]
+
+	PredictionOrbWalkSwitch()
+	Skills()	
+	GenerateTables()
+	enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
+	jungleMinions = minionManager(MINION_JUNGLE, 700, myHero, MINION_SORT_MAXHEALTH_DEC)
+	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
+	ts.name = "Anivia"
+	Param:addTS(ts)
+	PriorityOnLoad()
+	DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
+
+	-- if VIP_USER then
+	-- 	if (not Param.miscellaneous.skinchanger['saveSkin']) then
+	-- 		Param.miscellaneous.skinchanger['changeSkin'] = false
+	-- 		Param.miscellaneous.skinchanger['selectedSkin'] = 1
+	-- 	elseif (Param.miscellaneous.skinchanger['changeSkin']) then
+	-- 		SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+	-- 	end
+	-- end
+ end
+
+function PredictionOrbWalkSwitch()
 	if Param.prediction.n1 == 1 then
 		EnvoiMessage("VPrediction loading..")
 		LoadVPred()
@@ -342,10 +320,7 @@ function CustomLoad()
 	else
 		EnvoiMessage("No prediction loaded.")
 	end
-	-- Prediction Loading [END]
-	Skills()	
-	GenerateTables()
-	-- Orbwalker loading [START]
+
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
 	elseif Param.orbwalker.n1 == 1 then
@@ -359,17 +334,7 @@ function CustomLoad()
 		EnvoiMessage("Nebelwolfi's Orb Walker loading..")
 		LoadNEBOrb()
 	end
-	-- Orbwalker loading [END]
-	enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
-	jungleMinions = minionManager(MINION_JUNGLE, 700, myHero, MINION_SORT_MAXHEALTH_DEC)
-	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
-	ts.name = "Anivia"
-	Param:addTS(ts)
-	PriorityOnLoad()
-	DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
- end
-
-
+end
   
 function LoadSXOrb()
 
@@ -542,107 +507,20 @@ function OnTick()
 		Target = GetCustomTarget()
 		WdansR(Target)
 
-		-- Creating Key [START]
-		ComboKey = Param.Combo.comboKey
-		HarassKey = Param.Harass.Harasskey
-		LaneClearKey = Param.Clear.LaneClear.laneclearkey
-		JungleClearKey = Param.Clear.JungleClear.jungleclearkey
-		WaveClearKey = Param.Clear.WaveClear.waveclearkey
-		-- Creating Key [END]
-
-		--Combo Switcher PermaShow [START]
-		if ComboKey then 
-			Combo(Target)
-			Param.n5 = 2
-		end
-		if not ComboKey then
-			if HarassKey then
-				Harass(Target)
-				Param.n5 = 3
-			end	
-			if LaneClearKey then
-				LaneClear()
-				Param.n5 = 4
-			end
-			if WaveClearKey then
-				WaveClear()
-				Param.n5 = 5
-			end
-			if JungleClearKey then
-				JungleClear()
-				Param.n5 = 6
-			end
-		end
-		--Combo Switcher PermaShow [END]
+		KeyPermaShow()
 
 		KillSteal()
 
-		if QMissile ~= nil then
-			DetectQ()
-		end
+		SpellFunc()
 
-		if Param.miscellaneous.ManualR then
-			if RMissile ~= nil then
-				if not ValidR() then
-					if not JungleClearKey and not LaneClearKey and not WaveClearKey then
-						CastSpell(_R) 
-					end
-				end
-			end
-		end
-		if Teleport then
-			if Param.exploits.egg.eggactive then 
-				AutoEggTp()
-			end
-		end
+		DrawFunc()
 
-		DrawKillable()
-		AutoSeraphin()
-		AutoFrostQuenn()
-		AutoElixirDuSorcier()
-		AutoLvlSpell()
-		if Param.miscellaneous.Pots.potonlywithcombo and ComboKey then 
-			AutoPotions()
-		end
-		if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
-			if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
-				for i,group in pairs(wallSpots) do
-	 				for x, wallSpot in pairs(group.Locations) do
-	 					if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.radius and GetDistance(wallSpot) <= 1000 then
-	                       CastSpell(_W, wallSpot.x, wallSpot.z)
-	                    end                                    
-	     			end
-	            end
-	        end
-	    end
-	    if Param.drawing.wallmenu.holdwall then
-	       	drawWallSpots = true
-	    elseif Param.drawing.wallmenu.holdwall == false then
-	    	drawWallSpots = false
-	    end
-	    if VIP_USER then 
-			if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
-				lastTimeTickCalled = CurrentTimeInMillis()
-				if (Param.miscellaneous.skinchanger['changeSkin']) then
-					if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
-						lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
-						SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
-					end
-				elseif (lastSkin ~= 0) then
-					SendSkinPacket(myHero.charName, nil, myHero.networkID)
-					lastSkin = 0
-				end
-			end
-
-			if Param.n5 ~= 1 and not ComboKey and not HarassKey and not LaneClearKey and not JungleClearKey and not WaveClearKey then
-				Param.n5 = 1
-			end
-		end
+		Consommables()
 	--
 end
 
 function drawCircles(x,y,z,color)
-        DrawCircle(x, y, z, Param.drawing.wallmenu.radius, 0xFFFFFF)
+    DrawCircle(x, y, z, Param.drawing.wallmenu.radius, 0xFFFFFF)
 end
 
 function WdansR(unit)
@@ -682,6 +560,93 @@ function Combo(unit)
 			LogicR(unit)
 		end	
 	end
+end
+
+function Consommables()
+	DrawKillable()
+	AutoSeraphin()
+	AutoFrostQuenn()
+	AutoElixirDuSorcier()
+	AutoLvlSpell()
+	if Param.miscellaneous.Pots.potswithscript and not Param.miscellaneous.Pots.potonlywithcombo then
+		AutoPotions()
+	elseif Param.miscellaneous.Pots.potswithscript and Param.miscellaneous.Pots.potonlywithcombo and ComboKey then
+		AutoPotions() 
+	end
+end
+
+function SpellFunc()
+	if Teleport then
+		if Param.exploits.egg.eggactive then 
+			AutoEggTp()
+		end
+	end
+
+	if QMissile ~= nil then
+		DetectQ()
+	end
+
+	if Param.miscellaneous.ManualR then
+		if RMissile ~= nil then
+			if not ValidR() then
+				if not JungleClearKey and not LaneClearKey and not WaveClearKey then
+					CastSpell(_R) 
+				end
+			end
+		end
+	end
+end
+
+function KeyPermaShow()
+	ComboKey = Param.Combo.comboKey
+	HarassKey = Param.Harass.Harasskey
+	LaneClearKey = Param.Clear.LaneClear.laneclearkey
+	JungleClearKey = Param.Clear.JungleClear.jungleclearkey
+	WaveClearKey = Param.Clear.WaveClear.waveclearkey
+
+	if ComboKey then 
+		Combo(Target)
+		Param.n5 = 2
+	elseif not ComboKey then
+		if HarassKey then
+			Harass(Target)
+			Param.n5 = 3
+		elseif LaneClearKey then
+			LaneClear()
+			Param.n5 = 4
+		elseif WaveClearKey then
+			WaveClear()
+			Param.n5 = 5
+		elseif JungleClearKey then
+			JungleClear()
+			Param.n5 = 6
+		end
+	end
+	if Param.n5 ~= 1 and not ComboKey and not HarassKey and not LaneClearKey and not JungleClearKey and not WaveClearKey then
+		Param.n5 = 1
+	end
+end
+
+function DrawFunc()
+	if Param.drawing.wallmenu.active then
+		drawWallSpots = true
+	elseif not Param.drawing.wallmenu.active then
+	    drawWallSpots = false
+	end
+	-- if VIP_USER then 
+	-- 	if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
+	-- 		lastTimeTickCalled = CurrentTimeInMillis()
+	-- 		if (Param.miscellaneous.skinchanger['changeSkin']) then
+	-- 			if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
+	-- 				lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
+	-- 				SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+	-- 			end
+	-- 		elseif (lastSkin ~= 0) then
+	-- 			SendSkinPacket(myHero.charName, nil, myHero.networkID)
+	-- 			lastSkin = 0
+	-- 		end
+	-- 	end
+	-- end
 end
 
 function Harass(unit)
@@ -875,6 +840,7 @@ function LogicR(unit)
 end
 
 function DetectQ()
+	local QZone = 0
 	if Param.miscellaneous.QError == 1 then
 		QZone = 200
 	elseif Param.miscellaneous.QError == 2 then
@@ -882,6 +848,7 @@ function DetectQ()
 	elseif Param.miscellaneous.QError == 3 then
 		QZone = 190
 	end
+
 	if LaneClearKey or JungleClearKey then 
 		for i, minion in ipairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
@@ -891,6 +858,7 @@ function DetectQ()
 			end
 		end
 	end
+
 	if WaveClearKey then 
 		for i, minion in ipairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
@@ -900,6 +868,7 @@ function DetectQ()
 			end
 		end
 	end
+
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if ValidTarget(enemy) and enemy.visible and QMissile and not enemy.dead then
 			if GetDistance(enemy, QMissile) <= QZone then
@@ -1084,28 +1053,15 @@ function OnDraw()
 				end
 			end
 		end
-	end
 
-	if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
-		if Param.drawing.wallmenu.active then
-			for i,group in pairs(wallSpots) do
-				if Param.drawing.wallmenu.holdwall and Param.drawing.wallmenu.holdshow > 500 then
+		if GetGame().map.shortName == "summonerRift" then
+			if Param.drawing.wallmenu.active then
+				for i,group in pairs(wallSpots) do
 					for x, wallSpot in pairs(group.Locations) do
-						if GetDistance(wallSpot) < Param.drawing.wallmenu.holdshow then
-							if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.holdshow then
+						if GetDistance(wallSpot) < 1500 then
+							if GetDistance(wallSpot, mousePos) <= 1500 then
 								color = 0xFFFFFF
 							else
-							color = group.color
-							end
-							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,color)
-						end
-					end
-				elseif Param.drawing.wallmenu.showclose then
-					for x, wallSpot in pairs(group.Locations) do
-						if GetDistance(wallSpot) <= Param.drawing.wallmenu.showcloserange then
-							if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.showcloserange then
-								color = 0xFFFFFF
-							else 
 								color = group.color
 							end
 							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,color)
@@ -1143,6 +1099,7 @@ function OnProcessSpell(unit, spell)
 end
 
 function OnGainBuff (unit, buff)
+	local lastQss = 0
 	for i = 1, 1 do
 		if not Param.miscellaneous.QuickSS.qsswithscript then return end
 			if myHero:getBuff(isABuff) then
@@ -1161,6 +1118,22 @@ function OnGainBuff (unit, buff)
 				--
 			end
 		--
+	end
+end
+
+function OnWndMsg(msg, key)
+	if key == 1 then
+		if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
+			if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
+				for i,group in pairs(wallSpots) do
+	 				for x, wallSpot in pairs(group.Locations) do
+	 					if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.radius and GetDistance(wallSpot) <= 1000 then
+	              	      CastSpell(_W, wallSpot.x, wallSpot.z)
+	             	   end                                    
+	     			end
+	        	end
+	    	end
+		end
 	end
 end
 
@@ -1468,7 +1441,6 @@ function AutoEggTp()
 	end
 end
 
--- Auto Level Spell + Packets [START]
 function AutoLvlSpell()
  	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
     	autoLevelSetSequence(levelSequence)
@@ -1477,29 +1449,33 @@ function AutoLvlSpell()
 end
 
 _G.LevelSpell = function(id)
-	if GetGameVersion():sub(1,10) == "5.24.0.249" then
+	if (string.find(GetGameVersion(), 'Releases/6.1') ~= nil) then
 		local offsets = { 
-		[_Q] = 0x1E,
-		[_W] = 0xD3,
-		[_E] = 0x3A,
-		[_R] = 0xA8,
+			[_Q] = 0x71,
+			[_W] = 0xF1,
+			[_E] = 0x31,
+			[_R] = 0xB1,
 		}
-		local p = CLoLPacket(0x00B6)
-		p.vTable = 0xFE3124
+		local p = CLoLPacket(0x00DB)
+		p.vTable = 0xF6D830
 		p:EncodeF(myHero.networkID)
-		p:Encode1(0xC1)
-		p:Encode1(offsets[id])
-		for i = 1, 4 do p:Encode1(0x63) end
-		for i = 1, 4 do p:Encode1(0xC5) end
+		for i = 1, 4 do p:Encode1(0x30) end
+			p:Encode1(0x17)
+		for i = 1, 4 do p:Encode1(0x81) end
 		for i = 1, 4 do p:Encode1(0x6A) end
+			p:Encode1(offsets[id])
 		for i = 1, 4 do p:Encode1(0x00) end
-		SendPacket(p)
+			SendPacket(p)
 	end
 end
--- Auto Level Spell + Packets [END]
 
-
---DelayAction(function()EnvoiMessage("Special Note : QSS can be bugged, then, if you got errors, disable QSS usage.")end, 10)
+function AutoLvlSpellCombo()
+	if Param.miscellaneous.levelspell.ComboAutoLvlSpell == 1 then
+		levelSequence =  { 1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
+	elseif Param.miscellaneous.levelspell.ComboAutoLvlSpell == 2 then			
+		levelSequence =  { 1,3,3,2,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
+	else return end
+end
 
 --======START======--
 -- Developers: 
@@ -1507,57 +1483,57 @@ end
 -- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
 -- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
 --==================--
-if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
-	skinsPB = {
-	[1] = 0xCA,
-	[10] = 0x68,
-	[8] = 0xE8,
-	[4] = 0xF8,
-	[12] = 0xD8,
-	[5] = 0xB8,
-	[9] = 0xA8,
-	[7] = 0x38,
-	[3] = 0x0C,
-	[11] = 0x28,
-	[6] = 0x78,
-	[2] = 0x4C,
-	}
-	skinObjectPos = 6
-	skinHeader = 0x3A
-	dispellHeader = 0xB7
-	skinH = 0x8C
-	skinHPos = 32
-end
+-- if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
+-- 	skinsPB = {
+-- 	[1] = 0xCA,
+-- 	[10] = 0x68,
+-- 	[8] = 0xE8,
+-- 	[4] = 0xF8,
+-- 	[12] = 0xD8,
+-- 	[5] = 0xB8,
+-- 	[9] = 0xA8,
+-- 	[7] = 0x38,
+-- 	[3] = 0x0C,
+-- 	[11] = 0x28,
+-- 	[6] = 0x78,
+-- 	[2] = 0x4C,
+-- 	}
+-- 	skinObjectPos = 6
+-- 	skinHeader = 0x3A
+-- 	dispellHeader = 0xB7
+-- 	skinH = 0x8C
+-- 	skinHPos = 32
+-- end
 
-function SendSkinPacket(mObject, skinPB, networkID)
-	if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
-		local mP = CLoLPacket(0x3A)
-		mP.vTable = 0xF351B0;
-		mP:EncodeF(myHero.networkID)
-		for I = 1, string.len(mObject) do
-			mP:Encode1(string.byte(string.sub(mObject, I, I)))
-		end
-		for I = 1, (16 - string.len(mObject)) do
-			mP:Encode1(0x00)
-		end
-		mP:Encode4(0x0000000E)
-		mP:Encode4(0x0000000F)
-		mP:Encode2(0x0000)
-		if (skinPB == nil) then
-			mP:Encode4(0x82828282)
-		else
-			mP:Encode1(skinPB)
-			for I = 1, 3 do
-				mP:Encode1(skinH)
-			end
-		end
-		mP:Encode4(0x00000000)
-		mP:Encode4(0x00000000)
-		mP:Encode1(0x00)
-		mP:Hide()
-		RecvPacket(mP)
-	end
-end
+-- function SendSkinPacket(mObject, skinPB, networkID)
+-- 	if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
+-- 		local mP = CLoLPacket(0x3A)
+-- 		mP.vTable = 0xF351B0;
+-- 		mP:EncodeF(myHero.networkID)
+-- 		for I = 1, string.len(mObject) do
+-- 			mP:Encode1(string.byte(string.sub(mObject, I, I)))
+-- 		end
+-- 		for I = 1, (16 - string.len(mObject)) do
+-- 			mP:Encode1(0x00)
+-- 		end
+-- 		mP:Encode4(0x0000000E)
+-- 		mP:Encode4(0x0000000F)
+-- 		mP:Encode2(0x0000)
+-- 		if (skinPB == nil) then
+-- 			mP:Encode4(0x82828282)
+-- 		else
+-- 			mP:Encode1(skinPB)
+-- 			for I = 1, 3 do
+-- 				mP:Encode1(skinH)
+-- 			end
+-- 		end
+-- 		mP:Encode4(0x00000000)
+-- 		mP:Encode4(0x00000000)
+-- 		mP:Encode1(0x00)
+-- 		mP:Hide()
+-- 		RecvPacket(mP)
+-- 	end
+-- end
 
 --=======END========--
 -- Developers: 
