@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Code now clean, New Wall Casting with right click and permaShow, fixed AutoLvlSpell, Color of wall circles.")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'Code now clean, New Wall Casting with right click and permaShow, fixed AutoLvlSpell, Color of wall circles.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -1151,6 +1151,8 @@ function OnRemoveBuff(unit, buff)
 	end
 	if unit and unit.valid and unit.isMe and buff and buff.name == "rebirth" then
 		upoeuf = 0
+		cooldown = 1
+		DrawText3D(""..cooldown.."", myHero.x-100, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
 		EnvoiMessage("Rebirth [(Passive)] is now DOWN")
 	end
 end
@@ -2087,3 +2089,5 @@ function ScriptUpdate:DownloadUpdate()
     end
 end
 --====END UPDATE CLASS====--
+
+DelayAction(function() EnvoiMessage("You have to rightclick on the circles now to cast a Wall.") end, 10)
