@@ -59,7 +59,7 @@ local upoeuf = 1
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.46"
+local version = "0.47"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Code now clean, New Wall Casting with right click and permaShow, fixed AutoLvlSpell.")end, 15)
+		DelayAction(function() EnvoiMessage("What's new : 'Code now clean, New Wall Casting with right click and permaShow, fixed AutoLvlSpell, Color of wall circles.")end, 15)
 		whatsnew = 0
 	end
 	--
@@ -230,6 +230,7 @@ function OnLoad()
 			Param.drawing.wallmenu:permaShow("active")
 			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle Diameter : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
 			Param.drawing.wallmenu:permaShow("radius")
+			Param.drawing.wallmenu:addParam("color", "Choose a color for Circles :", SCRIPT_PARAM_LIST, 1, {"Normal (Lite Blue)", "Red", "Green", "White"})
 	--end
 	Param:addSubMenu("", "nil")
 	--
@@ -520,7 +521,7 @@ function OnTick()
 end
 
 function drawCircles(x,y,z,color)
-    DrawCircle(x, y, z, Param.drawing.wallmenu.radius, 0xFFFFFF)
+    DrawCircle(x, y, z, Param.drawing.wallmenu.radius, color)
 end
 
 function WdansR(unit)
@@ -1060,9 +1061,15 @@ function OnDraw()
 					for x, wallSpot in pairs(group.Locations) do
 						if GetDistance(wallSpot) < 1500 then
 							if GetDistance(wallSpot, mousePos) <= 1500 then
-								color = 0xFFFFFF
-							else
-								color = group.color
+								if Param.drawing.wallmenu.color == 1 then
+									color = 0xCCFFFF
+								elseif Param.drawing.wallmenu.color == 2 then
+									color = 0xFF0000
+								elseif Param.drawing.wallmenu.color == 3 then
+									color = 0x009900
+								elseif Param.drawing.wallmenu.color == 4 then
+									color = 0xFFFFFF
+								end
 							end
 							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,color)
 						end
@@ -1124,7 +1131,7 @@ end
 function OnWndMsg(msg, key)
 	if key == 1 then
 		if not Param.drawing.disablealldrawings and GetGame().map.shortName == "summonerRift" then
-			if Param.drawing.wallmenu.active and ((Param.drawing.wallmenu.holdshow + Param.drawing.wallmenu.showcloserange) > 500) then
+			if Param.drawing.wallmenu.active then
 				for i,group in pairs(wallSpots) do
 	 				for x, wallSpot in pairs(group.Locations) do
 	 					if GetDistance(wallSpot, mousePos) <= Param.drawing.wallmenu.radius and GetDistance(wallSpot) <= 1000 then
@@ -1885,9 +1892,6 @@ wallSpots = {
 					{ x = 11200,  y = 91, z = 10808},
 		--Wall Spots
 					},
-
-    	color = 0xFFFFFF,
-
  	},
 }
 
