@@ -59,7 +59,7 @@ local startTime = 0
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.50"
+local version = "0.51"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'HitChance switch, EggTimer.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : 'HitChance switch, EggTimer, Wall Improve")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -867,6 +867,12 @@ function LogicR(unit)
 				end
 			end
 		--
+	if unit ~= nil then
+		if not RMissile and myHero:CanUseSpell(_R) == READY and GetDistance(unit) <= SkillR.range then
+			local point = FindBestCircle(unit, SkillR.range, SkillR.width)
+			CastSpell(_R, point.x, point.z)
+		end
+	end
 	--
 end
 
@@ -2127,5 +2133,100 @@ function ScriptUpdate:DownloadUpdate()
     end
 end
 --====END UPDATE CLASS====--
+
+--==
+function OnNewPath(unit,startPos,endPos,isDash,dashSpeed,dashGravity,dashDistance)
+	if isDash and SkillW.ready and Param.miscellaneous.WdansR then
+		if GetDistance(startPos, endPos) < 0.55 * dashSpeed then
+			castPos = Vector(startPos) + (Vector(endPos) - Vector(startPos)):normalized() * 0.55 * dashSpeed
+		else
+			castPos = Vector(startPos) + (Vector(endPos) - Vector(startPos)):normalized() * (dashDistance + 50)
+		end
+			
+		if AngleDifference(myHero, startPos, castPos) < 45 and GetDistance(castPos) > 50 and GetDistance(castPos) < 500 then
+			CastSpell(_W, castPos.x, castPos.z)
+		end
+	end
+end
+
+function AngleDifference(from, p1, p2)
+	local p1Z = p1.z - from.z
+	local p1X = p1.x - from.x
+	local p1Angle = math.atan2(p1Z , p1X) * 180 / math.pi
+	
+	local p2Z = p2.z - from.z
+	local p2X = p2.x - from.x
+	local p2Angle = math.atan2(p2Z , p2X) * 180 / math.pi
+	
+	return math.sqrt((p1Angle - p2Angle) ^ 2)
+end
+
+function FindBestCircle(target, range, radius)
+	if Param.prediction.n1 == 1
+		local points = {}
+		
+		local rgDsqr = (range + radius) * (range + radius)
+		local diaDsqr = (radius * 2) * (radius * 2)
+
+		local Position = VP:GetPredictedPos(target, 0.25)
+
+		table.insert(points,Position)
+		
+		for i, enemy in ipairs(GetEnemyHeroes()) do
+			if enemy.networkID ~= target.networkID and not enemy.dead and GetDistanceSqr(enemy) <= rgDsqr and GetDistanceSqr(target,enemy) < diaDsqr then
+				local Position = VP:GetPredictedPos(enemy, 0.25)
+				table.insert(points, Position)
+			end
+		end
+		
+		while true do
+			local MECObject = MEC(points)
+			local OurCircle = MECObject:Compute()
+			
+			if OurCircle.radius <= radius then
+				return OurCircle.center, #points
+			end
+			
+			local Dist = -1
+			local MyPoint = points[1]
+			local index = 0
+			
+			for i=2, #points, 1 do
+				local DistToTest = GetDistanceSqr(points[i], MyPoint)
+				if DistToTest >= Dist then
+					Dist = DistToTest
+					index = i
+				end
+			end
+			if index > 0 then
+				table.remove(points, index)
+			else
+				return points[1], 1
+			end
+		end
+	end
+end
+
+function PointsOfIntersection(A, B, C, R)
+	local D, E, F, G = {}, {}, {}, {}
+
+	LAB = math.sqrt((B.x-A.x)^ 2+(B.y-A.y)^ 2)
+	D.x = (B.x-A.x)/LAB
+	D.y = (B.y-A.y)/LAB
+	t = D.x*(C.x-A.x) + D.y*(C.y-A.y)
+	E.x = t*D.x+A.x
+	E.y = t*D.y+A.y
+	LEC = math.sqrt( (E.x-C.x)^ 2+(E.y-C.y)^ 2 )
+	if LEC < R then
+		dt = math.sqrt( R^ 2 - LEC^ 2)
+		F.x = (t-dt)*D.x + A.x
+		F.y = (t-dt)*D.y + A.y
+		G.x = (t+dt)*D.x + A.x
+		G.y = (t+dt)*D.y + A.y
+	end
+	
+	return F, G
+end
+--===
 
 DelayAction(function() EnvoiMessage("You have to rightclick on the circles now to cast a Wall.") end, 10)
