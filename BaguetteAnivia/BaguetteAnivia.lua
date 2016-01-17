@@ -2162,7 +2162,7 @@ function AngleDifference(from, p1, p2)
 end
 
 function FindBestCircle(target, range, radius)
-	if Param.prediction.n1 == 1
+	if Param.prediction.n1 == 1 then
 		local points = {}
 		
 		local rgDsqr = (range + radius) * (range + radius)
