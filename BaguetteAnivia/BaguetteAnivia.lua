@@ -1062,7 +1062,7 @@ function OnDraw()
 			DrawCircle(myHero.x, myHero.y, myHero.z, 660, RGB(200, 0, 0))
 		end
 		if Param.drawing.spell.EggTimer and OeufTimerDraw == 1 then
-			DrawText3D("REBIRTH :"..math.round(startTime - os.clock(), 2).."", myHero.x-100, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
+			DrawText3D("REBIRTH :"..math.round(startTime - os.clock(), 2).."s", myHero.x-100, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
 		end
 		if Target ~= nil and ValidTarget(Target) then
 			if Param.drawing.tText then
