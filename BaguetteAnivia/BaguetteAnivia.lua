@@ -1,4 +1,3 @@
-
 --[[
 
 Script by spyk for Anivia.
@@ -48,6 +47,7 @@ local lastElixir = 0
 local lastTP = 0
 local ActualTPTime = 0
 local upoeuf = 1
+local startTime = 0 
 -- local skinsPB = {};
 -- local skinObjectPos = nil;
 -- local skinHeader = nil;
@@ -59,7 +59,7 @@ local upoeuf = 1
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.47"
+local version = "0.50"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Code now clean, New Wall Casting with right click and permaShow, fixed AutoLvlSpell, Color of wall circles.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : 'HitChance switch, EggTimer.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -224,6 +224,7 @@ function OnLoad()
 			Param.drawing.spell:addParam("Edraw","Display (E) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.drawing.spell:addParam("Rdraw","Display (R) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.drawing.spell:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
+			Param.drawing.spell:addParam("EggTimer", "Display EggTimer?", SCRIPT_PARAM_ONOFF, true)
 		--
 		Param.drawing:addSubMenu("About AutoWall", "wallmenu")
 			Param.drawing.wallmenu:addParam("active", "WallsCasts is Active?", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
@@ -321,6 +322,14 @@ function PredictionOrbWalkSwitch()
 	else
 		EnvoiMessage("No prediction loaded.")
 	end
+
+	if Param.prediction.n1 == 1 then Param.Combo:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 2, 1, 5) end
+	if Param.prediction.n1 == 2 then Param.Combo:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 0, 0, 3) end
+	if Param.prediction.n1 == 3 then Param.Combo:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 1, 0, 3) end
+
+	if Param.prediction.n1 == 1 then Param.Harass:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 2, 1, 5) end
+	if Param.prediction.n1 == 2 then Param.Harass:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 0, 0, 3) end
+	if Param.prediction.n1 == 3 then Param.Harass:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 1, 0, 3) end
 
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
@@ -559,7 +568,7 @@ function Combo(unit)
 		end	
 		if Param.Combo.UseR then 
 			LogicR(unit)
-		end	
+		end
 	end
 end
 
@@ -751,18 +760,39 @@ function LogicQ(unit)
 	if QMissile ~=nil then return end
 	if unit ~= nil and GetDistance(unit) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 		if Param.prediction.n1 == 1 then
+			if ComboKey then 
+				ChanceHit = Param.Combo.HitChance
+			elseif HarassKey then
+				ChanceHit = Param.Harass.HitChance
+			else 
+				ChanceHit = 2
+			end
 			CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false)
-			if HitChance >= 2 then
+			if HitChance >= ChanceHit then
 				CastSpell(_Q, CastPosition.x, CastPosition.z)
 			end
 		elseif Param.prediction.n1 == 2 then
+			if ComboKey then 
+				ChanceHit = Param.Combo.HitChance
+			elseif HarassKey then
+				ChanceHit = Param.Harass.HitChance
+			else 
+				ChanceHit = 0
+			end
   			local CastPosition, HitChance = HPred:GetPredict(HP_Q, unit, myHero)
-  			if HitChance > 0 then
+  			if HitChance > ChanceHit then
     			CastSpell(_Q, CastPosition.x, CastPosition.z)
   			end
 		elseif Param.prediction.n1 == 3 then
+			if ComboKey then 
+				ChanceHit = Param.Combo.HitChance
+			elseif HarassKey then
+				ChanceHit = Param.Harass.HitChance
+			else 
+				ChanceHit = 1
+			end
 			CastPosition, HitChance, PredPos = SP:Predict(unit, SkillQ.range, SkillQ.speed, SkillQ.delay, SkillQ.width, false, myHero)
-            if HitChance >= 1 then
+            if HitChance >= ChanceHit then
                 CastSpell(_Q, unit)
             end
 		end
@@ -1025,6 +1055,9 @@ function OnDraw()
 		if Param.drawing.spell.AAdraw then
 			DrawCircle(myHero.x, myHero.y, myHero.z, 660, RGB(200, 0, 0))
 		end
+		if Param.drawing.spell.EggTimer and OeufTimerDraw == 1 then
+			DrawText3D("REBIRTH :"..math.round(startTime - os.clock(), 2).."", myHero.x-100, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
+		end
 		if Target ~= nil and ValidTarget(Target) then
 			if Param.drawing.tText then
 				DrawText3D("ACTUAL BITCH",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFFFF) -- Acknowledgments to http://forum.botoflegends.com/user/25371-big-fat-corki/ and his Mark IV script for giving me the idea of the target name.
@@ -1154,6 +1187,11 @@ function OnRemoveBuff(unit, buff)
 		cooldown = 1
 		DrawText3D(""..cooldown.."", myHero.x-100, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
 		EnvoiMessage("Rebirth [(Passive)] is now DOWN")
+	end
+	if unit and unit.valid and unit.isMe and buff and buff.name == "rebirthready" then
+		startTime = os.clock() + 6
+		OeufTimerDraw = 1
+		DelayAction(function() OeufTimerDraw = 0 end, 6)
 	end
 end
 
