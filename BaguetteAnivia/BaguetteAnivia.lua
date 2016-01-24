@@ -59,7 +59,7 @@ local startTime = 0
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.52"
+local version = "0.53"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Keep R enable if one of Clear Key (Jungle, Lane and Wave), Fixed the enable/disable Auto Level Spell.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : ''Disable R if no target in' support now Jungle Minion and Minion. Fixed the enable/disable Auto Level Spell.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -199,7 +199,7 @@ function OnLoad()
 		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in?", SCRIPT_PARAM_ONOFF , true)
+		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in (Heroes, Minions, Jungle)?", SCRIPT_PARAM_ONOFF , true)
 		Param.miscellaneous:permaShow("ManualR")
 		--
 		Param:addSubMenu("Exploits", "exploits")
@@ -601,9 +601,7 @@ function SpellFunc()
 	if Param.miscellaneous.ManualR then
 		if RMissile ~= nil then
 			if not ValidR() then
-				if not JungleClearKey and not LaneClearKey and not WaveClearKey then
-					CastSpell(_R) 
-				end
+					CastSpell(_R)
 			end
 		end
 	end
@@ -705,7 +703,6 @@ function LaneClear()
 	if not ManaLaneClear() then
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil then
-			Param.miscellaneous.ManualR = false
 				if Param.Clear.LaneClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 					LogicQ(minion)
 				end
@@ -726,7 +723,6 @@ function WaveClear()
 	if not ManaWaveClear() then
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) then
-			Param.miscellaneous.ManualR = false
 				if GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and (minion.maxHealth >= canonheal) then
 					LogicQ(minion)
 				end
@@ -746,7 +742,6 @@ function JungleClear()
 	if not ManaJungleClear() then
 		for i, jungleMinion in pairs(jungleMinions.objects) do
 			if jungleMinion ~= nil then
-			Param.miscellaneous.ManualR = false
 				if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
 					LogicE(jungleMinion)
 				end
@@ -928,6 +923,18 @@ function ValidR()
 			if GetDistance(hero, RMissile) < 500 then
 				TargetCount = TargetCount + 1
 			end
+		end
+	end
+	enemyMinions:update()
+	for i, minion in pairs(enemyMinions.objects) do
+		if ValidTarget(minion) and minion ~= nil and GetDistance(minion, RMissile) < 500 then
+			TargetCount = TargetCount + 1
+		end
+	end
+	jungleMinions:update()
+	for i, jungleMinion in pairs(jungleMinions.objects) do
+		if jungleMinion ~= nil and GetDistance(jungleMinion, RMissile) < 500 then
+			TargetCount = TargetCount + 1
 		end
 	end
 	if TargetCount > 0 then 
