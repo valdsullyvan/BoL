@@ -59,7 +59,7 @@ local startTime = 0
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.51"
+local version = "0.52"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'HitChance switch, EggTimer, Wall Improve")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : 'Keep R enable if one of Clear Key (Jungle, Lane and Wave), Fixed the enable/disable Auto Level Spell.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -577,7 +577,9 @@ function Consommables()
 	AutoSeraphin()
 	AutoFrostQuenn()
 	AutoElixirDuSorcier()
-	AutoLvlSpell()
+	if Param.miscellaneous.levelspell.EnableAutoLvlSpell then
+	 	AutoLvlSpell()
+	end
 	if Param.miscellaneous.Pots.potswithscript and not Param.miscellaneous.Pots.potonlywithcombo then
 		AutoPotions()
 	elseif Param.miscellaneous.Pots.potswithscript and Param.miscellaneous.Pots.potonlywithcombo and ComboKey then
@@ -703,6 +705,7 @@ function LaneClear()
 	if not ManaLaneClear() then
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil then
+			Param.miscellaneous.ManualR = false
 				if Param.Clear.LaneClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 					LogicQ(minion)
 				end
@@ -723,6 +726,7 @@ function WaveClear()
 	if not ManaWaveClear() then
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) then
+			Param.miscellaneous.ManualR = false
 				if GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and (minion.maxHealth >= canonheal) then
 					LogicQ(minion)
 				end
@@ -742,6 +746,7 @@ function JungleClear()
 	if not ManaJungleClear() then
 		for i, jungleMinion in pairs(jungleMinions.objects) do
 			if jungleMinion ~= nil then
+			Param.miscellaneous.ManualR = false
 				if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
 					LogicE(jungleMinion)
 				end
