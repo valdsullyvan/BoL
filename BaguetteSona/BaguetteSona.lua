@@ -19,7 +19,7 @@ local charNames = {
 if not charNames[myHero.charName] then return end
 
 function EnvoiMessage(msg)
-	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteAnivia]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
+	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteSona]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
 
 function CurrentTimeInMillis()
@@ -37,7 +37,7 @@ local Exhaust = "Annie", "Akali", "Azir", "Brand", "Cassiopeia", "Darius", "Dian
 local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tristana", "Talon", "Sivir", "Ryze", "Riven", "Rengar", "Quinn", "MasterYi", "MissFortune", "Lucian", "KogMaw", "Kindred", "Katarina", "Kalista", "Jinx", "Ezreal", "Caitlyn", "Ashe", "Corki"
 
 --- Starting AutoUpdate
-local version = "0.10"
+local version = "0.11"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -72,7 +72,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteSona]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'First version!'")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : 'Patch for VIP spell bug!'")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -331,6 +331,8 @@ function Damages()
 		if myHero:CanUseSpell(_E) == READY then 
 			LogicE()
 		end
+	elseif myHero:GetSpellData(_Q).currentCd == 0 then
+		LogicQ()
 	else
 		myHero:MoveTo(mousePos.x, mousePos.z)
 	end
@@ -548,7 +550,6 @@ function moveToCursor()
 end
 
 function CastAA()
-	myHero:MoveTo(mousePos.x, mousePos.z)
 	local myTarget = ts.target
 	if myTarget ~=	nil and GetDistance(myTarget) < range - 50 then	
 		if timeToShoot() then
