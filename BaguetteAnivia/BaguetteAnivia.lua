@@ -59,7 +59,7 @@ local startTime = 0
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.53"
+local version = "0.54"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : ''Disable R if no target in' support now Jungle Minion and Minion. Fixed the enable/disable Auto Level Spell.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Fixed AutoLevelSpell for NO_VIP_USER because, they can't use these functions.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -577,8 +577,10 @@ function Consommables()
 	AutoSeraphin()
 	AutoFrostQuenn()
 	AutoElixirDuSorcier()
-	if Param.miscellaneous.levelspell.EnableAutoLvlSpell then
-	 	AutoLvlSpell()
+	if VIP_USER then
+		if Param.miscellaneous.levelspell.EnableAutoLvlSpell then
+	 		AutoLvlSpell()
+		end
 	end
 	if Param.miscellaneous.Pots.potswithscript and not Param.miscellaneous.Pots.potonlywithcombo then
 		AutoPotions()
