@@ -59,7 +59,7 @@ local startTime = 0
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.54"
+local version = "0.55"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Fixed AutoLevelSpell for NO_VIP_USER because, they can't use these functions.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Fixed AutoLevelSpell for League of Legend 6.2 ")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -1516,23 +1516,22 @@ function AutoLvlSpell()
 end
 
 _G.LevelSpell = function(id)
-	if (string.find(GetGameVersion(), 'Releases/6.1') ~= nil) then
+	if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
 		local offsets = { 
-			[_Q] = 0x71,
-			[_W] = 0xF1,
-			[_E] = 0x31,
-			[_R] = 0xB1,
+		[_Q] = 0x41,
+		[_W] = 0xFC,
+		[_E] = 0x64,
+		[_R] = 0xAA,
 		}
-		local p = CLoLPacket(0x00DB)
-		p.vTable = 0xF6D830
+		local p = CLoLPacket(0x0153)
+		p.vTable = 0xFE9264
 		p:EncodeF(myHero.networkID)
-		for i = 1, 4 do p:Encode1(0x30) end
-			p:Encode1(0x17)
-		for i = 1, 4 do p:Encode1(0x81) end
-		for i = 1, 4 do p:Encode1(0x6A) end
-			p:Encode1(offsets[id])
-		for i = 1, 4 do p:Encode1(0x00) end
-			SendPacket(p)
+		p:Encode1(offsets[id])
+		for i = 1, 4 do p:Encode1(0xF7) end
+		for i = 1, 4 do p:Encode1(0xAF) end
+		p:Encode1(0x8F)
+		for i = 1, 4 do p:Encode1(0xA5) end
+		SendPacket(p)
 	end
 end
 
