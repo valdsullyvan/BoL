@@ -59,7 +59,7 @@ local startTime = 0
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.55"
+local version = "0.551"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Fixed AutoLevelSpell for League of Legend 6.2 ")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Fixed VPredicton Point of Intersection error when you have another Prediction.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -869,12 +869,12 @@ function LogicR(unit)
 				end
 			end
 		--
-	if unit ~= nil then
-		if not RMissile and myHero:CanUseSpell(_R) == READY and GetDistance(unit) <= SkillR.range then
-			local point = FindBestCircle(unit, SkillR.range, SkillR.width)
-			CastSpell(_R, point.x, point.z)
+		if unit ~= nil Param.prediction.n1 == 1 then
+			if not RMissile and myHero:CanUseSpell(_R) == READY and GetDistance(unit) <= SkillR.range then
+				local point = FindBestCircle(unit, SkillR.range, SkillR.width)
+				CastSpell(_R, point.x, point.z)
+			end
 		end
-	end
 	--
 end
 
