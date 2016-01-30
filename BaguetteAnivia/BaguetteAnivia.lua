@@ -869,7 +869,7 @@ function LogicR(unit)
 				end
 			end
 		--
-		if unit ~= nil Param.prediction.n1 == 1 then
+		if unit ~= nil and Param.prediction.n1 == 1 then
 			if not RMissile and myHero:CanUseSpell(_R) == READY and GetDistance(unit) <= SkillR.range then
 				local point = FindBestCircle(unit, SkillR.range, SkillR.width)
 				CastSpell(_R, point.x, point.z)
