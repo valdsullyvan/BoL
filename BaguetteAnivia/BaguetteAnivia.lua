@@ -34,7 +34,7 @@ local TextList = {"Ignite = Kill", "Q = Kill", "DoubleQ = Kill", "Q + Ignite = K
 local KillText = {}
 local mods = "None"
 local damageQ = 30 * myHero:GetSpellData(_Q).level + 30 + .5 * myHero.ap
-local damageE = 30 * myHero:GetSpellData(_W).level + 25 + myHero.ap
+local damageE = 30 * myHero:GetSpellData(_E).level + 25 + myHero.ap
 local damageR = 40 * myHero:GetSpellData(_R).level + 40 + .25 * myHero.ap
 local lastPotion = 0
 local ActualPotTime = 15
@@ -59,7 +59,7 @@ local startTime = 0
 -- local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.551"
+local version = "0.552"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Fixed VPredicton Point of Intersection error when you have another Prediction.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Fixed E Spell calculation damage issue.")end, 0)
 		whatsnew = 0
 	end
 	--
