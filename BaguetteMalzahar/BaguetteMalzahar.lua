@@ -210,7 +210,7 @@ function CustomLoad()
 	ts.name = "Malzahar"
 	Param:addTS(ts)
 	PriorityOnLoad()
-	
+
 	DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 end
 
@@ -918,7 +918,7 @@ isAGapcloserToDo = {
 	['MissFortuneBulletTime'] = {true, Champ = 'MissFortune',	spellKey = 'R'},
 	['LucianR']	= {true, Champ = 'Lucian',	spellKey = 'R'},
 	['GalioIdolOfDurand'] = {true, Champ = 'Galio',	spellKey = 'R'},
-	['UFSlash']	= {true, Champ = 'Malphite', 	range = 1000,  	projSpeed = 1800, spellKey = 'R'},
+	['UFSlash']	= {true, Champ = 'Malphite', range = 1000, projSpeed = 1800, spellKey = 'R'},
 	['YasuoDashWrapper'] = {true, Champ = 'Yasuo',	spellKey = 'E'},
 	['RengarLeap'] = {true, Champ = 'Rengar',	spellKey = 'Q/R'},
 	['InfiniteDuress'] = {true, Champ = 'Warwick',	spellKey = 'R'},
@@ -926,15 +926,15 @@ isAGapcloserToDo = {
 	['MonkeyKingSpinToWin'] = {true, Champ = 'MonkeyKing', spellKey = 'R'},
 	['Crowstorm'] = {true, Champ = 'FiddleSticks',spellKey = 'R'},
 	['UrgotSwap2']	= {true, Champ = 'Urgot',	spellKey = 'R'},
-	['ZedR'] = {true, Champ = 'Zed', spellKey = 'R'}
-	['GravesMove']	= {true, Champ = 'Graves', 	range = 425,   	projSpeed = 2000, spellKey = 'E'},
+	['ZedR'] = {true, Champ = 'Zed', spellKey = 'R'},
+	['GravesMove']	= {true, Champ = 'Graves', 	range = 425, projSpeed = 2000, spellKey = 'E'},
 	['LucianR']	= {true, Champ = 'Lucian',	spellKey = 'R'},
-	['KhazixE']	= {true, Champ = 'Khazix', 	range = 900,   	projSpeed = 2000, spellKey = 'E'},
-	['khazixelong']	= {true, Champ = 'Khazix', 	range = 900,   	projSpeed = 2000, spellKey = 'E'},
-	['LeblancSlide']	= {true, Champ = 'Leblanc', 	range = 600,   	projSpeed = 2000, spellKey = 'W'},
-	['LeblancSlideM']	= {true, Champ = 'Leblanc', 	range = 600,   	projSpeed = 2000, spellKey = 'WMimic'},
-	['RocketJump']	= {true, Champ = 'Tristana', 	range = 900,  	projSpeed = 2000, spellKey = 'W'},
-	['DianaTeleport']       	= {true, Champ = 'Diana', 	spellKey = 'R'},
+	['KhazixE']	= {true, Champ = 'Khazix', 	range = 900, projSpeed = 2000, spellKey = 'E'},
+	['khazixelong']	= {true, Champ = 'Khazix', 	range = 900, projSpeed = 2000, spellKey = 'E'},
+	['LeblancSlide']	= {true, Champ = 'Leblanc', range = 600, projSpeed = 2000, spellKey = 'W'},
+	['LeblancSlideM']	= {true, Champ = 'Leblanc', range = 600, projSpeed = 2000, spellKey = 'WMimic'},
+	['RocketJump']	= {true, Champ = 'Tristana', range = 900,  	projSpeed = 2000, spellKey = 'W'},
+	['DianaTeleport'] = {true, Champ = 'Diana', spellKey = 'R'}
 }
 
 function Close()
