@@ -48,18 +48,18 @@ local lastTP = 0
 local ActualTPTime = 0
 local upoeuf = 1
 local startTime = 0 
--- local skinsPB = {};
--- local skinObjectPos = nil;
--- local skinHeader = nil;
--- local dispellHeader = nil;
--- local skinH = nil;
--- local skinHPos = nil;
--- local theMenu = nil;
--- local lastTimeTickCalled = 0;
--- local lastSkin = 0;
+local skinsPB = {};
+local skinObjectPos = nil;
+local skinHeader = nil;
+local dispellHeader = nil;
+local skinH = nil;
+local skinHPos = nil;
+local theMenu = nil;
+local lastTimeTickCalled = 0;
+local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.553"
+local version = "0.554"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Fixed E Spell calculation damage issue.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : ZedR GapCloser, Configurable GapCloser.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -177,14 +177,14 @@ function OnLoad()
 			Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
 			Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
 		--
-		--if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "skinchanger") end
-			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
-			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
-			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
-			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
-			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
-			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
-			-- if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
+		if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "skinchanger") end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
+			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
 		--
 		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Lvl Spell", "levelspell") end
 			if VIP_USER then Param.miscellaneous.levelspell:addParam("EnableAutoLvlSpell", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
@@ -194,8 +194,13 @@ function OnLoad()
 			if VIP_USER then Param.miscellaneous.levelspell:addParam("n3", "If you need more Combo, go on forum and tell me which.", SCRIPT_PARAM_INFO,"") end
 			if VIP_USER then Last_LevelSpell = 0 end
 		--
+		Param.miscellaneous:addSubMenu("GapCloser", "GapCloser")
+			Param.miscellaneous.GapCloser:addParam("QGapClos", "Use GapCloser (Q)?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.GapCloser:addParam("EGapClos", "Use (E) in GapCloser?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.GapCloser:addParam("RGapClos", "Use (R) in GapCloser?", SCRIPT_PARAM_ONOFF, true)
+			Param.miscellaneous.GapCloser:addParam("Special", "Enable special GapCloser (ZedR, etc..)?", SCRIPT_PARAM_ONOFF, true)
+
 		Param.miscellaneous:addParam("QError", "Set (Q) Diameter on (Normally = 200) :", SCRIPT_PARAM_LIST, 2,{"200", "195", "190"})
-		Param.miscellaneous:addParam("Qgapclos", "Use GapCloser?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
@@ -299,14 +304,14 @@ function CustomLoad()
 	PriorityOnLoad()
 	DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 
-	-- if VIP_USER then
-	-- 	if (not Param.miscellaneous.skinchanger['saveSkin']) then
-	-- 		Param.miscellaneous.skinchanger['changeSkin'] = false
-	-- 		Param.miscellaneous.skinchanger['selectedSkin'] = 1
-	-- 	elseif (Param.miscellaneous.skinchanger['changeSkin']) then
-	-- 		SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
-	-- 	end
-	-- end
+	if VIP_USER then
+		if (not Param.miscellaneous.skinchanger['saveSkin']) then
+			Param.miscellaneous.skinchanger['changeSkin'] = false
+			Param.miscellaneous.skinchanger['selectedSkin'] = 1
+		elseif (Param.miscellaneous.skinchanger['changeSkin']) then
+			SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+		end
+	end
  end
 
 function PredictionOrbWalkSwitch()
@@ -645,20 +650,20 @@ function DrawFunc()
 	elseif not Param.drawing.wallmenu.active then
 	    drawWallSpots = false
 	end
-	-- if VIP_USER then 
-	-- 	if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
-	-- 		lastTimeTickCalled = CurrentTimeInMillis()
-	-- 		if (Param.miscellaneous.skinchanger['changeSkin']) then
-	-- 			if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
-	-- 				lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
-	-- 				SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
-	-- 			end
-	-- 		elseif (lastSkin ~= 0) then
-	-- 			SendSkinPacket(myHero.charName, nil, myHero.networkID)
-	-- 			lastSkin = 0
-	-- 		end
-	-- 	end
-	-- end
+	if VIP_USER then 
+		if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
+			lastTimeTickCalled = CurrentTimeInMillis()
+			if (Param.miscellaneous.skinchanger['changeSkin']) then
+				if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
+					lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
+					SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
+				end
+			elseif (lastSkin ~= 0) then
+				SendSkinPacket(myHero.charName, nil, myHero.networkID)
+				lastSkin = 0
+			end
+		end
+	end
 end
 
 function Harass(unit)
@@ -1141,18 +1146,59 @@ function OnProcessSpell(unit, spell)
 	    	end
 	    end
 	end
-	if Param.miscellaneous.Qgapclos then
+	if Param.miscellaneous.GapCloser.QGapClos and myHero:CanUseSpell(_Q) == READY then
 	    if unit.team ~= myHero.team then
-	        if isAGapcloserUnitTarget[spell.name] then
+
+	    	if Param.miscellaneous.GapCloser.Special then
+		    	if spell.name == "ZedR" and spell.target and spell.target.networkID == myHero.networkID then
+		    		if myHero:CanUseSpell(_R) == READY and myHero.mana > 300 and not RMissile ~= nil and Param.miscellaneous.GapCloser.RGapClos then
+		    			CastSpell(_R, myHero.x, myHero.z)
+		    		elseif myHero:CanUseSpell(_R) == READY and myHero.mana < 300 and not RMissile ~= nil and Param.miscellaneous.GapCloser.RGapClos then
+		    			DelayAction(function()
+		    				CastSpell(_R, myHero.x, myHero.z)
+		    			end, 0.50)
+		    		end
+		    		if myHero:CanUseSpell(_Q) == READY then
+		    			DelayAction(function()
+		    				CastSpell(_Q, myHero.x-50, myHero.z-50)
+		    			end, 0.80)
+		    		end
+		    		if myHero:CanUseSpell(_E) == READY and Param.miscellaneous.GapCloser.EGapClos then
+		    			DelayAction(function()
+		    				CastSpell(_E, unit)
+		    			end, 1)
+		    		end
+		    	end
+		    end
+
+	        if isAGapcloserUnitTarget[spell.name] and spell.name ~= "ZedR" then
 	            if spell.target and spell.target.networkID == myHero.networkID then
-	                LogicQ(unit)
-	                LogicR(myHero)
-	                CastSpell(_E, unit)
+	            	if Param.miscellaneous.GapCloser.RGapClos and myHero:CanUseSpell(_R) == READY and not RMissile ~= nil then
+	            		CastSpell(_R, myHero.x, myHero.z)
+	            	end
+	            	DelayAction(function()
+	            		CastSpell(_Q, unit)
+	            	end, 0.05)
+	            	DelayAction(function()
+		            	if Param.miscellaneous.GapCloser.EGapClos and myHero:CanUseSpell(_E) == READY then
+		            		CastSpell(_E, unit)
+		            	end
+		            end, 0.25)
 	            end
 	        end
-	        if isAGapcloserUnitNoTarget[spell.name] and GetDistanceSqr(unit) <= 2000*2000 and (spell.target == nil or (spell.target and spell.target.isMe)) then
-	            LogicQ(unit)
-	            CastSpell(_E, unit)
+	        
+	        if isAGapcloserUnitNoTarget[spell.name] and GetDistanceSqr(unit) <= 2000*2000 and (spell.target == nil or (spell.target and spell.target.isMe)) and spell.name ~= "ZedR" then
+	        	if Param.miscellaneous.GapCloser.RGapClos and myHero:CanUseSpell(_R) == READY and not RMissile ~= nil then
+	        		LogicR(unit)
+	        	end
+	        	DelayAction(function()
+	        		LogicQ(unit)
+	        	end, 0.05)
+	        	DelayAction(function()
+	        		if Param.miscellaneous.GapCloser.EGapClos and myHero:CanUseSpell(_E) == READY then
+	        			CastSpell(_E, unit)
+	        		end
+	        	end, 0.25)
 	       	end
 	    end
 	end
@@ -1549,57 +1595,63 @@ end
 -- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
 -- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
 --==================--
--- if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
--- 	skinsPB = {
--- 	[1] = 0xCA,
--- 	[10] = 0x68,
--- 	[8] = 0xE8,
--- 	[4] = 0xF8,
--- 	[12] = 0xD8,
--- 	[5] = 0xB8,
--- 	[9] = 0xA8,
--- 	[7] = 0x38,
--- 	[3] = 0x0C,
--- 	[11] = 0x28,
--- 	[6] = 0x78,
--- 	[2] = 0x4C,
--- 	}
--- 	skinObjectPos = 6
--- 	skinHeader = 0x3A
--- 	dispellHeader = 0xB7
--- 	skinH = 0x8C
--- 	skinHPos = 32
--- end
+if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
+	skinsPB = {
+		[1] = 0xD4,
+		[10] = 0xAD,
+		[8] = 0xCD,
+		[4] = 0x95,
+		[12] = 0x8D,
+		[5] = 0x94,
+		[9] = 0xCC,
+		[7] = 0xEC,
+		[3] = 0xB4,
+		[11] = 0xAC,
+		[6] = 0xED,
+		[2] = 0xB5,
+	};
+	skinObjectPos = 37;
+	skinHeader = 0x0E
+	dispellHeader = 0x130;
+	skinH = 0xD4;
+	skinHPos = 32;
+  header = 0x0E
+end
 
--- function SendSkinPacket(mObject, skinPB, networkID)
--- 	if (string.find(GetGameVersion(), 'Releases/5.24') ~= nil) then
--- 		local mP = CLoLPacket(0x3A)
--- 		mP.vTable = 0xF351B0;
--- 		mP:EncodeF(myHero.networkID)
--- 		for I = 1, string.len(mObject) do
--- 			mP:Encode1(string.byte(string.sub(mObject, I, I)))
--- 		end
--- 		for I = 1, (16 - string.len(mObject)) do
--- 			mP:Encode1(0x00)
--- 		end
--- 		mP:Encode4(0x0000000E)
--- 		mP:Encode4(0x0000000F)
--- 		mP:Encode2(0x0000)
--- 		if (skinPB == nil) then
--- 			mP:Encode4(0x82828282)
--- 		else
--- 			mP:Encode1(skinPB)
--- 			for I = 1, 3 do
--- 				mP:Encode1(skinH)
--- 			end
--- 		end
--- 		mP:Encode4(0x00000000)
--- 		mP:Encode4(0x00000000)
--- 		mP:Encode1(0x00)
--- 		mP:Hide()
--- 		RecvPacket(mP)
--- 	end
--- end
+function SendSkinPacket(mObject, skinPB, networkID)
+	if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
+		local mP = CLoLPacket(header);
+
+			mP.vTable = 0xFB7464;
+
+		mP:EncodeF(myHero.networkID);
+    mP:Encode1(0x00);
+		for I = 1, string.len(mObject) do
+			mP:Encode1(string.byte(string.sub(mObject, I, I)));
+		end;
+
+		for I = 1, (14 - string.len(mObject)) do
+			mP:Encode1(0x00);
+		end;
+
+    mP:Encode2(0x0000);
+		mP:Encode4(0x0000000D);
+		mP:Encode4(0x0000000F);
+    mP:Encode4(0x00000000);
+    mP:Encode2(0x0000);
+    
+				if (skinnedObject) then
+			mP:Encode4(0xD5D5D5D5);
+		else
+			mP:Encode1(skinPB);
+			for I = 1, 3 do
+				mP:Encode1(skinH);
+			end;
+		end
+		mP:Hide();
+    RecvPacket(mP);
+	end
+end
 
 --=======END========--
 -- Developers: 
