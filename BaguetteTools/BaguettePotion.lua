@@ -1,3 +1,10 @@
+--[[
+
+You can use Buff too, especialy for re-launch a potion
+
+]]--
+
+
 -- Function to send chat logs.
 function EnvoiMessage(msg)
 	PrintChat("<font color=\"#e74c3c\"><b>[BaguettePotion]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
