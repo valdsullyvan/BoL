@@ -6,7 +6,7 @@ Script by spyk for Malzahar.
 
 - Github link : https://github.com/spyk1/BoL/blob/master/BaguetteMalzahar/BaguetteMalzahar.lua
 
-- Forum Thread : http://forum.botoflegends.com/
+- Forum Thread : http://forum.botoflegends.com/topic/89837-beta-baguette-malzahar/
 
 ]]--
 
