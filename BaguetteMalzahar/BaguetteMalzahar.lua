@@ -38,7 +38,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.11"
+local version = "0.12"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -159,7 +159,7 @@ function OnLoad()
 			Param.draw.spell:addParam("Qdraw","Display (Q) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("Wdraw","Display (W) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("Edraw","Display (E) Spell draw?", SCRIPT_PARAM_ONOFF, true)
-			Param.draw.spell:addParam("PoissonDraw","Display (E) Damages prediction draw?", SCRIPT_PARAM_ONOFF, true)
+			Param.draw.spell:addParam("PoisonDraw","Display (E) Damages prediction draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("Rdraw","Display (R) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
 	--
@@ -562,7 +562,7 @@ function OnDraw()
 		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.Edraw then 
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, 0xFFFFFFFF)
 		end
-		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.PoissonDraw then 
+		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.PoisonDraw then 
 			for i, enemy in ipairs(GetEnemyHeroes()) do
 				if enemy and ValidTarget(enemy) then
 					DrawEIndicator(enemy)
@@ -649,7 +649,7 @@ function DrawEIndicator(enemy)
     if not SPos then return end
     local barwidth = EPos.x - SPos.x
     local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
-    DrawRectangle(math.floor(Position), math.floor(SPos.y + 8), 5, 30, ARGB(255,124,22,158))
+    DrawRectangle(math.floor(Position), math.floor(SPos.y + 8), 2, 15, ARGB(255,124,22,158))
 end
  
 function DrawKillable()
