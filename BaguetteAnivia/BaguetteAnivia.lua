@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.554"
+local version = "0.56"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : ZedR GapCloser, Configurable GapCloser.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : ZedR GapCloser, Configurable GapCloser, SionR, VayneE wall cast.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -215,7 +215,10 @@ function OnLoad()
 			if Teleport then Param.exploits.egg:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
 			if Teleport then Param.exploits.egg:addParam("n1", "Carefull, it's an bug you can be banned,", SCRIPT_PARAM_INFO,"") end
 			if Teleport then Param.exploits.egg:addParam("n2", "if you use it too many times in the same game.", SCRIPT_PARAM_INFO,"") end
-	--
+			--
+			Param.exploits:addParam("EVayne", "Enable E Vayne Wall to stun casting?", SCRIPT_PARAM_ONOFF, false)
+			Param.exploits:addParam("RSion", "Enable R Sion block with wall?", SCRIPT_PARAM_ONOFF, false)
+			--
 	Param:addSubMenu("Drawing", "drawing")
 		Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
 		Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
@@ -612,6 +615,11 @@ function SpellFunc()
 			end
 		end
 	end
+
+	if Param.exploits.SionR then
+		SionUlti()
+	end
+
 end
 
 function KeyPermaShow()
@@ -1138,7 +1146,23 @@ function OnDraw()
 	end
 end
 
+function SionUlti()
+	if Param.exploits.RSion then
+		if UnitHaveBuff("SionR", unit) and GetDistanceSqr(unit) <= 715*715 then
+		       CastSpell(_W, unit.x+300, unit.z+300)
+		end
+	end
+end
+
 function OnProcessSpell(unit, spell)
+
+	if Param.exploits.EVayne then
+		if spell.name == "VayneCondemn" then
+	 		if unit.team == myHero.team and GetDistanceSqr(unit) <= 715*715 then
+				CastSpell(_W, spell.target.x-250, spell.target.z-250)
+			end
+		end
+	end
 	if Param.miscellaneous.Wstop then
 		if unit.team ~= myHero.team then
 	   	 	if isAChampToInterrupt[spell.name] and GetDistanceSqr(unit) <= 715*715 then
@@ -1555,7 +1579,7 @@ function AutoEggTp()
 end
 
 function AutoLvlSpell()
- 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+ 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 and Param.miscellaneous.levelspell.EnableAutoLvlSpell then
     	autoLevelSetSequence(levelSequence)
     	Last_LevelSpell = os.clock()
   	end
