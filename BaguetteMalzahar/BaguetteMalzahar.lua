@@ -134,7 +134,7 @@ function OnLoad()
 		Param.AutoKill:addParam("n3", "Don't use him everytime to get much powerness with the script. Like, only when you are running to an enemy to kill him.", SCRIPT_PARAM_INFO, "")
 
 	--
-	Param:addSubMenu("Miscellaneous because Swag!", "miscellaneous")
+	Param:addSubMenu("Miscellaneous", "miscellaneous")
 	--
 		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Lvl Spell", "levelspell") end
 			if VIP_USER then Param.miscellaneous.levelspell:addParam("EnableAutoLvlSpell", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, false) end
@@ -465,7 +465,7 @@ function WaveClear()
 				if GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY and (minion.maxHealth >= canonheal) and Param.Clear.WaveClear.UseE then
 					CastSpell(_E, minion)
 				elseif GetDistance(minion) <= SkillW.range and myHero:CanUseSpell(_W) == READY and (minion.maxHealth >= canonheal) and Param.Clear.WaveClear.UseW then
-					CastSpell(_W, minion)
+					CastSpell(_W, minion.x, minion.z)
 				elseif GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and (minion.maxHealth >= canonheal) and Param.Clear.WaveClear.UseQ then
 					CastSpell(_Q, minion.x, minion.z)
 				end 
@@ -473,9 +473,9 @@ function WaveClear()
 				if Param.Clear.WaveClear.UseE and GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
 					CastSpell(_E, minion)
 				elseif Param.Clear.WaveClear.UseW and GetDistance(minion) <= SkillW.range and myHero:CanUseSpell(_W) == READY then
-					CastSpell(_W, minion)
+					CastSpell(_W, minion.x, minion.z)
 				elseif Param.Clear.WaveClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
-					CastSpell(_Q, minion)
+					CastSpell(_Q, minion.x, minion.z)
 				end
 			end
 		end
@@ -937,30 +937,31 @@ isAGapcloserToDo = {
 	['DianaTeleport'] = {true, Champ = 'Diana', spellKey = 'R'}
 }
 
-function Close()
-	DelayAction(function()
-		if myHero:CanUseSpell(_E) == READY and Param.miscellaneous.GapCloser.UseE then
-			LogicE(unit)
-		end
-	end, 0.01)
-	if myHero:CanUseSpell(_W) == READY and Param.miscellaneous.GapCloser.UseW then
-		LogicW(unit)
-	end
-	DelayAction(function()
-		if myHero:CanUseSpell(_R) == READY then
-			LogicR(unit)
-		end
-	end, 0.10)
-end
-
 function OnProcessSpell(unit, spell)
 	if Param.miscellaneous.GapCloser.Enable then
 		if unit.team ~= myHero.team and myHero:CanUseSpell(_R) == READY then
 			if isAGapcloserToDo[spell.name] and unit.health < 2300 then
 				if spell.name ==  "ZedR" then
+					if myHero:CanUseSpell(_W) == READY and Param.miscellaneous.GapCloser.UseW then
+						CastSpell(_W, myHero.x, myHero.z)
+					end
+					if myHero:CanUseSpell(_Q) == READY then
+						DelayAction(function()
+							CastSpell(_Q, myHero.x-50, myHero.z-50)
+						end, 0.50)
+					end
 					DelayAction(function()
-							Close()
-					end, 1)
+						if myHero:CanUseSpell(_E) == READY and Param.miscellaneous.GapCloser.UseE then
+							DelayAction(function()
+								LogicE(unit)
+							end, 0.05)
+						end
+						if myHero:CanUseSpell(_R) == READY then
+							DelayAction(function()
+								LogicR(unit)
+							end, 0.20)
+						end
+					end, 0.80)
 				end
 
 				if spell.name ~= "ZedR" then
