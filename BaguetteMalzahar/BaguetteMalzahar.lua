@@ -38,7 +38,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.10"
+local version = "0.11"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -73,7 +73,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteMalzahar]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : RELEASE :o :o :o ")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : JungleClear Fixed, E damages pred draw, Humanized R GapCloser")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -159,6 +159,7 @@ function OnLoad()
 			Param.draw.spell:addParam("Qdraw","Display (Q) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("Wdraw","Display (W) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("Edraw","Display (E) Spell draw?", SCRIPT_PARAM_ONOFF, true)
+			Param.draw.spell:addParam("PoissonDraw","Display (E) Damages prediction draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("Rdraw","Display (R) Spell draw?", SCRIPT_PARAM_ONOFF, true)
 			Param.draw.spell:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
 	--
@@ -513,11 +514,11 @@ function JungleClear()
 			for i, jungleMinion in pairs(jungleMinions.objects) do
 				if jungleMinion ~= nil then
 					if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
-						CastSpell(_E, minion)
+						CastSpell(_E, jungleMinion)
 					elseif Param.Clear.JungleClear.UseW and GetDistance(jungleMinion) <= SkillW.range and myHero:CanUseSpell(_W) == READY then 
-						CastSpell(_W, minion)
+						CastSpell(_W, jungleMinion.x, jungleMinion.z)
 					elseif Param.Clear.JungleClear.UseQ and GetDistance(jungleMinion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
-						CastSpell(_Q, minion)
+						CastSpell(_Q, jungleMinion.x, jungleMinion.z)
 					end
 				end
 			end
@@ -560,6 +561,13 @@ function OnDraw()
 		end
 		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.Edraw then 
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, 0xFFFFFFFF)
+		end
+		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.PoissonDraw then 
+			for i, enemy in ipairs(GetEnemyHeroes()) do
+				if enemy and ValidTarget(enemy) then
+					DrawEIndicator(enemy)
+				end
+			end
 		end
 		if myHero:CanUseSpell(_R) == READY and Param.draw.spell.Rdraw then
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, 0xFFFFFFFF)
@@ -631,7 +639,18 @@ function DrawIndicator(enemy)
     local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
     DrawText("=", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
     DrawText("HP: "..math.floor(enemy.health - damage), 12, math.floor(SPos.x + 25), math.floor(SPos.y - 15), (enemy.health - damage) > 0 and ARGB(255, 0, 255, 0) or  ARGB(255, 255, 0, 0))
-end 
+end
+
+function DrawEIndicator(enemy)
+	local Edmg = CalcSpellDamage(enemy)
+	Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+    local damage = Edmg
+    local SPos, EPos = GetEnemyHPBarPos(enemy)
+    if not SPos then return end
+    local barwidth = EPos.x - SPos.x
+    local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
+    DrawRectangle(math.floor(Position), math.floor(SPos.y + 8), 5, 30, ARGB(255,124,22,158))
+end
  
 function DrawKillable()
 	for i = 1, heroManager.iCount, 1 do
@@ -779,13 +798,12 @@ function KeyPermaShow()
 		if HarassKey then
 			Harass(Target)
 			Param.n5 = 3
-		elseif LaneClearKey then
-			LaneClear()
-			Param.n5 = 4
-		elseif WaveClearKey then
+		end
+		if WaveClearKey then
 			WaveClear()
 			Param.n5 = 5
-		elseif JungleClearKey then
+		end
+		if JungleClearKey then
 			JungleClear()
 			Param.n5 = 6
 		end
@@ -941,7 +959,7 @@ function OnProcessSpell(unit, spell)
 	if Param.miscellaneous.GapCloser.Enable then
 		if unit.team ~= myHero.team and myHero:CanUseSpell(_R) == READY then
 			if isAGapcloserToDo[spell.name] and unit.health < 2300 then
-				if spell.name ==  "ZedR" then
+				if spell.name ==  "ZedR" and spell.target and spell.target.networkID == myHero.networkID then
 					if myHero:CanUseSpell(_W) == READY and Param.miscellaneous.GapCloser.UseW then
 						CastSpell(_W, myHero.x, myHero.z)
 					end
@@ -969,7 +987,7 @@ function OnProcessSpell(unit, spell)
 					if myHero:CanUseSpell(_E) == READY and Param.miscellaneous.GapCloser.UseE then
 						LogicE(unit)
 					end
-					end, 0.01)
+					end, 0.05)
 					if myHero:CanUseSpell(_W) == READY and Param.miscellaneous.GapCloser.UseW then
 						LogicW(unit)
 					end
@@ -977,7 +995,7 @@ function OnProcessSpell(unit, spell)
 					if myHero:CanUseSpell(_R) == READY then
 						LogicR(unit)
 					end
-					end, 0.10)
+					end, 0.20)
 				end
 			end
 		end
