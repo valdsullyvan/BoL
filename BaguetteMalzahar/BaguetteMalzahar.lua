@@ -38,7 +38,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.121"
+local version = "0.13"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -73,7 +73,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteMalzahar]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Auto LvL Spell fixed for the update.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Auto LvL Spell fixed for the update + HitChance prediction re-ajusted and HitChance chooser added.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -229,6 +229,14 @@ function PredictionOrbWalkSwitch()
 		EnvoiMessage("No prediction loaded.")
 	end
 
+	if Param.prediction.n1 == 1 then Param.Combo:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 2, 1, 5) end
+	if Param.prediction.n1 == 2 then Param.Combo:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 0, 0, 3) end
+	if Param.prediction.n1 == 3 then Param.Combo:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 1, 0, 3) end
+
+	if Param.prediction.n1 == 1 then Param.Harass:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 2, 1, 5) end
+	if Param.prediction.n1 == 2 then Param.Harass:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 0, 0, 3) end
+	if Param.prediction.n1 == 3 then Param.Harass:addParam("HitChance", "Set (Q) HitChance" , SCRIPT_PARAM_SLICE, 1, 0, 3) end
+
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
 	elseif Param.orbwalker.n1 == 1 then
@@ -338,9 +346,7 @@ function LoadHPred()
 		require("HPrediction")
 		EnvoiMessage("Succesfully loaded HPred")
 		HPred = HPrediction()
-		HP_Q = HPSkillshot({type = "DelayLine", delay = 0.250, range = 1075, width = 110, speed = 850})
-		HP_W = HPSkillshot({type = "DelayLine", delay = 0.25, range = 1000, width = 100, speed = math.huge})
-		HP_R = HPSkillshot({type = "DelayLine", delay = 0.100, range = 625, width = 350, speed = math.huge})
+		HP_Q = HPSkillshot({type = "DelayLine", delay = 0.250, range = 900, width = 400, speed = 850})
 		UseHP = true
 	else
 		local ToUpdate = {}
@@ -692,7 +698,7 @@ function DrawKillable()
 end
 
 function Skills()
-	SkillQ = { name = "AlZaharCalloftheVoid", range = 900, delay = 0.250, speed = 850, width = 110, ready = false }
+	SkillQ = { name = "AlZaharCalloftheVoid", range = 900, delay = 0.250, speed = 850, width = 400, ready = false }
 	SkillW = { name = "AlZaharNullZone", range = 800, delay = 0, speed = math.huge, width = 350, ready = false }
 	SkillE = { name = "AlZaharMaleficVisions", range = 650, delay = 0.25, speed = math.huge, width = nil, ready = false }
 	SkillR = { name = "AlZaharNetherGrasp", range = 700, delay = 0.100, speed = math.huge, width = 350, ready = false }
@@ -701,19 +707,34 @@ end
 function LogicQ(unit)
 	if ultTimer > CurrentTimeInMillis() then return end
 	if target ~= nil and GetDistance(target) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+		if ComboKey or HarassKey then
+			if ComboKey then
+				ChanceHit = Param.Combo.HitChance
+			elseif HarassKey then
+				ChanceHit = Param.Harass.HitChance
+			end
+		else 
+			if Param.prediction.n1 == 1 then
+				ChanceHit = 2
+			elseif Param.prediction.n1 == 2 then
+				ChanceHit = 0
+			elseif Param.prediction.n1 == 3 then
+				ChanceHit = 1
+			end
+		end
 		if Param.prediction.n1 == 1 then
 			CastPosition,  HitChance,  Position = VP:GetLineCastPosition(target, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false)
-			if HitChance >= 0 then
+			if HitChance >= ChanceHit then
 				CastSpell(_Q, CastPosition.x, CastPosition.z)
 			end
 		elseif Param.prediction.n1 == 2 then
 			local CastPosition, HitChance = HPred:GetPredict(HP_Q, target, myHero)
-			if HitChance > 0 then
+			if HitChance > ChanceHit then
 				CastSpell(_Q, CastPosition.x, CastPosition.z)
 			end
 		elseif Param.prediction.n1 == 3 then
 			CastPosition, HitChance, PredPos = SP:Predict(target, SkillQ.range, SkillQ.speed, SkillQ.delay, SkillQ.width, false, myHero)
-			if HitChance >= 1 then
+			if HitChance >= ChanceHit then
 				CastSpell(_Q, target)
 			end
 		end
