@@ -38,7 +38,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.12"
+local version = "0.121"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -73,7 +73,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteMalzahar]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : JungleClear Fixed, E damages pred draw, Humanized R GapCloser")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Auto LvL Spell fixed for the update.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -877,14 +877,14 @@ end
 
 _G.LevelSpell = function(id)
 	if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
-		local offsets = { 
+		local offsets = {
 		[_Q] = 0x41,
 		[_W] = 0xFC,
 		[_E] = 0x64,
 		[_R] = 0xAA,
 		}
 		local p = CLoLPacket(0x0153)
-		p.vTable = 0xFE9264
+		p.vTable = 0xF700D0
 		p:EncodeF(myHero.networkID)
 		p:Encode1(offsets[id])
 		for i = 1, 4 do p:Encode1(0xF7) end
