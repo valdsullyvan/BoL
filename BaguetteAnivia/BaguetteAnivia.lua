@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.562"
+local version = "0.563"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Fixed JungleClear if you got the same key as WaveClear and VayneE wall should work perfectly now.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Look at the permashow ^^.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -204,7 +204,7 @@ function OnLoad()
 		Param.miscellaneous:addParam("Wstop", "Use (W) Spell to stop spells during casting?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("WdansR", "Cast (W) into (R)?", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("EGel", "Use (E) Spell only if enemy is frozen?", SCRIPT_PARAM_ONOFF, true)
-		Param.miscellaneous:addParam("ManualR","Automaticly disable R if no target in (Heroes, Minions, Jungle)?", SCRIPT_PARAM_ONOFF , true)
+		Param.miscellaneous:addParam("ManualR","Disable R if nothing in :", SCRIPT_PARAM_ONOFF , true)
 		Param.miscellaneous:permaShow("ManualR")
 		--
 		Param:addSubMenu("Exploits", "exploits")
@@ -415,7 +415,6 @@ function LoadNEBOrb()
 function LoadSACR()
 	if _G.Reborn_Initialised then
 	elseif _G.Reborn_Loaded then
-		DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 		EnvoiMessage("Loaded SAC:R")
 	else
 		DelayAction(function()EnvoiMessage("Failed to Load SAC:R")end, 7)
