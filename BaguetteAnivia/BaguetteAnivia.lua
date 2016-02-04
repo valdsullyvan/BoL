@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.561"
+local version = "0.562"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Auto LvL spell fixed for the update.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Fixed JungleClear if you got the same key as WaveClear and VayneE wall should work perfectly now.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -636,13 +636,16 @@ function KeyPermaShow()
 		if HarassKey then
 			Harass(Target)
 			Param.n5 = 3
-		elseif LaneClearKey then
+		end
+		if LaneClearKey then
 			LaneClear()
 			Param.n5 = 4
-		elseif WaveClearKey then
+		end
+		if WaveClearKey then
 			WaveClear()
 			Param.n5 = 5
-		elseif JungleClearKey then
+		end
+		if JungleClearKey then
 			JungleClear()
 			Param.n5 = 6
 		end
@@ -901,7 +904,7 @@ function DetectQ()
 		QZone = 190
 	end
 
-	if LaneClearKey or JungleClearKey then 
+	if LaneClearKey then
 		for i, minion in ipairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
 				if GetDistance(minion, QMissile) <= QZone then
@@ -915,6 +918,18 @@ function DetectQ()
 		for i, minion in ipairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
 				if (minion.maxHealth >= ((CurrentTimeInMillis()/6000)+700)) and GetDistance(minion, QMissile) <= QZone then
+					CastSpell(_Q)
+				elseif GetDistance(minion, QMissile) <= QZone then
+					CastSpell(_Q)
+				end
+			end
+		end
+	end
+
+	if JungleClearKey then
+		for i, jungleMinion in pairs(jungleMinions.objects) do
+			if ValidTarget(jungleMinion) and jungleMinion.visible and QMissile and not jungleMinion.dead then
+				if GetDistance(jungleMinion, QMissile) <= QZone then
 					CastSpell(_Q)
 				end
 			end
@@ -1158,8 +1173,10 @@ function OnProcessSpell(unit, spell)
 
 	if Param.exploits.EVayne then
 		if spell.name == "VayneCondemn" then
-	 		if unit.team == myHero.team and GetDistanceSqr(unit) <= 715*715 then
-				CastSpell(_W, spell.target.x-250, spell.target.z-250)
+	 		if unit.team == myHero.team and GetDistanceSqr(unit) <= 750*750 then
+	 			DelayAction(function()
+					CastSpell(_W, spell.target.x-250, spell.target.z-250)
+				end, 0.10)
 			end
 		end
 	end
