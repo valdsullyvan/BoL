@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.563"
+local version = "0.564"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Look at the permashow ^^.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Failed on VayneCondemn again.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -1173,8 +1173,10 @@ function OnProcessSpell(unit, spell)
 	if Param.exploits.EVayne then
 		if spell.name == "VayneCondemn" then
 	 		if unit.team == myHero.team and GetDistanceSqr(unit) <= 750*750 then
+	 			local Xtarg = spell.target.x-250
+	 			local Ztarg = spell.target.z-250
 	 			DelayAction(function()
-					CastSpell(_W, spell.target.x-250, spell.target.z-250)
+					CastSpell(_W, Xtarg, Ztarg)
 				end, 0.10)
 			end
 		end
