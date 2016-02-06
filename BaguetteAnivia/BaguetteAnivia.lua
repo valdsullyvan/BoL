@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.564"
+local version = "0.5641"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -1173,8 +1173,8 @@ function OnProcessSpell(unit, spell)
 	if Param.exploits.EVayne then
 		if spell.name == "VayneCondemn" then
 	 		if unit.team == myHero.team and GetDistanceSqr(unit) <= 750*750 then
-	 			local Xtarg = spell.target.x-350
-	 			local Ztarg = spell.target.z-350
+	 			local Xtarg = spell.target.x+350
+	 			local Ztarg = spell.target.z+350
 	 			DelayAction(function()
 					CastSpell(_W, Xtarg, Ztarg)
 				end, 0.10)
