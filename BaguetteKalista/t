@@ -953,8 +953,10 @@ function AutoEMob()
 					end 
 				end
 			end
-			if ccount > 1 and not TargetHaveBuff("summonerexhaust", myHero) then
-				CastSpell(_E)
+			if not TargetHaveBuff("summonerexhaust", myHero) then
+				if ccount > 1 then
+					CastSpell(_E)
+				end
 			elseif TargetHaveBuff("summonerexhaust", myHero) then
 				if ccount > 1 then
 					CastSpell(_E)
@@ -1174,21 +1176,14 @@ function OnDraw()
 								D3E = D1 + ((GetStacks(jungleMinion)-1) * D2)
 								local D3E1 = math.floor(D3E/jungleMinion.health*100)
 
-								if Param.Draw.EDraw.Mob2 then
-									-- AA Remaining
-								end
 
-								if not Param.Draw.EDraw.Mob2 then
-									if D3E1 < 80 then
-										DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
-									elseif D3E1 >= 80 and D3E1 < 100 then
-										DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-									elseif D3E1 >= 100 then
-									DrawText3D("100% !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-									end
-								elseif Param.Draw.EDraw.Mob2 then
-
-								else return end
+								if D3E1 < 80 then
+									DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+								elseif D3E1 >= 80 and D3E1 < 100 then
+									DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+								elseif D3E1 >= 100 then
+								DrawText3D("100% !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+							end
 							end
 						end
 					end
@@ -1218,22 +1213,22 @@ function AutoLvlSpell()
 end
 
 _G.LevelSpell = function(id)
-	if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
-		local offsets = {
-		[_Q] = 0x41,
-		[_W] = 0xFC,
-		[_E] = 0x64,
-		[_R] = 0xAA,
-		}
-		local p = CLoLPacket(0x0153)
-		p.vTable = 0xF700D0
-		p:EncodeF(myHero.networkID)
-		p:Encode1(offsets[id])
-		for i = 1, 4 do p:Encode1(0xF7) end
-		for i = 1, 4 do p:Encode1(0xAF) end
-		p:Encode1(0x8F)
-		for i = 1, 4 do p:Encode1(0xA5) end
-		SendPacket(p)
+	if (string.find(GetGameVersion(), 'Releases/6.3') ~= nil) then
+		 local offsets = { 
+		  [_Q] = 0x8A,
+		  [_W] = 0xE1,
+		  [_E] = 0x23,
+		  [_R] = 0x14,
+		  }
+		  local p = CLoLPacket(0x00E7)
+		  p.vTable = 0xF9C650
+		  p:EncodeF(myHero.networkID)
+		  p:Encode1(0x9B)
+		  p:Encode1(offsets[id])
+		  for i = 1, 4 do p:Encode1(0x2D) end
+		  for i = 1, 4 do p:Encode1(0x6A) end
+		  for i = 1, 4 do p:Encode1(0x0F) end
+		  SendPacket(p)
 	end
 end
 
