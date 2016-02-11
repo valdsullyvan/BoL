@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.5641"
+local version = "0.5642"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +94,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Failed on VayneCondemn again.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Auto LvL Spell.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -1604,21 +1604,21 @@ function AutoLvlSpell()
 end
 
 _G.LevelSpell = function(id)
-	if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
-		local offsets = {
-		[_Q] = 0x41,
-		[_W] = 0xFC,
-		[_E] = 0x64,
-		[_R] = 0xAA,
+	if (string.find(GetGameVersion(), 'Releases/6.3') ~= nil) then
+		local offsets = { 
+		[_Q] = 0x8A,
+		[_W] = 0xE1,
+		[_E] = 0x23,
+		[_R] = 0x14,
 		}
-		local p = CLoLPacket(0x0153)
-		p.vTable = 0xF700D0
+		local p = CLoLPacket(0x00E7)
+		p.vTable = 0xF9C650
 		p:EncodeF(myHero.networkID)
+		p:Encode1(0x9B)
 		p:Encode1(offsets[id])
-		for i = 1, 4 do p:Encode1(0xF7) end
-		for i = 1, 4 do p:Encode1(0xAF) end
-		p:Encode1(0x8F)
-		for i = 1, 4 do p:Encode1(0xA5) end
+		for i = 1, 4 do p:Encode1(0x2D) end
+		for i = 1, 4 do p:Encode1(0x6A) end
+		for i = 1, 4 do p:Encode1(0x0F) end
 		SendPacket(p)
 	end
 end
