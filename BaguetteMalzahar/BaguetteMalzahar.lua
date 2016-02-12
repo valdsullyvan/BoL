@@ -38,7 +38,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.132"
+local version = "0.1321"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -568,7 +568,7 @@ function OnDraw()
 		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.Edraw then 
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, 0xFFFFFFFF)
 		end
-		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.PoisonDraw then 
+		if Param.draw.spell.PoisonDraw then 
 			for i, enemy in ipairs(GetEnemyHeroes()) do
 				if enemy and ValidTarget(enemy) then
 					DrawEIndicator(enemy)
@@ -643,7 +643,7 @@ function DrawIndicator(enemy)
     if not SPos then return end
     local barwidth = EPos.x - SPos.x
     local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
-    DrawText("=", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
+    DrawText(" | ", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
     DrawText("HP: "..math.floor(enemy.health - damage), 12, math.floor(SPos.x + 25), math.floor(SPos.y - 15), (enemy.health - damage) > 0 and ARGB(255, 0, 255, 0) or  ARGB(255, 255, 0, 0))
 end
 
