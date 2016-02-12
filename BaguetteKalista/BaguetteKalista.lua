@@ -26,6 +26,8 @@ function CurrentTimeInMillis()
 	return (os.clock() * 1000);
 end
 
+-- Misc
+local bind = 0
 -- Evadeee 
 -- local Evadeee = 0
 -- Immune check
@@ -426,6 +428,12 @@ function OnLoad()
 
 	-------------------MISC|OPTIONS-----------------------------------
 	Param:addSubMenu("Miscellaneous", "Misc")
+		Param.Misc:addSubMenu("(R) Saver Settings", "R")
+			Param.Misc.R:addParam("Enable", "Enable this feature :", SCRIPT_PARAM_ONOFF, true)
+			Param.Misc.R:addParam("n1Blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.R:addParam("Life", "Auto ult if HP < X :", SCRIPT_PARAM_SLICE, 15, 0, 100)
+			Param.Misc.R:addParam("n2Blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.R:addParam("ninf", "Anti Ults (Annie/Malph) should come soon !", SCRIPT_PARAM_INFO, "")
 		if VIP_USER then Param.Misc:addSubMenu("Auto LVL Spell :", "LVL") end
 			if VIP_USER then Param.Misc.LVL:addParam("Enable", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
 			if VIP_USER then Param.Misc.LVL:addParam("Combo", "LVL Spell Order :", SCRIPT_PARAM_LIST, 1, {"E > W > Q (Max E)"}) end
@@ -442,6 +450,8 @@ function OnLoad()
 			if VIP_USER then Param.Misc.Starter:addParam("Doran", "Buy a doran blade :", SCRIPT_PARAM_ONOFF, true) end
 			if VIP_USER then Param.Misc.Starter:addParam("Pots", "Buy a potion :", SCRIPT_PARAM_ONOFF, true) end
 			if VIP_USER then Param.Misc.Starter:addParam("Trinket", "Buy a Green Trinket :", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.Misc.Starter:addParam("n1blank", "", SCRIPT_PARAM_INFO, "") end
+			if VIP_USER then Param.Misc.Starter:addParam("TrinketBleu", "Buy a Blue Trinket at lvl.9 :", SCRIPT_PARAM_INFO, true) end
 		Param.Misc:addSubMenu("Sentinel Trick :", "WTrick")
 			Param.Misc.WTrick:addParam("Drake", "Cast (W) Spell trick on Drake?", SCRIPT_PARAM_ONOFF, false)
 			Param.Misc.WTrick:addParam("Baron", "Cast (W) Spell trick on Baron?", SCRIPT_PARAM_ONOFF, false)
@@ -538,6 +548,12 @@ function CustomLoad()
 	end
 
 	DelayAction(function()AutoBuy()end, 3)
+
+	DelayAction(function() 
+		if bind == 0 then 
+			EnvoiMessage("You should bind with an ally!")
+		end
+	end, 300)
 
 end
 
@@ -667,6 +683,11 @@ function Keys()
 			LastHit()
 		end
 
+		if not _G.AutoCarry.Keys.AutoCarry and AAON == 1 then
+			_G.AutoCarry.Keys.LaneClear = false
+			AAON = 0
+		end
+
 	elseif Param.orbwalker.n1 == 1 and _G.SxOrbMenu then
 
 		if _G.SxOrbMenu.AutoCarry then 
@@ -679,6 +700,11 @@ function Keys()
 			LastHit()
 		end
 
+		if not _G.SxOrbMenu.AutoCarry and AAON == 1 then
+			_G.SxOrbMenu.LaneClear = false
+			AAON = 0
+		end
+
 	elseif Param.orbwalker.n1 == 2 and _G["BigFatOrb_Loaded"] == true then
 
 		if _G["BigFatOrb_Mode"] == 'Combo' then
@@ -689,6 +715,11 @@ function Keys()
 			LastHit()
 		elseif _G["BigFatOrb_Mode"] == 'LaneClear' then
 			LaneClear()
+		end
+
+		if not _G["BigFatOrb_Mode"] == 'Combo' and AAON == 1 then
+		 	_G["BigFatOrb_Mode"] = 'Combo'
+		 	AAON = 0
 		end
 
 	elseif Param.orbwalker.n1 == 3 and _G.NebelwolfisOrbWalkerLoaded then
@@ -781,14 +812,26 @@ end
 function OutOfAA()
 	for _, unit in pairs(GetEnemyHeroes()) do
 		if GetDistance(unit) < myHero.range+myHero.boundingRadius+50 and not unit.dead then
-			if Param.orbwalker.n1 == 3 and _G.NebelwolfisOrbWalkerLoaded then
+			if _G.AutoCarry and _G.AutoCarry.Keys and _G.Reborn_Loaded ~= nil then
+				_G.AutoCarry.Keys.LaneClear = false
+			elseif Param.orbwalker.n1 == 1 and _G.SxOrbMenu then
+				_G.SxOrbMenu.LaneClear = false
+			elseif Param.orbwalker.n1 == 2 and _G["BigFatOrb_Loaded"] == true then
+				_G["BigFatOrb_Mode"] = 'Combo'
+			elseif Param.orbwalker.n1 == 3 and _G.NebelwolfisOrbWalkerLoaded then
 				_G.NebelwolfisOrbWalker.Config.k.LaneClear = false
 			end
 		elseif GetDistance(unit) > myHero.range+myHero.boundingRadius+50 and AAON == 0 or GetDistance(unit) < myHero.range+myHero.boundingRadius+50 and unit.dead then
-			if Param.orbwalker.n1 == 3 and _G.NebelwolfisOrbWalkerLoaded then
+			if _G.AutoCarry and _G.AutoCarry.Keys and _G.Reborn_Loaded ~= nil then
+				_G.AutoCarry.Keys.LaneClear = true
+			elseif Param.orbwalker.n1 == 1 and _G.SxOrbMenu then
+				_G.SxOrbMenu.LaneClear = true
+			elseif Param.orbwalker.n1 == 2 and _G["BigFatOrb_Loaded"] == true then
+				_G["BigFatOrb_Mode"] = 'LaneClear'
+			elseif Param.orbwalker.n1 == 3 and _G.NebelwolfisOrbWalkerLoaded then
 				_G.NebelwolfisOrbWalker.Config.k.LaneClear = true
-				AAON = 1
 			end
+			AAON = 1
 		end
 	end
 end
@@ -1101,13 +1144,20 @@ function CheckShield()
 
 end
 
-function OnUpdateBuff(Unit, buff, Stacks)
+function OnUpdateBuff(unit, buff, Stacks)
    if buff.name == "kalistaexpungemarker" then
       unitStacks[Unit.networkID] = Stacks
    end
 end
  
-function OnRemoveBuff(Unit, buff)
+function OnRemoveBuff(unit, buff)
+	if buff.name == "recall" and unit.isMe then
+		if myHero.level >= 9 then
+			if Param.Misc.Starter.TrinketBleu then
+				BuyItem(3363)
+			end
+		end
+	end
     if buff.name == "kalistaexpungemarker" then
       unitStacks[Unit.networkID] = nil
     end
@@ -1118,6 +1168,12 @@ function OnRemoveBuff(Unit, buff)
 end
 
 function OnApplyBuff(source, unit, buff)
+	
+	if buff.name == "kalistavobindally" and unit.team == myHero.team and unit.name ~= "Disabled member" then
+		EnvoiMessage("Succesfully binded with : "..unit.name.." - "..unit.charName)
+		bind = unit.name
+	end
+
 	if buff.name == "s5tooltip_dragonslayerbuffv1" and unit.isMe then
 		Dragons = 1
 	elseif buff.name == "s5tooltip_dragonslayerbuffv2" and unit.isMe then
@@ -1129,6 +1185,7 @@ function OnApplyBuff(source, unit, buff)
 	elseif buff.name == "s5tooltip_dragonslayerbuffv5" and unit.isMe then
 		Dragons = 5
 	end
+
 	if buff.name == "DarkBindingMissile" and unit.isMe and Param.Misc.Items.QssRoot then
 		QSS()
 	end
@@ -1147,6 +1204,7 @@ function OnApplyBuff(source, unit, buff)
 	if buff.name == "Root" and unit.isMe and Param.Mics.Items.QssRoot then
 		QSS()
 	end
+
 	if TargetHaveBuff("rocketgrab2", unit) and Param.Misc.Blitz.Blitz then
 		if unit.team ~= myHero.team then
 			if GetDistance(unit) > Param.Misc.Blitz.BlitzRangeMin and GetDistance(unit) < Param.Misc.Blitz.BlitzRangeMax then
@@ -1154,6 +1212,7 @@ function OnApplyBuff(source, unit, buff)
 			end
 		end
 	end
+
 	if TargetHaveBuff("tamhkenchdevoured", unit) and Param.Misc.Blitz.Tahm then
 		if unit.team ~= myHero.team then
 			if GetDistance(unit) > Param.Misc.Blitz.TahmRangeMin and GetDistance(unit) < Param.Misc.Blitz.TahmRangeMax then
@@ -1164,6 +1223,13 @@ function OnApplyBuff(source, unit, buff)
 end
 
 function OnProcessSpell(unit, spell)
+	if spell.target then 
+		if spell.target.name ~= nil and spell.target.name == bind then
+			if spell.target.health < ((spell.target.maxHealth * Param.Misc.R.Life) / 100 ) then
+				CastSpell(_R)
+			end
+		end
+    end
 	if spell.name == "ZedR" and spell.target and spell.target.networkID == myHero.networkID then
 		if Param.Misc.Items.QssZedR then
 			DelayAction(function()
@@ -1208,7 +1274,7 @@ function OnDraw()
 		-- TARGET DRAW
 		if Target ~= nil and ValidTarget(Target) then
 			if Param.Draw.Target then
-				DrawText3D(">> Current|Target <<",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFFFF)
+				DrawText3D(">> Current |Target <<",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFFFF)
 			end
 		end
 
@@ -1232,21 +1298,50 @@ function OnDraw()
 							D3E = D1 + ((GetStacks(unit)-1) * D2)
 							local D3E1 = math.floor(D3E/unit.health*100)
 
-							if not TargetHaveBuff("summonerexhaust", myHero) then 
-								if D3E1 < 80 then
-									DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
-								elseif D3E1 >= 80 and D3E1 < 100 then
-									DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-								elseif D3E1 >= 100 then
-									DrawText3D("100% !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+							if not Param.Draw.EDraw.Hero2 then
+								if not TargetHaveBuff("summonerexhaust", myHero) then 
+									if D3E1 < 80 then
+										DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
+									elseif D3E1 >= 80 and D3E1 < 100 then
+										DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									elseif D3E1 >= 100 then
+										DrawText3D("100% !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									end
+								elseif TargetHaveBuff("summonerexhaust", myHero) then
+									if (D3E1-((D3E1*40)/100)) < 80 then
+										DrawText3D((D3E1-((D3E1*40)/100)).."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
+									elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
+										DrawText3D((D3E1-((D3E1*40)/100)).."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									elseif (D3E1-((D3E1*40)/100)) >= 100 then
+										DrawText3D("100% !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									end
 								end
-							elseif TargetHaveBuff("summonerexhaust", myHero) then
-								if (D3E1-((D3E1*40)/100)) < 80 then
-									DrawText3D((D3E1-((D3E1*40)/100)).."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
-								elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
-									DrawText3D((D3E1-((D3E1*40)/100)).."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-								elseif (D3E1-((D3E1*40)/100)) >= 100 then
-									DrawText3D("100% !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+							end
+
+							-- AA remaining & %
+
+							if Param.Draw.EDraw.Hero2 then
+
+								DAA1 = math.round(myHero:CalcDamage(unit,myHero.totalDamage*90/100))
+								local DAA = math.round(unit.health/(D3E+DAA1))
+								local DAAEX = (DAA-((DAA*40)/100))
+
+								if not TargetHaveBuff("summonerexhaust", myHero) then 
+									if D3E1 < 80 then
+										DrawText3D(D3E1.."%".." | "..DAA, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
+									elseif D3E1 >= 80 and D3E1 < 100 then
+										DrawText3D(D3E1.."%".." | "..DAA, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									elseif D3E1 >= 100 then
+										DrawText3D("100% ! | 0 !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									end
+								elseif TargetHaveBuff("summonerexhaust", myHero) then
+									if (D3E1-((D3E1*40)/100)) < 80 then
+										DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
+									elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
+										DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									elseif (D3E1-((D3E1*40)/100)) >= 100 then
+										DrawText3D("100% ! | 0 !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+									end
 								end
 							end
 						end
@@ -1278,14 +1373,51 @@ function OnDraw()
 								D3E = D1 + ((GetStacks(jungleMinion)-1) * D2)
 								local D3E1 = math.floor(D3E/jungleMinion.health*100)
 
+								if not Param.Draw.EDraw.Mob2 then
+									if not TargetHaveBuff("summonerexhaust", myHero) then 
+										if D3E1 < 80 then
+											DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+										elseif D3E1 >= 80 and D3E1 < 100 then
+											DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										elseif D3E1 >= 100 then
+											DrawText3D("100% !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										end
+									elseif TargetHaveBuff("summonerexhaust", myHero) then
+										if (D3E1-((D3E1*40)/100)) < 80 then
+											DrawText3D((D3E1-((D3E1*40)/100)).."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+										elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
+											DrawText3D((D3E1-((D3E1*40)/100)).."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										elseif (D3E1-((D3E1*40)/100)) >= 100 then
+											DrawText3D("100% !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										end
+									end
 
-								if D3E1 < 80 then
-									DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
-								elseif D3E1 >= 80 and D3E1 < 100 then
-									DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-								elseif D3E1 >= 100 then
-								DrawText3D("100% !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-							end
+								-- AA remaining & %
+
+								elseif Param.Draw.EDraw.Mob2 then
+
+									DAA1 = math.round(myHero:CalcDamage(jungleMinion,myHero.totalDamage*90/100))
+									local DAA = math.round(jungleMinion.health/(D3E+DAA1))
+									local DAAEX = (DAA-((DAA*40)/100))
+
+									if not TargetHaveBuff("summonerexhaust", myHero) then 
+										if D3E1 < 80 then
+											DrawText3D(D3E1.."%".." | "..DAA, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+										elseif D3E1 >= 80 and D3E1 < 100 then
+											DrawText3D(D3E1.."%".." | "..DAA, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										elseif D3E1 >= 100 then
+											DrawText3D("100% ! | 0 !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										end
+									elseif TargetHaveBuff("summonerexhaust", myHero) then
+										if (D3E1-((D3E1*40)/100)) < 80 then
+											DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+										elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
+											DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										elseif (D3E1-((D3E1*40)/100)) >= 100 then
+											DrawText3D("100% ! | 0 !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+										end
+									end
+								end
 							end
 						end
 					end
