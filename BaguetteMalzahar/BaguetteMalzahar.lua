@@ -38,7 +38,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.1321"
+local version = "0.1322"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -649,7 +649,7 @@ end
 
 function DrawEIndicator(enemy)
 	local Edmg = CalcSpellDamage(enemy)
-	Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+	Edmg = damageE
     local damage = Edmg
     local SPos, EPos = GetEnemyHPBarPos(enemy)
     if not SPos then return end
