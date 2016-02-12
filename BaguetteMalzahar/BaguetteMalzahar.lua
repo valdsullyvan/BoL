@@ -38,7 +38,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.131"
+local version = "0.132"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -890,10 +890,12 @@ function PriorityOnLoad()
 end
 
 function AutoLvlSpell()
- 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-    	autoLevelSetSequence(levelSequence)
-    	Last_LevelSpell = os.clock()
-  	end
+	if Param.miscellaneous.levelspell.EnableAutoLvlSpell then
+	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+	    	autoLevelSetSequence(levelSequence)
+	    	Last_LevelSpell = os.clock()
+	  	end
+	end
 end
 
 _G.LevelSpell = function(id)
