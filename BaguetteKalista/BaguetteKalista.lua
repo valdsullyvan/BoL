@@ -1146,7 +1146,7 @@ end
 
 function OnUpdateBuff(unit, buff, Stacks)
    if buff.name == "kalistaexpungemarker" then
-      unitStacks[Unit.networkID] = Stacks
+      unitStacks[unit.networkID] = Stacks
    end
 end
  
@@ -1159,7 +1159,7 @@ function OnRemoveBuff(unit, buff)
 		end
 	end
     if buff.name == "kalistaexpungemarker" then
-      unitStacks[Unit.networkID] = nil
+      unitStacks[unit.networkID] = nil
     end
 	 if buff.name == "manabarrier" then
 		LastBlitz = os.clock()+90
