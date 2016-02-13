@@ -43,7 +43,7 @@ local buffs = {
     ["KarthusDeathDefiedBuff"] = true,
     ["zhonyasringshield"] = true,
     ["lissandrarself"] = true,
-    ["Kindredrnodeathbuff"] = true
+    ["kindredrnodeathbuff"] = true
 }
 -- E
 local unitStacks = {}
