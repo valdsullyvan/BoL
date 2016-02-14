@@ -6,7 +6,7 @@ Script by spyk for Kalista.
 
 - Github link : https://github.com/spyk1/BoL/blob/master/BaguetteKalista/BaguetteKalista.lua
 
-- Forum Thread : http://forum.botoflegends.com/
+- Forum Thread : http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/
 
 ]]--
 
