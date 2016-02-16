@@ -1,5 +1,6 @@
+local LastMSG = 0
 --- Starting AutoUpdate.
-local version = "0.02"
+local version = "0.04"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteIgnite"
 local AUTOUPDATE = true
@@ -19,7 +20,7 @@ if AUTOUPDATE then
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
 				whatsnew = 1
 			else
-				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..") Enjoy you'r game!") end, 3)
+				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..") Enjoy you'r game!") end, 1)
 			end
 		end
 		else
@@ -50,14 +51,17 @@ function OnUnload()
 	EnvoiMessage(">>Unloaded<<")
 end
 
-function Ignite()
+function AutoIgnite()
 	for _, unit in pairs(GetEnemyHeroes()) do
 		health = unit.health
 		if GetDistance(unit) <= 600 then
 			if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
-				if health < 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
+				if health+unit.shield < 40 + (20 * myHero.level) and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
 					CastSpell(Ignite, unit)
-					EnvoiMessage("Casted Ignite.")
+					if os.clock() - LastMSG > 2 then
+						LastMSG = os.clock()
+						EnvoiMessage("Casted Ignite.")
+					end
 				end
 			end
 		end
@@ -66,7 +70,7 @@ end
 
 function OnTick()
 	if Menu.Use then
-		Ignite()
+		AutoIgnite()
 	end
 end
 
