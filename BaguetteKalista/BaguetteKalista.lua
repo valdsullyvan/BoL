@@ -76,7 +76,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.101"
+local version = "0.1011"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -670,8 +670,10 @@ function OnTick()
 
 	end
 
-	if Param.Draw.Skin.changeSkin and VIP_USER then
-		DrawSkin()
+	if VIP_USER then
+		if Param.Draw.Skin.changeSkin then
+			DrawSkin()
+		end
 	end
 
 end
