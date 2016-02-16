@@ -1,5 +1,5 @@
 --- Starting AutoUpdate.
-local version = "0.01"
+local version = "0.02"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteIgnite"
 local AUTOUPDATE = true
@@ -72,7 +72,8 @@ end
 
 function OnDraw()
 	if not myHero.dead and Menu.Draw then
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
-		DrawCircle(myHero.x, myHero.y, myHero.z, 600, RGB(200, 0, 0))
+		if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+			DrawCircle(myHero.x, myHero.y, myHero.z, 600, RGB(200, 0, 0))
+		end
 	end
 end
