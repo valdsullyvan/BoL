@@ -71,8 +71,8 @@ function OnTick()
 end
 
 function OnDraw()
-	if not myHero.dead and not Param.drawing.disablealldrawings then
-	if myHero:CanUseSpell(_Q) == READY and Menu.Draw then 
+	if not myHero.dead and Menu.Draw then
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
 		DrawCircle(myHero.x, myHero.y, myHero.z, 600, RGB(200, 0, 0))
 	end
 end
