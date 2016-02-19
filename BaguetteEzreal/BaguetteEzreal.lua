@@ -1,5 +1,3 @@
--- Just something to cast QSpell, don't use this script.
-
 function EnvoiMessage(msg)
 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteKalista]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
@@ -15,7 +13,32 @@ function OnLoad()
 	ts.name = "Kalista"
 	Param:addTS(ts)
 	LoadVPred()
+	LoadNEBOrb()
 end
+
+function LoadNEBOrb()
+		if not _G.NebelwolfisOrbWalkerLoaded then
+			require "Nebelwolfi's Orb Walker"
+			NebelwolfisOrbWalkerClass()
+		end
+	end
+	if not FileExist(LIB_PATH.."Nebelwolfi's Orb Walker.lua") then
+		DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
+			LoadNEBOrb()
+		end)
+	else
+		local f = io.open(LIB_PATH.."Nebelwolfi's Orb Walker.lua")
+		f = f:read("*all")
+		if f:sub(1,4) == "func" then
+			DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
+				LoadNEBOrb()
+			end)
+		else
+			if neo == 1 then
+				LoadNEBOrb()
+			end
+		end
+	end
 
 function LoadVPred()
 	if FileExist(LIB_PATH .. "/VPrediction.lua") then
@@ -103,5 +126,11 @@ function GetCustomTarget()
 		return ts.target
 	else
 		return nil
+	end
+end
+
+function OnWndMsg(msg, key)
+	if key == 32 then
+		Combo(Target)
 	end
 end
