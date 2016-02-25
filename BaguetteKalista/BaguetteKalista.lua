@@ -1472,7 +1472,7 @@ function AutoLvlSpell()
 end
 
 _G.LevelSpell = function(id)
-	if (string.find(GetGameVersion(), 'Releases/6.3') ~= nil) then
+	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
 		local offsets = { 
 			[_Q] = 0x9C,
 			[_W] = 0x7C,
