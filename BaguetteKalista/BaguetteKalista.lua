@@ -76,7 +76,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.1011"
+local version = "0.1012"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -110,7 +110,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Release.")
+		EnvoiMessage("What's new : Packets Fixed.")
 		whatsnew = 0
 	end
 
@@ -1473,21 +1473,21 @@ end
 
 _G.LevelSpell = function(id)
 	if (string.find(GetGameVersion(), 'Releases/6.3') ~= nil) then
-		 local offsets = { 
-		  [_Q] = 0x8A,
-		  [_W] = 0xE1,
-		  [_E] = 0x23,
-		  [_R] = 0x14,
-		  }
-		  local p = CLoLPacket(0x00E7)
-		  p.vTable = 0xF9C650
-		  p:EncodeF(myHero.networkID)
-		  p:Encode1(0x9B)
-		  p:Encode1(offsets[id])
-		  for i = 1, 4 do p:Encode1(0x2D) end
-		  for i = 1, 4 do p:Encode1(0x6A) end
-		  for i = 1, 4 do p:Encode1(0x0F) end
-		  SendPacket(p)
+		local offsets = { 
+			[_Q] = 0x9C,
+			[_W] = 0x7C,
+			[_E] = 0xA5,
+			[_R] = 0xC4,
+		}
+		local p = CLoLPacket(0x0016)
+		p.vTable = 0xF3C42C
+		p:EncodeF(myHero.networkID)
+		p:Encode4(0x99)
+		p:Encode1(0x83)
+		p:Encode4(0x20)
+		p:Encode1(offsets[id])
+		p:Encode4(0xEB)
+		SendPacket(p)
 	end
 end
 
