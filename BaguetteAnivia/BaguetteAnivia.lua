@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.5642"
+local version = "0.5643"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -1606,19 +1606,19 @@ end
 _G.LevelSpell = function(id)
 	if (string.find(GetGameVersion(), 'Releases/6.3') ~= nil) then
 		local offsets = { 
-		[_Q] = 0x8A,
-		[_W] = 0xE1,
-		[_E] = 0x23,
-		[_R] = 0x14,
+			[_Q] = 0x9C,
+			[_W] = 0x7C,
+			[_E] = 0xA5,
+			[_R] = 0xC4,
 		}
-		local p = CLoLPacket(0x00E7)
-		p.vTable = 0xF9C650
+		local p = CLoLPacket(0x0016)
+		p.vTable = 0xF3C42C
 		p:EncodeF(myHero.networkID)
-		p:Encode1(0x9B)
+		p:Encode4(0x99)
+		p:Encode1(0x83)
+		p:Encode4(0x20)
 		p:Encode1(offsets[id])
-		for i = 1, 4 do p:Encode1(0x2D) end
-		for i = 1, 4 do p:Encode1(0x6A) end
-		for i = 1, 4 do p:Encode1(0x0F) end
+		p:Encode4(0xEB)
 		SendPacket(p)
 	end
 end
