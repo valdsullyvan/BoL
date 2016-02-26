@@ -76,7 +76,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.1012"
+local version = "0.1013"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -1465,31 +1465,35 @@ function Consommables()
 end
 
 function AutoLvlSpell()
- 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-    	autoLevelSetSequence(levelSequence)
-    	Last_LevelSpell = os.clock()
-  	end
-end
-
-_G.LevelSpell = function(id)
 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
-		local offsets = { 
-			[_Q] = 0x9C,
-			[_W] = 0x7C,
-			[_E] = 0xA5,
-			[_R] = 0xC4,
-		}
-		local p = CLoLPacket(0x0016)
-		p.vTable = 0xF3C42C
-		p:EncodeF(myHero.networkID)
-		p:Encode4(0x99)
-		p:Encode1(0x83)
-		p:Encode4(0x20)
-		p:Encode1(offsets[id])
-		p:Encode4(0xEB)
-		SendPacket(p)
+	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+	    	autoLevelSetSequence(levelSequence)
+	    	Last_LevelSpell = os.clock()
+	  	end
+	else
+		do return end
 	end
 end
+
+-- _G.LevelSpell = function(id)
+-- 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
+--   local offsets = { 
+--   [_Q] = 0x9C,
+--   [_W] = 0x7C,
+--   [_E] = 0xA5,
+--   [_R] = 0xC4,
+--   }
+--   local p = CLoLPacket(0x0016)
+--   p.vTable = 0xF3C42C
+--   p:EncodeF(myHero.networkID)
+--   p:Encode4(0x99)
+--   p:Encode1(0x83)
+--   p:Encode4(0x20)
+--   p:Encode1(offsets[id])
+--   p:Encode4(0xEB)
+--   SendPacket(p)
+-- 	end
+-- end
 
 function AutoLvlSpellCombo()
 	if Param.Misc.LVL.Combo == 1 then
