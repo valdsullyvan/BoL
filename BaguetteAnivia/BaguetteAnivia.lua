@@ -59,7 +59,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.5643"
+local version = "0.56431"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -1612,7 +1612,7 @@ _G.LevelSpell = function(id)
 			[_R] = 0xC4,
 		}
 		local p = CLoLPacket(0x0016)
-		p.vTable = 0xF3C42C
+		p.vTable = 0xE4C8D4
 		p:EncodeF(myHero.networkID)
 		p:Encode4(0x99)
 		p:Encode1(0x83)
