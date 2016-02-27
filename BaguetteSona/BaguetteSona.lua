@@ -37,7 +37,7 @@ local Exhaust = "Annie", "Akali", "Azir", "Brand", "Cassiopeia", "Darius", "Dian
 local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tristana", "Talon", "Sivir", "Ryze", "Riven", "Rengar", "Quinn", "MasterYi", "MissFortune", "Lucian", "KogMaw", "Kindred", "Katarina", "Kalista", "Jinx", "Ezreal", "Caitlyn", "Ashe", "Corki"
 
 --- Starting AutoUpdate
-local version = "0.123"
+local version = "0.1231"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -862,7 +862,7 @@ _G.LevelSpell = function(id)
 			[_R] = 0xC4,
 		}
 		local p = CLoLPacket(0x0016)
-		p.vTable = 0xF3C42C
+		p.vTable = 0xE4C8D4
 		p:EncodeF(myHero.networkID)
 		p:Encode4(0x99)
 		p:Encode1(0x83)
