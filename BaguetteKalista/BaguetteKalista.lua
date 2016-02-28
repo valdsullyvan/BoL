@@ -1175,7 +1175,7 @@ function AutoEMob()
 						end
 
 						if D3 > jungleMinion.health and IsANormalMobToE[jungleMinion.name] and Param.Jungle.E.NormalMob then
-							if Param.Jungle.E.early and GetGameTimer() > 180 then
+							if Param.Jungle.E.early and GetGameTimer() > 200 then
 								if not Param.Humanizer then 
 									CastSpell(_E)
 								else 
@@ -1191,7 +1191,7 @@ function AutoEMob()
 										CastSpell(_E)
 									end, Human)
 								end
-							elseif Param.Jungle.E.early and GetGameTimer() < 180 then
+							elseif Param.Jungle.E.early and GetGameTimer() < 200 then
 								if os.clock() - LastMSG > 1 then
 									LastMSG = os.clock()
 									EnvoiMessage("Cannont Steal, Menu > Jungle > (E) > Security")
