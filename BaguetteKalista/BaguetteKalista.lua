@@ -1449,7 +1449,7 @@ function OnDraw()
 
 		-- DEBUG DRAW
 
-			DrawText3D(""..GetGameTimer().."", myHero.x, myHero.y, myHero.z, 20, 0xFFFFFFFF)
+			--DrawText3D(""..GetGameTimer().."", myHero.x, myHero.y, myHero.z, 20, 0xFFFFFFFF)
 
 		-- SPELL DRAW
 
