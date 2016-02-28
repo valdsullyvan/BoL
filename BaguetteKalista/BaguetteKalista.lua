@@ -22,12 +22,23 @@ function EnvoiMessage(msg)
 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteKalista]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
 
+function drawCircles(x,y,z,color)
+    DrawCircle(x, y, z, 50, color)
+end
+
 function CurrentTimeInMillis()
 	return (os.clock() * 1000);
 end
 
 -- Misc
 local bind = 0
+local D3E1 = 0
+local DAA = 0
+local dmg = 0
+local HurricanGet = 0
+local Last_Hurrican = 120
+local Human = 0
+local Last_Humanizer = 10
 -- Evadeee 
 -- local Evadeee = 0
 -- Immune check
@@ -43,6 +54,9 @@ local buffs = {
     ["KarthusDeathDefiedBuff"] = true,
     ["zhonyasringshield"] = true,
     ["lissandrarself"] = true,
+    ["bansheesveil"] = true,
+    ["SivirE"] = true,
+    ["NocturneW"] = true,
     ["kindredrnodeathbuff"] = true
 }
 -- E
@@ -76,7 +90,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.1013"
+local version = "0.20"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -110,7 +124,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Packets Fixed.")
+		EnvoiMessage("What's new : DAMN OPPPP UPDATE.")
 		whatsnew = 0
 	end
 
@@ -182,6 +196,9 @@ function OnLoad()
 			Param.Jungle.E:addParam("n1NormalMob", "NormalMob : Krug, Razorbeak, Murkwolf, Crab, Gromp.", SCRIPT_PARAM_INFO, "")
 			Param.Jungle.E:addParam("All", "Use (E) Spell if you has > 1 mobs to kill?", SCRIPT_PARAM_ONOFF, true)
 			Param.Jungle.E:addParam("early", "Enable Early Jungle Help Security?", SCRIPT_PARAM_ONOFF, true)
+
+		Param.Jungle:addParam("Q", "Enable (Q) Spell in Jungle :", SCRIPT_PARAM_ONOFF, true)
+		Param.Jungle:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 	
 	------------------------------------------------------------
 	Param:addSubMenu("", "n3")
@@ -199,10 +216,17 @@ function OnLoad()
 			Param.Draw.EDraw:addParam("Hero", "Display percent deal by (E) on Heroes :", SCRIPT_PARAM_ONOFF, true) 
 			Param.Draw.EDraw:addParam("Mob", "Display percent deal by (E) on Mobs :", SCRIPT_PARAM_ONOFF, true) 
 			Param.Draw.EDraw:addParam("n1Blank", "", SCRIPT_PARAM_INFO, "")
-			Param.Draw.EDraw:addParam("Hero2", "Display AA remaining for (E) Spell on Mob :", SCRIPT_PARAM_ONOFF, true)
+			Param.Draw.EDraw:addParam("Hero2", "Display AA remaining for (E) Spell on Hero :", SCRIPT_PARAM_ONOFF, true)
 			Param.Draw.EDraw:addParam("Mob2", "Display AA reamining for (E) Spell on Mob :", SCRIPT_PARAM_ONOFF, true)
+			Param.Draw.EDraw:addParam("n2Blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Draw.EDraw:addParam("Hero3", "Display current damages for (E) Spell on Hero :", SCRIPT_PARAM_ONOFF, true)
+			Param.Draw.EDraw:addParam("Mob3", "Display current damages for (E) Spell on Mob :", SCRIPT_PARAM_ONOFF, true)
+			Param.Draw.EDraw:addParam("n3Blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Draw.EDraw:addParam("HeroBlock", "Display damages on health bar :", SCRIPT_PARAM_ONOFF, true)
 		Param.Draw:addParam("R", "Display (R) Spell Range :", SCRIPT_PARAM_ONOFF, true)
 		Param.Draw:addParam("Target", "Display Target Draw :", SCRIPT_PARAM_ONOFF, true)
+		Param.Draw:addParam("n1Blank", "", SCRIPT_PARAM_INFO, "")
+		Param.Draw:addParam("LagFree", "Enable LagFree Draws :", SCRIPT_PARAM_ONOFF, true)
 		Param.Draw:addSubMenu("WallJump", "WallJump")
 			Param.Draw.WallJump:addParam("Enable", " Enable WallJump :", SCRIPT_PARAM_ONOFF, true)
 
@@ -440,7 +464,7 @@ function OnLoad()
 			Param.Misc.R:addParam("ninf", "Anti Ults (Annie/Malph) should come soon !", SCRIPT_PARAM_INFO, "")
 		if VIP_USER then Param.Misc:addSubMenu("Auto LVL Spell :", "LVL") end
 			if VIP_USER then Param.Misc.LVL:addParam("Enable", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.Misc.LVL:addParam("Combo", "LVL Spell Order :", SCRIPT_PARAM_LIST, 1, {"E > W > Q (Max E)"}) end
+			if VIP_USER then Param.Misc.LVL:addParam("Combo", "LVL Spell Order :", SCRIPT_PARAM_LIST, 1, {"E > W > Q (Max E)", "W > E > Q (Max E)", "Q > E > W (Max E)", "E > Q > W (Max E)"}) end
 			if VIP_USER then Last_LevelSpell = 0 end
 		Param.Misc:addSubMenu("Masteries :", "Masteries")
 			Param.Misc.Masteries:addParam("DoubleEdgedSword", "Double Edeged Sword :", SCRIPT_PARAM_ONOFF, false)
@@ -457,8 +481,11 @@ function OnLoad()
 			if VIP_USER then Param.Misc.Starter:addParam("n1blank", "", SCRIPT_PARAM_INFO, "") end
 			if VIP_USER then Param.Misc.Starter:addParam("TrinketBleu", "Buy a Blue Trinket at lvl.9 :", SCRIPT_PARAM_ONOFF, true) end
 		Param.Misc:addSubMenu("Sentinel Trick :", "WTrick")
-			Param.Misc.WTrick:addParam("Drake", "Cast (W) Spell trick on Drake?", SCRIPT_PARAM_ONOFF, false)
-			Param.Misc.WTrick:addParam("Baron", "Cast (W) Spell trick on Baron?", SCRIPT_PARAM_ONOFF, false)
+			Param.Misc.WTrick:addParam("Drake", "Cast (W) Spell trick on Drake :", SCRIPT_PARAM_ONOFF, false)
+			Param.Misc.WTrick:addParam("DrakeKey", "Cast (W) Spell trick on Drake :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("P"))
+			Param.Misc.WTrick:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.WTrick:addParam("Baron", "Cast (W) Spell trick on Baron :", SCRIPT_PARAM_ONOFF, false)
+			Param.Misc.WTrick:addParam("BaronKey", "Cast (W) Spell trick on Baron :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("M"))
 		Param.Misc:addSubMenu("Items :", "Items")
 			Param.Misc.Items:addParam("Pot", "Use potions with this script :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.Items:addParam("PotXHP", "At how many %HP :", SCRIPT_PARAM_SLICE, 60, 0, 100)
@@ -482,6 +509,9 @@ function OnLoad()
 			Param.Misc.Blitz:addParam("TahmRangeMax", "Set the maximum range to use :", SCRIPT_PARAM_SLICE, 1400, 0, 1400)
 		Param.Misc:addSubMenu("WallJump", "WallJump")
 			Param.Misc.WallJump:addParam("Enable", " Enable WallJump :", SCRIPT_PARAM_ONOFF, true)
+			Param.Misc.WTrick:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.WTrick:addParam("n1info", "You have to right-click where you are on a spot", SCRIPT_PARAM_INFO, "")
+			Param.Misc.WTrick:addParam("n2info", "to use the wall jump function. ", SCRIPT_PARAM_INFO, "")
 		Param.Misc:addParam("PermaE", "Enable (E) to kill when it's possible :", SCRIPT_PARAM_ONOFF, true)
 
 		-- Use E before your death
@@ -501,11 +531,18 @@ function OnLoad()
 		Param.orbwalker:addParam("n2", "If you want to change OrbWalker,", SCRIPT_PARAM_INFO, "")
 		Param.orbwalker:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
 		Param.orbwalker:addParam("n4", "", SCRIPT_PARAM_INFO, "")
-		Param.orbwalker:addParam("n5", "SAC:R is automaticly loaded.(Enable it in BoLStudio)", SCRIPT_PARAM_INFO, "")
+		Param.orbwalker:addParam("n5", "=> SAC:R & Pewalk are automaticly loaded.", SCRIPT_PARAM_INFO, "")
+		Param.orbwalker:addParam("n6", "=> Enable one of them in BoLStudio", SCRIPT_PARAM_INFO, "")
 	--
 
 	------------------------------------------------------------
 	Param:addSubMenu("", "n6")
+	------------------------------------------------------------
+	Param:addParam("n7", "", SCRIPT_PARAM_INFO, "")
+	------------------------------------------------------------
+	Param:addParam("Humanizer", "Use Humanizer ? -not recommanded-", SCRIPT_PARAM_ONOFF, false)
+	------------------------------------------------------------
+	Param:addParam("n6", "", SCRIPT_PARAM_INFO, "")
 	------------------------------------------------------------
 
 	Param:addParam("n4", "Baguette Kalista | Version", SCRIPT_PARAM_INFO, ""..version.."")
@@ -526,10 +563,6 @@ function CustomLoad()
 	Param:addTS(ts)
 	LoadVPred()
 
-	if VIP_USER and Param.Misc.LVL.Enable then
-		AutoLvlSpellCombo()
-	end
-
 	if VIP_USER then
 		if (not Param.Draw.Skin['saveSkin']) then
 			Param.Draw.Skin['changeSkin'] = false
@@ -541,6 +574,8 @@ function CustomLoad()
 
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
+   	elseif _Pewalk then
+   		LoadPewalk()
 	elseif Param.orbwalker.n1 == 1 then
 		EnvoiMessage("SxOrbWalk loading..")
 		LoadSXOrb()
@@ -630,6 +665,15 @@ function LoadSACR()
 	end 
 end
 
+function LoadPewalk()
+	if _Pewalk then
+		EnvoiMessage("Loaded Pewalk")
+		DelayAction(function ()EnvoiMessage("[Pewalk] Disable every spell usage in Pewalk for better performances with my script.")end, 7)
+	elseif not _Pewalk then
+		EnvoiMessage("Pewalk loading error")
+	end
+end
+
 function LoadVPred()
 	if FileExist(LIB_PATH .. "/VPrediction.lua") then
 		require("VPrediction")
@@ -693,6 +737,23 @@ function Keys()
 
 		if not _G.AutoCarry.Keys.AutoCarry and AAON == 1 then
 			_G.AutoCarry.Keys.LaneClear = false
+			AAON = 0
+		end
+
+	elseif _Pewalk then
+
+		if _G._Pewalk.GetActiveMode().Carry then 
+			Combo()
+		elseif _G._Pewalk.GetActiveMode().Mixed then 
+			Harass()
+		elseif _G._Pewalk.GetActiveMode().LaneClear then
+			LaneClear()
+		elseif _G._Pewalk.GetActiveMode().Farm then 
+			LastHit()
+		end
+
+		if not _G._Pewalk.GetActiveMode().Carry and AAON == 1 then
+			_G._Pewalk.GetActiveMode().LaneClear = false
 			AAON = 0
 		end
 
@@ -792,13 +853,17 @@ function Spell()
 	if Param.Harass.E.Auto then
 		EHarass()
 	end
-	if Param.Misc.WTrick.Drake == true then
+	if Param.Misc.WTrick.Drake == true or Param.Misc.WTrick.DrakeKey then
 		CastSpell(_W, 9866.148, -71, 4414.014)
 		Param.Misc.WTrick.Drake = false
 	end
-	if Param.Misc.WTrick.Baron == true then
+	if Param.Misc.WTrick.Baron == true or Param.Misc.WTrick.BaronKey then
 		CastSpell(_W, 5007.124, -71, 10471.45)
 		Param.Misc.WTrick.Baron = false
+	end
+	RunnanHurricaneCheck()
+	if Param.Humanizer then
+		Humanizing()
 	end
 end
 
@@ -845,6 +910,24 @@ function OutOfAA()
 end
 
 function LaneClear()
+	if not ManaQJungle() then
+		if Param.Jungle.Q then
+			if myHero:CanUseSpell(_Q) == READY then
+				jungleMinions:update()
+				for i, jungleMinion in pairs(jungleMinions.objects) do
+					if jungleMinion ~= nil then
+						if myHero:CanUseSpell(_Q) == READY and GetDistance(jungleMinion) < SkillQ.range then
+							local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
+							if HitChance >= 2 then
+								--print("Cast Q")
+								CastSpell(_Q, castPos.x, castPos.z)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 function Harass()
@@ -863,7 +946,7 @@ function EHarass()
 			local ccount = 0
 			for i, minion in pairs(enemyMinions.objects) do
 				if ValidTarget(minion) and minion ~= nil and not minion.dead then
-					if GetStacks(minion) > 0 then
+					if GetStacks(minion) > 0 and GetDistance(minion) < SkillE.range then
 						D1 = math.floor(myHero:CalcDamage(minion,dmgE))
 
 						ELvl()
@@ -881,14 +964,20 @@ function EHarass()
 			for _, unit in pairs(GetEnemyHeroes()) do
 				if unit ~= nil and GetDistance(unit) < SkillE.range and not unit.dead then
 					if GetStacks(unit) > 0 and not unit.dead then
-						if GetStacks(unit) >= Param.Harass.E.AAHero then
+						if GetStacks(unit) >= Param.Harass.E.AAHero and GetDistance(unit) < SkillE.range then
 							ccounthero = ccounthero + GetStacks(unit)
 						end
 					end
 				end
 			end
 			if ccounthero >= Param.Harass.E.AAHero and ccount >= Param.Harass.E.Minions then
-				CastSpell(_E)
+				if not Param.Humanizer then 
+					CastSpell(_E)
+				else 
+					DelayAction(function()
+						CastSpell(_E)
+					end, Human)
+				end
 			end
 		end
 	end
@@ -896,6 +985,14 @@ end
 
 function ManaEHarass()
     if myHero.mana < (myHero.maxMana * ( Param.Harass.E.Mana / 100)) then
+        return true
+    else
+        return false
+    end
+end
+
+function ManaQJungle()
+    if myHero.mana < (myHero.maxMana * ( Param.Jungle.QMana / 100)) then
         return true
     else
         return false
@@ -936,7 +1033,49 @@ function AutoEMinion()
 			end
 		end
 		if ccount >= Param.LastHit.E.Count then
-			CastSpell(_E)
+			if HurricanGet <= 0 then
+				if not Param.Humanizer then 
+					CastSpell(_E)
+				else 
+					DelayAction(function()
+						CastSpell(_E)
+					end, Human)
+				end
+			elseif HurricanGet >= 1 then
+				if not Param.LastHit.E.HurricanGet then
+					if not Param.Humanizer then 
+						CastSpell(_E)
+					else 
+						DelayAction(function()
+							CastSpell(_E)
+						end, Human)
+					end
+				end
+			end
+		elseif ccount >= Param.LastHit.E.Count then
+			if HurricanGet >= 1 then
+				if Param.LastHit.E.CountHurrican then
+					if Param.LastHit.E.HurricanGet then
+						if not Param.Humanizer then 
+							CastSpell(_E)
+						else 
+							DelayAction(function()
+								CastSpell(_E)
+							end, Human)
+						end
+					end
+				end
+			elseif HurricanGet <= 0 then
+				if ccount >= Param.LastHit.E.Count then
+					if not Param.Humanizer then 
+						CastSpell(_E)
+					else 
+						DelayAction(function()
+							CastSpell(_E)
+						end, Human)
+					end
+				end
+			end
 		end
 	end
 end
@@ -971,78 +1110,108 @@ function AutoEMob()
 						D2 = math.floor(myHero:CalcDamage(jungleMinion,dmgEX))
 						D3 = D1 + ((GetStacks(jungleMinion)-1) * D2)
 
-						if not TargetHaveBuff("summonerexhaust", myHero) then
-							if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name ~= "SRU_Dragon6.1.1" then
-									CastSpell(_E)
-							end
+						if not TargetHaveBuff("SummonerExhaust", myHero) then
+							D3E1 = D3
+						elseif TargetHaveBuff("SummonerExhaust", myHero) then
+							D3E1 = (D3 - ((D3 * 40)/100))
+						end
 
-							if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name == "SRU_Dragon6.1.1" then
-								if Dragons ~= 0 then
-									if (D3-(((D3*7)/100)*Dragons)) > jungleMinion.health then
+						if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name == "SRU_Baron12.1.1" then
+							if not TargetHaveBuff("barontarget", myHero) then
+								CastSpell(_E)
+							elseif TargetHaveBuff("barontarget", myHero) then
+								if (D3/2) > jungleMinion.health then
+									if not Param.Humanizer then 
 										CastSpell(_E)
-									end
-								elseif Dragons == 0 then
-									CastSpell(_E)
-								end
-							end
-
-							if D3 > jungleMinion.health and IsABuffMobToE[jungleMinion.name] and Param.Jungle.E.BuffMob then
-								CastSpell(_E)
-							end
-
-							if D3 > jungleMinion.health and IsANormalMobToE[jungleMinion.name] and Param.Jungle.E.NormalMob then
-								if Param.Jungle.E.early and GetGameTimer() > 170 then
-									CastSpell(_E)
-								elseif not Param.Jungle.E.early then
-									CastSpell(_E)
-								elseif Param.Jungle.E.early and GetGameTimer() < 170 then
-									if os.clock() - LastMSG > 2 then
-										LastMSG = os.clock()
-										EnvoiMessage("Cannont Steal, Menu > Jungle > (E) > Security")
+									else 
+										DelayAction(function()
+											CastSpell(_E)
+										end, Human)
 									end
 								end
 							end
+						end
 
-							if D3 > jungleMinion.health and Param.Jungle.E.All then
-								ccount = ccount + 1
-							end
-
-						elseif TargetHaveBuff("summonerexhaust", myHero) then
-							if (D3 - ((D3 * 40)/100)-100) > jungleMinion.health and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob then -- - 10Temporaire, buff drake & de-buff nash pls
-								CastSpell(_E)
-							end
-
-							if (D3 - ((D3 * 40)/100)) > jungleMinion.health and IsABuffMobToE[jungleMinion.name] and Param.Jungle.E.BuffMob then
-								CastSpell(_E)
-							end
-
-							if (D3 - ((D3 * 40)/100)) > jungleMinion.health and IsANormalMobToE[jungleMinion.name] and Param.Jungle.E.NormalMob then
-								if Param.Jungle.E.early and GetGameTimer() > 170 then
-									CastSpell(_E)
-								elseif not Param.Jungle.E.early then
-									CastSpell(_E)
-								elseif Param.Jungle.E.early and GetGameTimer() < 170 then
-									if os.clock() - LastMSG > 2 then
-										LastMSG = os.clock()
-										EnvoiMessage("Cannont Steal, Menu > Jungle > (E) > Security")
+						if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name == "SRU_Dragon6.1.1" then
+							if Dragons ~= 0 then
+								if (D3-(((D3*7)/100)*Dragons)) > jungleMinion.health then
+									if not Param.Humanizer then 
+										CastSpell(_E)
+									else 
+										DelayAction(function()
+											CastSpell(_E)
+										end, Human)
 									end
 								end
+							elseif Dragons == 0 then
+								if not Param.Humanizer then 
+									CastSpell(_E)
+								else 
+									DelayAction(function()
+										CastSpell(_E)
+									end, Human)
+								end
 							end
+						end
 
-							if (D3 - ((D3 * 40)/100)) > jungleMinion.health and Param.Jungle.E.All then
-								ccount = ccount + 1
+						if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name == "SRU_RiftHerald17.1.1" then
+							if not Param.Humanizer then 
+								CastSpell(_E)
+							else 
+								DelayAction(function()
+									CastSpell(_E)
+								end, Human)
 							end
+						end
+
+						if D3 > jungleMinion.health and IsABuffMobToE[jungleMinion.name] and Param.Jungle.E.BuffMob then
+							if not Param.Humanizer then 
+								CastSpell(_E)
+							else 
+								DelayAction(function()
+									CastSpell(_E)
+								end, Human)
+							end
+						end
+
+						if D3 > jungleMinion.health and IsANormalMobToE[jungleMinion.name] and Param.Jungle.E.NormalMob then
+							if Param.Jungle.E.early and GetGameTimer() > 180 then
+								if not Param.Humanizer then 
+									CastSpell(_E)
+								else 
+									DelayAction(function()
+										CastSpell(_E)
+									end, Human)
+								end
+							elseif not Param.Jungle.E.early then
+								if not Param.Humanizer then 
+									CastSpell(_E)
+								else 
+									DelayAction(function()
+										CastSpell(_E)
+									end, Human)
+								end
+							elseif Param.Jungle.E.early and GetGameTimer() < 180 then
+								if os.clock() - LastMSG > 1 then
+									LastMSG = os.clock()
+									EnvoiMessage("Cannont Steal, Menu > Jungle > (E) > Security")
+								end
+							end
+						end
+
+						if D3 > jungleMinion.health and Param.Jungle.E.All then
+							ccount = ccount + 1
 						end
 					end 
 				end
 			end
-			if not TargetHaveBuff("summonerexhaust", myHero) then
-				if ccount > 1 then
+			if ccount > 1 then
+				if not Param.Humanizer then 
 					CastSpell(_E)
-				end
-			elseif TargetHaveBuff("summonerexhaust", myHero) then
-				if ccount > 1 then
-					CastSpell(_E)
+				else 
+					DelayAction(function()
+						CastSpell(_E)
+					end, Human)
 				end
 			end
 		end
@@ -1092,64 +1261,80 @@ function AutoEHero()
 					D2 = math.floor(myHero:CalcDamage(unit,dmgEX))
 					D3 = D1 + ((GetStacks(unit)-1) * D2)
 
-					if not TargetHaveBuff("summonerexhaust", myHero) then
-						if unit.charName == "Blitzcrank" then
-							if LastBlitz > os.clock() then
-								if (D3 > (unit.health+((unit.mana*50)/100))) and not Immune(unit) and unit.shield < 1 then
+					if not TargetHaveBuff("SummonerExhaust", myHero) and not TargetHaveBuff("meditate", unit) then
+						D3E1 = D3
+					elseif TargetHaveBuff("SummonerExhaust", myHero) and not TargetHaveBuff("meditate", unit) then
+						D3E1 = (D3 - ((D3 * 40)/100))
+					elseif TargetHaveBuff("meditate", unit) then
+						dmgmajoration = (UnitHaveBuff(target, "meditate") and 1-(target:GetSpellData(_W).level * 0.05 + 0.5) or 1)
+						if not TargetHaveBuff("SummonerExhaust", myHero) then
+							D3E1 = D3*dmgmajoration
+						elseif TargetHaveBuff("SummonerExhaust", myHero) then
+							D3E1 = (D3 - ((D3 * 40)/100))*dmgmajoration
+						end
+					end
+
+					if unit.charName == "Blitzcrank" then
+						if LastBlitz > os.clock() then
+							if (D3E1 > (unit.health+((unit.mana*50)/100))) and not Immune(unit) and unit.shield < 1 then
+								if not Param.Humanizer then 
 									CastSpell(_E)
-								elseif (D3 > (unit.health+unit.shield+((unit.mana*50)/100))) and not Immune(unit) and unit.shield > 1 then
-									CastSpell(_E)
-									--EnvoiMessage("Blitzcrank Passive DOWN.")
+								else 
+									DelayAction(function()
+										CastSpell(_E)
+									end, Human)
 								end
-							elseif LastBlitz < os.clock() then
-								if D3 > unit.health and not Immune(unit) and unit.shield < 1 then
+							elseif (D3E1 > (unit.health+unit.shield+((unit.mana*50)/100))) and not Immune(unit) and unit.shield > 1 then
+								if not Param.Humanizer then 
 									CastSpell(_E)
-								elseif (D3 > (unit.health+unit.shield)) and not Immune(unit) and unit.shield > 1 then
+								else 
+									DelayAction(function()
+										CastSpell(_E)
+									end, Human)
+								end
+								--EnvoiMessage("Blitzcrank Passive DOWN.")
+							end
+						elseif LastBlitz < os.clock() then
+							if D3E1 > unit.health and not Immune(unit) and unit.shield < 1 then
+								if not Param.Humanizer then 
 									CastSpell(_E)
+								else 
+									DelayAction(function()
+										CastSpell(_E)
+									end, Human)
+								end
+							elseif (D3E1 > (unit.health+unit.shield)) and not Immune(unit) and unit.shield > 1 then
+								if not Param.Humanizer then 
+									CastSpell(_E)
+								else 
+									DelayAction(function()
+										CastSpell(_E)
+									end, Human)
 								end
 							end
 						end
-						if D3 > unit.health and not Immune(unit) and unit.shield < 1 and unit.charName ~= "Blitzcrank" then
+					end
+					if D3E1 > unit.health and not Immune(unit) and unit.shield < 1 and unit.charName ~= "Blitzcrank" then
+						if not Param.Humanizer then 
 							CastSpell(_E)
-						elseif (D3 > (unit.health+unit.shield)) and not Immune(unit) and unit.shield > 1 and unit.charName ~= "Blitzcrank"  then
-							CastSpell(_E)
+						else 
+							DelayAction(function()
+								CastSpell(_E)
+							end, Human)
 						end
-					elseif TargetHaveBuff("summonerexhaust", myHero) then
-						if unit.charName == "Blitzcrank" then
-							if LastBlitz > os.clock() then
-								if (D3 > (unit.health+((unit.mana*50)/100))) and not Immune(unit) and unit.shield < 1 then
-									CastSpell(_E)
-									EnvoiMessage("Blitzcrank Passive DOWN.")
-								elseif (D3 > (unit.health+unit.shield+((unit.mana*50)/100))) and not Immune(unit) and unit.shield > 1 then
-									CastSpell(_E)
-									EnvoiMessage("Blitzcrank Passive DOWN.")
-								end
-							elseif LastBlitz < os.clock() then
-								if D3 > unit.health and not Immune(unit) and unit.shield < 1 then
-									CastSpell(_E)
-								elseif (D3 > (unit.health+unit.shield)) and not Immune(unit) and unit.shield > 1 then
-									CastSpell(_E)
-								end
-							end
-						end
-						if (D3 - ((D3 * 40)/100)) > unit.health and not Immune(unit) and unit.shield < 1 and unit.charName ~= "Blitzcrank" then
+					elseif (D3E1 > (unit.health+unit.shield)) and not Immune(unit) and unit.shield > 1 and unit.charName ~= "Blitzcrank"  then
+						if not Param.Humanizer then 
+						CastSpell(_E)
+					else 
+						DelayAction(function()
 							CastSpell(_E)
-						elseif (D3 > (unit.health+unit.shield)) and not Immune(unit) and unit.shield > 1 and unit.charName ~= "Blitzcrank" then
-							CastSpell(_E)
-						end
+						end, Human)
+					end
 					end
 				end
 			end
 		end
 	end
-end
-
-function CheckBuff()
-
-end
-
-function CheckShield()
-
 end
 
 function OnUpdateBuff(unit, buff, Stacks)
@@ -1194,27 +1379,29 @@ function OnApplyBuff(source, unit, buff)
 		Dragons = 5
 	end
 
-	if buff.name == "DarkBindingMissile" and unit.isMe and Param.Misc.Items.QssRoot then
-		QSS()
-	end
-	if buff.name == "Stun" and unit.isMe and Param.Misc.Items.QssStun then
-		QSS()
-	end
-	if buff.name == "summonerexhaust" and unit.isMe and Param.Misc.Items.QssExhaust then
-		QSS()
-	end
-	--if buff.name == "Taunt" and unit.isMe and Param.Misc.Items.QssTaunt then
-		--QSS()
-	--end
-	if buff.name == "Silence" and unit.isMe and Param.Misc.Items.QssSilence then
-		QSS()
-	end
-	if buff.name == "Root" and unit.isMe and Param.Mics.Items.QssRoot then
-		QSS()
+	if unit ~= nil then
+		if buff.name == "DarkBindingMissile" and unit.isMe and Param.Misc.Items.QssRoot then
+			QSS()
+		end
+		if buff.name == "Stun" and unit.isMe and Param.Misc.Items.QssStun then
+			QSS()
+		end
+		if buff.name == "SummonerExhaust" and unit.isMe and Param.Misc.Items.QssExhaust then
+			QSS()
+		end
+		--if buff.name == "Taunt" and unit.isMe and Param.Misc.Items.QssTaunt then
+			--QSS()
+		--end
+		if buff.name == "Silence" and unit.isMe and Param.Misc.Items.QssSilence then
+			QSS()
+		end
+		if buff.name == "Root" and unit.isMe and Param.Mics.Items.QssRoot then
+			QSS()
+		end
 	end
 
 	if TargetHaveBuff("rocketgrab2", unit) and Param.Misc.Blitz.Blitz then
-		if unit.team ~= myHero.team then
+		if unit.team ~= myHero.team and unit.type == myHero.type then
 			if GetDistance(unit) > Param.Misc.Blitz.BlitzRangeMin and GetDistance(unit) < Param.Misc.Blitz.BlitzRangeMax then
 				CastSpell(_R)
 			end
@@ -1222,7 +1409,7 @@ function OnApplyBuff(source, unit, buff)
 	end
 
 	if TargetHaveBuff("tamhkenchdevoured", unit) and Param.Misc.Blitz.Tahm then
-		if unit.team ~= myHero.team then
+		if unit.team ~= myHero.team and unit.type == myHero.type then
 			if GetDistance(unit) > Param.Misc.Blitz.TahmRangeMin and GetDistance(unit) < Param.Misc.Blitz.TahmRangeMax then
 				CastSpell(_R)
 			end
@@ -1231,6 +1418,7 @@ function OnApplyBuff(source, unit, buff)
 end
 
 function OnProcessSpell(unit, spell)
+	--print(spell.name)
 	if spell.target then 
 		if spell.target.name ~= nil and spell.target.name == bind then
 			if spell.target.health < ((spell.target.maxHealth * Param.Misc.R.Life) / 100 ) then
@@ -1259,24 +1447,32 @@ SkillR = { name = "Fate's Call", range = 1500, delay = nil, speed = nil, width =
 function OnDraw()
 	if not myHero.dead and not Param.Draw.Disable then
 
+		-- DEBUG DRAW
+
+			DrawText3D(""..GetGameTimer().."", myHero.x, myHero.y, myHero.z, 20, 0xFFFFFFFF)
+
 		-- SPELL DRAW
-		if myHero:CanUseSpell(_Q) == READY and Param.Draw.Q then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, 0xFFFFFFFF)
-		end
+
 		if myHero:CanUseSpell(_W) == READY and Param.Draw.W then 
 			DrawCircleMinimap(myHero.x, myHero.y, myHero.z, SkillW.range)
 		end
-		if myHero:CanUseSpell(_E) == READY and Param.Draw.E then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, 0xFFFFFFFF)
-		end
-		if myHero:CanUseSpell(_R) == READY and Param.Draw.R then
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, 0xFFFFFFFF)
-		end
-		if Param.Draw.AA then
-			DrawCircle(myHero.x, myHero.y, myHero.z, myHero.range+myHero.boundingRadius, 0xFFFFFFFF)
-		end
-		if Param.Draw.HitBox then
-			DrawCircle(myHero.x, myHero.y, myHero.z, myHero.boundingRadius, 0xFFFFFFFF)
+
+		if Param.Draw.LagFree then
+			if myHero:CanUseSpell(_Q) == READY and Param.Draw.Q then 
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
+			end
+			if myHero:CanUseSpell(_E) == READY and Param.Draw.E then 
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
+			end
+			if myHero:CanUseSpell(_R) == READY and Param.Draw.R then
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
+			end
+			if Param.Draw.AA then
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.range+myHero.boundingRadius, 1, 0xFFFFFFFF)
+			end
+			if Param.Draw.HitBox then
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.boundingRadius, 1, 0xFFFFFFFF)
+			end
 		end
 
 		-- TARGET DRAW
@@ -1298,31 +1494,30 @@ function OnDraw()
 
 						if GetStacks(unit) > 0 then
 
-							D1 = math.round(myHero:CalcDamage(unit,dmgE))
+							D1 = math.floor(myHero:CalcDamage(unit,dmgE))
 
 							ELvl()
 
-							D2 = math.round(myHero:CalcDamage(unit,dmgEX))
+							D2 = math.floor(myHero:CalcDamage(unit,dmgEX))
 							D3E = D1 + ((GetStacks(unit)-1) * D2)
-							local D3E1 = math.floor(D3E/unit.health*100)
+
+							DAA1 = math.round(myHero:CalcDamage(unit,myHero.totalDamage*90/100))
+
+							if not TargetHaveBuff("SummonerExhaust", myHero) then
+								D3E1 = math.floor(D3E/unit.health*100)
+								DAA = math.floor(unit.health/(D3E+DAA1))
+							elseif TargetHaveBuff("SummonerExhaust", myHero) then
+								D3E1 = math.floor(D3E/unit.health*100)-((math.floor(D3E/unit.health*100)*40)/100)
+								DAA = math.floor(unit.health/(D3E+DAA1))-((math.floor(unit.health/(D3E+DAA1))*40)/100)
+							end
 
 							if not Param.Draw.EDraw.Hero2 then
-								if not TargetHaveBuff("summonerexhaust", myHero) then 
-									if D3E1 < 80 then
-										DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
-									elseif D3E1 >= 80 and D3E1 < 100 then
-										DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-									elseif D3E1 >= 100 then
-										DrawText3D("100% !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-									end
-								elseif TargetHaveBuff("summonerexhaust", myHero) then
-									if (D3E1-((D3E1*40)/100)) < 80 then
-										DrawText3D((D3E1-((D3E1*40)/100)).."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
-									elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
-										DrawText3D((D3E1-((D3E1*40)/100)).."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-									elseif (D3E1-((D3E1*40)/100)) >= 100 then
-										DrawText3D("100% !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-									end
+								if D3E1 < 80 then
+									DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
+								elseif D3E1 >= 80 and D3E1 < 100 then
+									DrawText3D(D3E1.."%", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+								elseif D3E1 >= 100 then
+									DrawText3D("100% !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
 								end
 							end
 
@@ -1330,26 +1525,39 @@ function OnDraw()
 
 							if Param.Draw.EDraw.Hero2 then
 
-								DAA1 = math.round(myHero:CalcDamage(unit,myHero.totalDamage*90/100))
-								local DAA = math.round(unit.health/(D3E+DAA1))
-								local DAAEX = (DAA-((DAA*40)/100))
+								if D3E1 < 80 then
+									DrawText3D(D3E1.."%".." | "..DAA, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
+								elseif D3E1 >= 80 and D3E1 < 100 then
+									DrawText3D(D3E1.."%".." | "..DAA, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+								elseif D3E1 >= 100 then
+									DrawText3D("100% ! | 0 !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+								end
+							end
 
-								if not TargetHaveBuff("summonerexhaust", myHero) then 
-									if D3E1 < 80 then
-										DrawText3D(D3E1.."%".." | "..DAA, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
-									elseif D3E1 >= 80 and D3E1 < 100 then
-										DrawText3D(D3E1.."%".." | "..DAA, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-									elseif D3E1 >= 100 then
-										DrawText3D("100% ! | 0 !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
+							-- COLOR BLOCK
+							if Param.Draw.EDraw.HeroBlock then
+								local Center = GetUnitHPBarPos(unit)
+								if Center.x > -100 and Center.x < WINDOW_W+100 and Center.y > -100 and Center.y < WINDOW_H+100 then
+									local off = GetUnitHPBarOffset(unit)
+									local y=Center.y + (off.y * 53) + 2
+									local xOff = ({['AniviaEgg'] = -0.1,['Darius'] = -0.05,['Renekton'] = -0.05,['Sion'] = -0.05,['Thresh'] = -0.03,})[unit.charName]
+									local x = Center.x + ((xOff or 0) * 140) - 66
+									if not TargetHaveBuff("SummonerExhaust", myHero) then
+										dmg = unit.health - D3E
+									elseif TargetHaveBuff("SummonerExhaust", myHero) then
+										dmg = unit.health - (D3E-((D3E*40)/100))
 									end
-								elseif TargetHaveBuff("summonerexhaust", myHero) then
-									if (D3E1-((D3E1*40)/100)) < 80 then
-										DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,250,250,250), 0)
-									elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
-										DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-									elseif (D3E1-((D3E1*40)/100)) >= 100 then
-										DrawText3D("100% ! | 0 !", unit.x+125, unit.y+85, unit.z+155, 30, ARGB(255,205,51,51), 0)
-									end
+									DrawLine(x + ((unit.health /unit.maxHealth) * 104),y, x+(((dmg > 0 and dmg or 0) / unit.maxHealth) * 104),y,9, GetDistance(unit) < 3000 and 0x6699FFFF)
+								end
+							end
+
+							-- DMG DRAW SIMPLE
+
+							if Param.Draw.EDraw.Hero3 then
+								if not TargetHaveBuff("SummonerExhaust", myHero) then
+									DrawText3D(""..D3E.."", unit.x+125, unit.y+175, unit.z+155, 30, ARGB(255,250,250,250), 0)
+								elseif TargetHaveBuff("SummonerExhaust", myHero) then
+									DrawText3D(""..(D3E-((D3E*40)/100)).."", unit.x+125, unit.y+175, unit.z+155, 30, ARGB(255,250,250,250), 0)
 								end
 							end
 						end
@@ -1373,16 +1581,24 @@ function OnDraw()
 
 							if GetStacks(jungleMinion) > 0 then
 
-								D1 = math.round(myHero:CalcDamage(jungleMinion,dmgE))
+								D1 = math.floor(myHero:CalcDamage(jungleMinion,dmgE))
 
 								ELvl()
 
-								D2 = math.round(myHero:CalcDamage(jungleMinion,dmgEX))
+								D2 = math.floor(myHero:CalcDamage(jungleMinion,dmgEX))
 								D3E = D1 + ((GetStacks(jungleMinion)-1) * D2)
-								local D3E1 = math.floor(D3E/jungleMinion.health*100)
+
+								DAA1 = math.round(myHero:CalcDamage(jungleMinion,myHero.totalDamage*90/100))
+
+								if not TargetHaveBuff("SummonerExhaust", myHero) then
+									D3E1 = math.floor(D3E/jungleMinion.health*100)
+									DAA = math.round(jungleMinion.health/(D3E+DAA1))
+								elseif TargetHaveBuff("SummonerExhaust", myHero) then
+									D3E1 = math.floor(D3E/jungleMinion.health*100)-((math.floor(D3E/jungleMinion.health*100)*40)/100)
+									DAA = math.floor(jungleMinion.health/(D3E+DAA1))-((math.floor(jungleMinion.health/(D3E+DAA1))*40)/100)
+								end
 
 								if not Param.Draw.EDraw.Mob2 then
-									if not TargetHaveBuff("summonerexhaust", myHero) then 
 										if D3E1 < 80 then
 											DrawText3D(D3E1.."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
 										elseif D3E1 >= 80 and D3E1 < 100 then
@@ -1390,40 +1606,27 @@ function OnDraw()
 										elseif D3E1 >= 100 then
 											DrawText3D("100% !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
 										end
-									elseif TargetHaveBuff("summonerexhaust", myHero) then
-										if (D3E1-((D3E1*40)/100)) < 80 then
-											DrawText3D((D3E1-((D3E1*40)/100)).."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
-										elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
-											DrawText3D((D3E1-((D3E1*40)/100)).."%", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-										elseif (D3E1-((D3E1*40)/100)) >= 100 then
-											DrawText3D("100% !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-										end
-									end
 
 								-- AA remaining & %
 
 								elseif Param.Draw.EDraw.Mob2 then
 
-									DAA1 = math.round(myHero:CalcDamage(jungleMinion,myHero.totalDamage*90/100))
-									local DAA = math.round(jungleMinion.health/(D3E+DAA1))
-									local DAAEX = (DAA-((DAA*40)/100))
+									if D3E1 < 80 then
+										DrawText3D(D3E1.."%".." | "..DAA, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+									elseif D3E1 >= 80 and D3E1 < 100 then
+										DrawText3D(D3E1.."%".." | "..DAA, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+									elseif D3E1 >= 100 then
+										DrawText3D("100% ! | 0 !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+									end
+								end
 
-									if not TargetHaveBuff("summonerexhaust", myHero) then 
-										if D3E1 < 80 then
-											DrawText3D(D3E1.."%".." | "..DAA, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
-										elseif D3E1 >= 80 and D3E1 < 100 then
-											DrawText3D(D3E1.."%".." | "..DAA, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-										elseif D3E1 >= 100 then
-											DrawText3D("100% ! | 0 !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-										end
-									elseif TargetHaveBuff("summonerexhaust", myHero) then
-										if (D3E1-((D3E1*40)/100)) < 80 then
-											DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
-										elseif (D3E1-((D3E1*40)/100)) >= 80 and (D3E1-((D3E1*40)/100)) < 100 then
-											DrawText3D((D3E1-((D3E1*40)/100)).."%".." | "..DAAEX, jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-										elseif (D3E1-((D3E1*40)/100)) >= 100 then
-											DrawText3D("100% ! | 0 !", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
-										end
+								-- DMG DRAW SIMPLE
+
+								if Param.Draw.EDraw.Mob3 then
+									if not TargetHaveBuff("SummonerExhaust", myHero) then
+										DrawText3D(""..D3E.."", jungleMinion.x+125, jungleMinion.y+175, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+									elseif TargetHaveBuff("SummonerExhaust", myHero) then
+										DrawText3D(""..(D3E-((D3E*40)/100)).."", jungleMinion.x+125, jungleMinion.y+175, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
 									end
 								end
 							end
@@ -1440,10 +1643,7 @@ function OnDraw()
 				for i,group in pairs(wallSpots) do
 					for x, wallSpot in pairs(group.Locations) do
 						if GetDistance(wallSpot) < 1000 then
-							if GetDistance(wallSpot, mousePos) <= 1000 then
-									color = 0xFFFFFF
-							end
-							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,color)
+							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z, 0xFFFFFF)
 						end
 					end
 				end
@@ -1467,37 +1667,51 @@ end
 function AutoLvlSpell()
 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
 	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-	    	autoLevelSetSequence(levelSequence)
-	    	Last_LevelSpell = os.clock()
+	 		AutoLvlSpellCombo()
+	 		if Param.Misc.LVL.Enable then
+		    	autoLevelSetSequence(levelSequence)
+		    	Last_LevelSpell = os.clock()
+		    elseif not Param.Misc.LVL.Enable then
+		    	autoLevelSetSequence(nil)
+		    	Last_LevelSpell = os.clock()+10
+		    end
 	  	end
 	else
 		do return end
 	end
 end
 
--- _G.LevelSpell = function(id)
--- 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
---   local offsets = { 
---   [_Q] = 0x9C,
---   [_W] = 0x7C,
---   [_E] = 0xA5,
---   [_R] = 0xC4,
---   }
---   local p = CLoLPacket(0x0016)
---   p.vTable = 0xF3C42C
---   p:EncodeF(myHero.networkID)
---   p:Encode4(0x99)
---   p:Encode1(0x83)
---   p:Encode4(0x20)
---   p:Encode1(offsets[id])
---   p:Encode4(0xEB)
---   SendPacket(p)
--- 	end
--- end
+_G.LevelSpell = function(id)
+	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) and Param.Misc.LVL.Enable then
+		local offsets = { 
+			[_Q] = 0x9C,
+			[_W] = 0x7C,
+			[_E] = 0xA5,
+			[_R] = 0xC4,
+		}
+		local p = CLoLPacket(0x0016)
+		p.vTable = 0xE4C8D4
+		p:EncodeF(myHero.networkID)
+		p:Encode4(0x99)
+		p:Encode1(0x83)
+		p:Encode4(0x20)
+		p:Encode1(offsets[id])
+		p:Encode4(0xEB)
+		SendPacket(p)
+	end
+end
 
 function AutoLvlSpellCombo()
-	if Param.Misc.LVL.Combo == 1 then
-		levelSequence =  {3,2,1,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
+	if Param.Misc.LVL.Enable then
+		if Param.Misc.LVL.Combo == 1 then
+			levelSequence =  {3,2,1,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | E > W > Q
+		elseif Param.Misc.LVL.Combo == 2 then
+			levelSequence =  {2,3,1,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | W > E > Q
+		elseif Param.Misc.LVL.Combo == 3 then
+			levelSequence =  {1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | Q > E > W
+		elseif Param.Misc.LVL.Combo == 4 then
+			levelSequence =  {3,1,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | E > Q > W
+		end
 	end
 end
 
@@ -1741,6 +1955,13 @@ skinMeta = {
 
 }
 
+--=======END========--
+-- Developers: 
+-- Divine (http://forum.botoflegends.com/user/86308-divine/)
+-- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
+-- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
+--==================--
+
 function AutoBuy()
 	if VIP_USER and GetGameTimer() < 60 then
 		if Param.Misc.Starter.Doran then
@@ -1754,13 +1975,6 @@ function AutoBuy()
 		end
 	end
 end
-
---=======END========--
--- Developers: 
--- Divine (http://forum.botoflegends.com/user/86308-divine/)
--- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
--- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
---==================--
 
 function AutoPotions()
 	if not Param.Misc.Items.Pot then return end
@@ -1888,314 +2102,314 @@ function OnWndMsg(msg, key)
  							elseif x == 14 then
  								CastSpell(_Q, 11354,5511 )
  								player:MoveTo(11354,5511)
- 							elseif x == 6 then
+ 							elseif x == 15 then
  								CastSpell(_Q, 11345,4813 )
  								player:MoveTo(11345,4813)
- 							elseif x == 15 then
+ 							elseif x == 16 then
  								CastSpell(_Q, 11725,5120 )
  								player:MoveTo(11725,5120)
- 							elseif x == 16 then
+ 							elseif x == 17 then
  								CastSpell(_Q, 11960,4802 )
  								player:MoveTo(11960,4802)
- 							elseif x == 17 then
+ 							elseif x == 18 then
  								CastSpell(_Q, 11697,4614 )
  								player:MoveTo(11697,4614)
- 							elseif x == 18 then
+ 							elseif x == 19 then
  								CastSpell(_Q, 3437,10186 )
  								player:MoveTo(3437,10186)
- 							elseif x == 19 then
+ 							elseif x == 20 then
  								CastSpell(_Q, 2964,10012 )
  								player:MoveTo(2964,10012)
- 							elseif x == 20 then
+ 							elseif x == 21 then
  								CastSpell(_Q, 3104,9701 )
  								player:MoveTo(3104,9701)
- 							elseif x == 21 then
+ 							elseif x == 22 then
  								CastSpell(_Q, 3519,9833 )
  								player:MoveTo(3519,9833)
- 							elseif x == 22 then
+ 							elseif x == 23 then
  								CastSpell(_Q, 3224,9440 )
  								player:MoveTo(3224,9440)
- 							elseif x == 23 then
+ 							elseif x == 24 then
  								CastSpell(_Q, 3478,9422 )
  								player:MoveTo(3478,9422)
- 							elseif x == 24 then
+ 							elseif x == 25 then
  								CastSpell(_Q, 6685,9116 )
  								player:MoveTo(6685,9116)
- 							elseif x == 25 then
+ 							elseif x == 26 then
  								CastSpell(_Q, 6484,8804 )
  								player:MoveTo(6484,8804)
- 							elseif x == 26 then
+ 							elseif x == 27 then
  								CastSpell(_Q, 6685,9116 )
  								player:MoveTo(6685,9116)
- 							elseif x == 27 then
+ 							elseif x == 28 then
  								CastSpell(_Q, 6848,8804 )
  								player:MoveTo(6848,8804)
- 							elseif x == 28 then
+ 							elseif x == 29 then
  								CastSpell(_Q, 7095,8727 )
  								player:MoveTo(7095,8727)
- 							elseif x == 29 then
+ 							elseif x == 30 then
  								CastSpell(_Q, 6857,8517 )
  								player:MoveTo(6857,8517)
- 							elseif x == 30 then
+ 							elseif x == 31 then
  								CastSpell(_Q, 7456,8539 )
  								player:MoveTo(7456,8539)
- 							elseif x == 31 then
+ 							elseif x == 32 then
  								CastSpell(_Q, 7100,8159 )
  								player:MoveTo(7100,8159)
- 							elseif x == 32 then
+ 							elseif x == 33 then
  								CastSpell(_Q, 7378,6298 )
  								player:MoveTo(7378,6298)
- 							elseif x == 33 then
+ 							elseif x == 34 then
  								CastSpell(_Q, 7714,6544 )
  								player:MoveTo(7714,6544)
- 							elseif x == 34 then
+ 							elseif x == 35 then
  								CastSpell(_Q, 7813,5938 )
  								player:MoveTo(7813,5938)
- 							elseif x == 35 then
+ 							elseif x == 36 then
  								CastSpell(_Q, 8139,6210 )
  								player:MoveTo(8139,6210)
- 							elseif x == 36 then
+ 							elseif x == 37 then
  								CastSpell(_Q, 8412,6081 )
  								player:MoveTo(8412,6081)
- 							elseif x == 37 then
+ 							elseif x == 38 then
  								CastSpell(_Q, 8194,5742 )
  								player:MoveTo(8194,5742)
- 							elseif x == 38 then
+ 							elseif x == 39 then
  								CastSpell(_Q, 5355,10832 )
  								player:MoveTo(5355,10832)
- 							elseif x == 39 then
+ 							elseif x == 40 then
  								CastSpell(_Q, 5812,10832 )
  								player:MoveTo(5812,10832)
- 							elseif x == 40 then
+ 							elseif x == 41 then
  								CastSpell(_Q, 4292,10199 )
  								player:MoveTo(4292,10199)
- 							elseif x == 41 then
+ 							elseif x == 42 then
  								CastSpell(_Q, 4480,10437 )
  								player:MoveTo(4480,10437)
- 							elseif x == 42 then
+ 							elseif x == 43 then
  								CastSpell(_Q, 4993,9706 )
  								player:MoveTo(4993,9706)
- 							elseif x == 43 then
+ 							elseif x == 44 then
  								CastSpell(_Q, 5083,9998 )
  								player:MoveTo(5083,9998)
- 							elseif x == 44 then
+ 							elseif x == 45 then
  								CastSpell(_Q, 8971,4284 )
  								player:MoveTo(8971,4284)
- 							elseif x == 45 then
+ 							elseif x == 46 then
  								CastSpell(_Q, 9378,4431 )
  								player:MoveTo(9378,4431)
- 							elseif x == 46 then
+ 							elseif x == 47 then
  								CastSpell(_Q, 9803,5249 )
  								player:MoveTo(9803,5249)
- 							elseif x == 47 then
+ 							elseif x == 48 then
  								CastSpell(_Q, 9751,4884 )
  								player:MoveTo(9751,4884)
- 							elseif x == 48 then
+ 							elseif x == 49 then
  								CastSpell(_Q, 10643,4641 )
  								player:MoveTo(10643,4641)
- 							elseif x == 49 then
- 								CastSpell(_Q, 10375,441 )
- 								player:MoveTo(10375,441)
  							elseif x == 50 then
+ 								CastSpell(_Q, 10375,4441 )
+ 								player:MoveTo(10375,4441)
+ 							elseif x == 51 then
  								CastSpell(_Q, 6553,11666 )
  								player:MoveTo(6553,11666)
- 							elseif x == 51 then
+ 							elseif x == 52 then
  								CastSpell(_Q, 6543,12054 )
  								player:MoveTo(6543,12054)
- 							elseif x == 52 then
+ 							elseif x == 53 then
  								CastSpell(_Q, 8213,3326 )
  								player:MoveTo(8213,3326)
- 							elseif x == 53 then
+ 							elseif x == 54 then
  								CastSpell(_Q, 8282,2741 )
  								player:MoveTo(8282,2741)
- 							elseif x == 54 then
+ 							elseif x == 55 then
  								CastSpell(_Q, 9535,3203 )
  								player:MoveTo(9535,3203)
- 							elseif x == 55 then
+ 							elseif x == 56 then
  								CastSpell(_Q, 9505,2756 )
  								player:MoveTo(9505,2756)
- 							elseif x == 56 then
+ 							elseif x == 57 then
  								CastSpell(_Q, 9862,3111 )
  								player:MoveTo(9862,3111)
- 							elseif x == 57 then
+ 							elseif x == 58 then
  								CastSpell(_Q, 9815,2673 )
  								player:MoveTo(9815,2673)
- 							elseif x == 58 then
+ 							elseif x == 59 then
  								CastSpell(_Q, 10046,2675 )
  								player:MoveTo(10046,2675)
- 							elseif x == 59 then
+ 							elseif x == 60 then
  								CastSpell(_Q, 10259,2925 )
  								player:MoveTo(10259,2925)
- 							elseif x == 60 then
+ 							elseif x == 61 then
  								CastSpell(_Q, 5363,12158 )
  								player:MoveTo(5363,12158)
- 							elseif x == 61 then
+ 							elseif x == 62 then
  								CastSpell(_Q, 5269,11725 )
  								player:MoveTo(5269,11725)
- 							elseif x == 62 then
+ 							elseif x == 63 then
  								CastSpell(_Q, 5110,12210 )
  								player:MoveTo(5110,12210)
- 							elseif x == 63 then
+ 							elseif x == 64 then
  								CastSpell(_Q, 4993,11836 )
  								player:MoveTo(4993,11836)
- 							elseif x == 64 then
+ 							elseif x == 65 then
  								CastSpell(_Q, 4825,12307 )
  								player:MoveTo(4825,12307)
- 							elseif x == 65 then
+ 							elseif x == 66 then
  								CastSpell(_Q, 4605,11970 )
  								player:MoveTo(4605,11970)
- 							elseif x == 66 then
+ 							elseif x == 67 then
  								CastSpell(_Q, 7115,5524 )
  								player:MoveTo(7115,5524)
- 							elseif x == 67 then
+ 							elseif x == 68 then
  								CastSpell(_Q, 7424,5905 )
  								player:MoveTo(7424,5905)
- 							elseif x == 68 then
+ 							elseif x == 69 then
  								CastSpell(_Q, 3856,7412 )
  								player:MoveTo(3856,7412)
- 							elseif x == 69 then
+ 							elseif x == 70 then
  								CastSpell(_Q, 3802,7743 )
  								player:MoveTo(3802,7743)
- 							elseif x == 70 then
+ 							elseif x == 71 then
  								CastSpell(_Q, 3422,7759 )
  								player:MoveTo(3422,7759)
- 							elseif x == 71 then
+ 							elseif x == 72 then
  								CastSpell(_Q, 3437,7398 )
  								player:MoveTo(3437,7398)
- 							elseif x == 72 then
+ 							elseif x == 73 then
  								CastSpell(_Q, 4382,8149 )
  								player:MoveTo(4382,8149)
- 							elseif x == 73 then
+ 							elseif x == 74 then
  								CastSpell(_Q, 4124,8022 )
  								player:MoveTo(4124,8022)
- 							elseif x == 74 then
+ 							elseif x == 75 then
  								CastSpell(_Q, 4624,9010 )
  								player:MoveTo(4624,9010)
- 							elseif x == 75 then
+ 							elseif x == 76 then
  								CastSpell(_Q, 4672,8519 )
  								player:MoveTo(4672,8519)
- 							elseif x == 76 then
+ 							elseif x == 77 then
  								CastSpell(_Q, 4074,9322 )
  								player:MoveTo(4074,9322)
- 							elseif x == 77 then
+ 							elseif x == 78 then
  								CastSpell(_Q, 3737,8233 )
  								player:MoveTo(3737,8233)
- 							elseif x == 78 then
+ 							elseif x == 79 then
  								CastSpell(_Q, 10904,7512 )
  								player:MoveTo(10904,7512)
- 							elseif x == 79 then
+ 							elseif x == 80 then
  								CastSpell(_Q, 11040,7179 )
  								player:MoveTo(11040,7179)
- 							elseif x == 80 then
+ 							elseif x == 81 then
  								CastSpell(_Q, 11449,7514 )
  								player:MoveTo(11449,7514)
- 							elseif x == 81 then
+ 							elseif x == 82 then
  								CastSpell(_Q, 11458,7155 )
  								player:MoveTo(11458,7155)
- 							elseif x == 82 then
+ 							elseif x == 83 then
  								CastSpell(_Q, 10189,5922 )
  								player:MoveTo(10189,5922)
- 							elseif x == 83 then
+ 							elseif x == 84 then
  								CastSpell(_Q, 10185,6286 )
  								player:MoveTo(10185,6286)
- 							elseif x == 84 then
+ 							elseif x == 85 then
  								CastSpell(_Q, 11049,5660 )
  								player:MoveTo(11049,5660)
- 							elseif x == 85 then
+ 							elseif x == 86 then
  								CastSpell(_Q, 10665,5662 )
  								player:MoveTo(10665,5662)
- 							elseif x == 86 then
+ 							elseif x == 87 then
  								CastSpell(_Q, 2800,9596 )
  								player:MoveTo(2800,9596)
- 							elseif x == 87 then
+ 							elseif x == 88 then
  								CastSpell(_Q, 2573,9674 )
  								player:MoveTo(2573,9674)
- 							elseif x == 88 then
+ 							elseif x == 89 then
  								CastSpell(_Q, 2500,9262 )
  								player:MoveTo(2500,9262)
- 							elseif x == 89 then
+ 							elseif x == 90 then
  								CastSpell(_Q, 2884,9291 )
  								player:MoveTo(2884,9291)
- 							elseif x == 90 then
+ 							elseif x == 91 then
  								CastSpell(_Q, 4772,5636 )
  								player:MoveTo(4772,5636)
- 							elseif x == 91 then
+ 							elseif x == 92 then
  								CastSpell(_Q, 4644,5876 )
  								player:MoveTo(4644,5876)
- 							elseif x == 92 then
+ 							elseif x == 93 then
  								CastSpell(_Q, 4869,6452 )
  								player:MoveTo(4869,6452)
- 							elseif x == 93 then
+ 							elseif x == 94 then
  								CastSpell(_Q, 4938,6062 )
  								player:MoveTo(4938,6062)
- 							elseif x == 94 then
+ 							elseif x == 95 then
  								CastSpell(_Q, 5998,5536 )
  								player:MoveTo(5998,5536)
- 							elseif x == 95 then
+ 							elseif x == 96 then
  								CastSpell(_Q, 6199,5286 )
  								player:MoveTo(6199,5286)
- 							elseif x == 96 then
+ 							elseif x == 97 then
  								CastSpell(_Q, 12027,5265 )
  								player:MoveTo(12027,5265)
- 							elseif x == 97 then
+ 							elseif x == 98 then
  								CastSpell(_Q, 12327,5243 )
  								player:MoveTo(12327,5243)
- 							elseif x == 98 then
+ 							elseif x == 99 then
  								CastSpell(_Q, 12343,5498 )
  								player:MoveTo(12343,5498)
- 							elseif x == 99 then
+ 							elseif x == 100 then
  								CastSpell(_Q, 11969,5480 )
  								player:MoveTo(11969,5480)
- 							elseif x == 100 then
+ 							elseif x == 101 then
  								CastSpell(_Q, 8831,9384 )
  								player:MoveTo(8831,9384)
- 							elseif x == 101 then
+ 							elseif x == 102 then
  								CastSpell(_Q, 8646,9635 )
  								player:MoveTo(8646,9635)
- 							elseif x == 102 then
+ 							elseif x == 103 then
  								CastSpell(_Q, 10061,9282 )
  								player:MoveTo(10061,9282)
- 							elseif x == 103 then
+ 							elseif x == 104 then
  								CastSpell(_Q, 10193,9052 )
  								player:MoveTo(10193,9052)
- 							elseif x == 104 then
+ 							elseif x == 105 then
  								CastSpell(_Q, 9856,8831 )
  								player:MoveTo(9856,8831)
- 							elseif x == 105 then
+ 							elseif x == 106 then
  								CastSpell(_Q, 9967,8429 )
  								player:MoveTo(9967,8429)
- 							elseif x == 106 then
+ 							elseif x == 107 then
  								CastSpell(_Q, 8369,9807 )
  								player:MoveTo(8369,9807)
- 							elseif x == 107 then
+ 							elseif x == 108 then
  								CastSpell(_Q, 8066,9796 )
  								player:MoveTo(8066,9796)
- 							elseif x == 108 then
+ 							elseif x == 109 then
  								CastSpell(_Q, 4780,3460 )
  								player:MoveTo(4780,3460)
- 							elseif x == 109 then
+ 							elseif x == 110 then
  								CastSpell(_Q, 4463,3260 )
  								player:MoveTo(4463,3260)
- 							elseif x == 110 then
+ 							elseif x == 111 then
  								CastSpell(_Q, 3182,4917 )
  								player:MoveTo(3182,4917)
- 							elseif x == 111 then
+ 							elseif x == 112 then
  								CastSpell(_Q, 3085,4539 )
  								player:MoveTo(3085,4539)
- 							elseif x == 112 then
+ 							elseif x == 113 then
  								CastSpell(_Q, 11621,10092 )
  								player:MoveTo(11621,10092)
- 							elseif x == 113 then
+ 							elseif x == 114 then
  								CastSpell(_Q, 11735,10430 )
  								player:MoveTo(11735,10430)
- 							elseif x == 114 then
+ 							elseif x == 115 then
  								CastSpell(_Q, 9999,11554 )
  								player:MoveTo(9999,11554)
- 							elseif x == 115 then
+ 							elseif x == 116 then
  								CastSpell(_Q, 10321,11664 )
  								player:MoveTo(10321,11664)
  							else
- 								print("false")
+ 								EnvoiMessage("WallJump ERROR | Report it on the forum thread please!")
  							end
  						end
  					end
@@ -2676,6 +2890,20 @@ wallSpots = {
  	},
 }
 
-function drawCircles(x,y,z,color)
-    DrawCircle(x, y, z, 50, color)
+function RunnanHurricaneCheck()
+	if Param.LastHit.Hurrican and os.clock()-Last_Hurrican > 60 then
+		Last_Hurrican = os.clock()
+		for SLOT = ITEM_1, ITEM_6 do
+			if GetInventoryHaveItem(3085) then
+				HurricanGet = 1
+			end
+		end
+	end
+end
+
+function Humanizing()
+	if Param.Humanizer and Last_Humanizer > 10 then
+		Human = (math.random(250)/1000)
+		Last_Humanizer = os.clock()
+	end
 end
