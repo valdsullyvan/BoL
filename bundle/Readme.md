@@ -4,7 +4,7 @@ I'll perhaps release him when it will be fully working :turtle:
 
 > Check my advancement here 
 
-  http://spyk.space/projets/lua/p/Elo Spike's.php
+  http://spyk.space/projets/lua/p/Elo%20Spike's.php
   
 > and here :
 
