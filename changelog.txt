@@ -3,3 +3,7 @@
       - todo_list.php
   *[Beta]BaguetteKalista (http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/) :
       - Updated to v0.2 (http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/page-5#entry1090387)
+  *Core [IDEA]
+      - Developped a librarie to make the updates faster, I'll adapt every scripts during the week.
+  *Elo Spike's  (http://spyk.space/projets/lua/p/Elo%20Spike's.php)
+      - PermaShow function
