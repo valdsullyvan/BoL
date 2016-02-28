@@ -1,3 +1,8 @@
 > Private project for the moment :alien:
 
 I'll perhaps release him when it will be fully working :turtle:
+
+> Check my advancement here 
+  http://spyk.space/projets/lua/p/Elo Spike's.php
+> and here :
+  http://spyk.space/projets/lua/p/todo_list.php
