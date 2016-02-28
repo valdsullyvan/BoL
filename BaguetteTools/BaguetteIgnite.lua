@@ -1,6 +1,6 @@
 local LastMSG = 0
 --- Starting AutoUpdate.
-local version = "0.04"
+local version = "0.1"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteIgnite"
 local AUTOUPDATE = true
@@ -18,7 +18,6 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-				whatsnew = 1
 			else
 				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..") Enjoy you'r game!") end, 1)
 			end
@@ -37,7 +36,7 @@ function OnLoad()
 
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteIgnite]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
+	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then Ignite = SUMMONER_2 end
 
 	Menu = scriptConfig("[Baguette] Ignite", "BaguetteIgnite")
 
@@ -55,7 +54,7 @@ function AutoIgnite()
 	for _, unit in pairs(GetEnemyHeroes()) do
 		health = unit.health
 		if GetDistance(unit) <= 600 then
-			if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+			if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then
 				if health+unit.shield < 40 + (20 * myHero.level) and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
 					CastSpell(Ignite, unit)
 					if os.clock() - LastMSG > 2 then
@@ -76,7 +75,7 @@ end
 
 function OnDraw()
 	if not myHero.dead and Menu.Draw then
-		if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+		if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then
 			DrawCircle(myHero.x, myHero.y, myHero.z, 600, RGB(200, 0, 0))
 		end
 	end
