@@ -1,3 +1,6 @@
+== 01/03/2016 == 
+  *Adding Core to every script for faster update (On the Elo Spike's system)
+  *Adding less lag draw for every script (Kalista already implemented)
 == 28/02/2016 ==
   *WebSite (http://lua.spyk.space/) :
       - todo_list.php
