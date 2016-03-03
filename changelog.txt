@@ -1,3 +1,10 @@
+== 03/03/2016 ==
+  *[Beta]BaguetteKalista (http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/) :
+    - Fixed random _Q issue on waveclear / jungleclear
+    - Fixed draws range
+  *Elo Spike's  (http://spyk.space/projets/lua/p/Elo%20Spike's.php)
+    - Added Skin Changer new and much perform system.
+    - Starting draw with a bundle logic.
 == 01/03/2016 == 
   *Adding Core to every script for faster update (On the Elo Spike's system)
   *Adding less lag draw for every script (Kalista already implemented)
