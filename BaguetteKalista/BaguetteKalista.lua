@@ -90,7 +90,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.20"
+local version = "0.201"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -124,7 +124,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : DAMN OPPPP UPDATE.")
+		EnvoiMessage("What's new : Fixed random _Q Cast in JungleClear.")
 		whatsnew = 0
 	end
 
