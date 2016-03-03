@@ -910,19 +910,15 @@ function OutOfAA()
 end
 
 function LaneClear()
-	if not ManaQJungle() then
-		if Param.Jungle.Q then
-			if myHero:CanUseSpell(_Q) == READY then
-				jungleMinions:update()
-				for i, jungleMinion in pairs(jungleMinions.objects) do
-					if jungleMinion ~= nil then
-						if myHero:CanUseSpell(_Q) == READY and GetDistance(jungleMinion) < SkillQ.range then
-							local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
-							if HitChance >= 2 then
-								--print("Cast Q")
-								CastSpell(_Q, castPos.x, castPos.z)
-							end
-						end
+	if Param.Jungle.Q then
+		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
+			jungleMinions:update()
+			for i, jungleMinion in pairs(jungleMinions.objects) do
+				if jungleMinion ~= nil and GetDistance(jungleMinion) < SkillQ.range then
+					local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
+					if HitChance >= 2 then
+						--print("Cast Q")
+						CastSpell(_Q, castPos.x, castPos.z)
 					end
 				end
 			end
