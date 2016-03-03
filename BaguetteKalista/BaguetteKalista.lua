@@ -90,7 +90,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.202"
+local version = "0.21"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -124,7 +124,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Fixed random _Q Cast in JungleClear and draw range issue.")
+		EnvoiMessage("What's new : LvL Spell and Skin Changer.")
 		whatsnew = 0
 	end
 
@@ -197,7 +197,7 @@ function OnLoad()
 			Param.Jungle.E:addParam("All", "Use (E) Spell if you has > 1 mobs to kill?", SCRIPT_PARAM_ONOFF, true)
 			Param.Jungle.E:addParam("early", "Enable Early Jungle Help Security?", SCRIPT_PARAM_ONOFF, true)
 
-		Param.Jungle:addParam("Q", "Enable (Q) Spell in Jungle :", SCRIPT_PARAM_ONOFF, true)
+		--Param.Jungle:addParam("Q", "Enable (Q) Spell in Jungle :", SCRIPT_PARAM_ONOFF, true)
 		Param.Jungle:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 	
 	------------------------------------------------------------
@@ -232,223 +232,24 @@ function OnLoad()
 
 
 		if VIP_USER then Param.Draw:addSubMenu("Skin Changer", "Skin") end
-			if VIP_USER then Param.Draw.Skin:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.Draw.Skin:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.Draw.Skin:addParam("LetterChamp", "Select the first letter of you'r champion :", SCRIPT_PARAM_LIST, 11, {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}) end
-			if VIP_USER then 
-				if Param.Draw.Skin.LetterChamp == 1 then LetterChampion = {"Aatrox", "Ahri", "Akali", "Alistar", "Amumu", "Anivia", "Annie", "Ashe", "Azir"} 
-					elseif Param.Draw.Skin.LetterChamp == 2 then LetterChampion = {"Bard", "Blitzcrank", "Brand", "Braum"}
-					elseif Param.Draw.Skin.LetterChamp == 3 then LetterChampion = {"Caitlyn", "Cassiopeia", "Chogath", "Corki"} 
-					elseif Param.Draw.Skin.LetterChamp == 4 then LetterChampion = {"Darius", "Diana", "DrMundo", "Draven"} 
-					elseif Param.Draw.Skin.LetterChamp == 5 then LetterChampion = {"Ekko", "Elise", "Evelynn", "Ezreal"} 
-					elseif Param.Draw.Skin.LetterChamp == 6 then LetterChampion = {"FiddleSticks", "Fiora", "Fizz"} 
-					elseif Param.Draw.Skin.LetterChamp == 7 then LetterChampion = {"Galio", "Gangplank", "Garen", "Gnar", "Gragas", "Graves"} 
-					elseif Param.Draw.Skin.LetterChamp == 8 then LetterChampion = {"Hecarim", "Heimerdinger"}
-					elseif Param.Draw.Skin.LetterChamp == 9 then LetterChampion = {"Illaoi", "Irelia"}
-					elseif Param.Draw.Skin.LetterChamp == 10 then LetterChampion = {"Janna", "JarvanIV", "Jax", "Jayce", "Jinx"}
-					elseif Param.Draw.Skin.LetterChamp == 11 then LetterChampion = {"Kalista", "Karma", "Karthus", "Kassadin", "Katarina", "Kayle", "Kennen", "Khazix", "Kindred", "KogMaw"}
-					elseif Param.Draw.Skin.LetterChamp == 12 then LetterChampion = {"Leblanc", "LeeSin", "Leona", "Lissandra", "Lucian", "Lulu", "Lux"}
-					elseif Param.Draw.Skin.LetterChamp == 13 then LetterChampion = {"Malphite", "Malzahar", "Maokai", "MasterYi", "MissFortune", "Mordekaiser", "Morgana"}
-					elseif Param.Draw.Skin.LetterChamp == 14 then LetterChampion = {"Nami", "Nasus", "Nautilus", "Nidalee", "Nocturne", "Nunu"}
-					elseif Param.Draw.Skin.LetterChamp == 15 then LetterChampion = {"Olaf", "Orianna"}
-					elseif Param.Draw.Skin.LetterChamp == 16 then LetterChampion = {"Pantheon", "Poppy"}
-					elseif Param.Draw.Skin.LetterChamp == 17 then LetterChampion = {"Quinn"}
-					elseif Param.Draw.Skin.LetterChamp == 18 then LetterChampion = {"Rammus", "Reksai", "Renekton", "Rengar", "Riven", "Rumble", "Ryze"}
-					elseif Param.Draw.Skin.LetterChamp == 19 then LetterChampion = {"Sejuani", "Shaco", "Shen", "Shyvana", "Singed", "Sion", "Sivir", "Skarner", "Sona", "Soraka", "Swain", "Syndra"}
-					elseif Param.Draw.Skin.LetterChamp == 20 then LetterChampion = {"TahmKench", "Talon", "Taric", "Teemo", "Tresh", "Tristana", "Trundle", "Tryndamere", "TwistedFate", "Twitch"}
-					elseif Param.Draw.Skin.LetterChamp == 21 then LetterChampion = {"Udyr", "Urgot"}
-					elseif Param.Draw.Skin.LetterChamp == 22 then LetterChampion = {"Varus", "Vayne", "Veigar", "Velkoz", "Vi", "Viktor", "Vladimir", "Volibear"}
-					elseif Param.Draw.Skin.LetterChamp == 23 then LetterChampion = {"Warwick", "MonkeyKing"}
-					elseif Param.Draw.Skin.LetterChamp == 24 then LetterChampion = {"Xerath", "XinZhao"}
-					elseif Param.Draw.Skin.LetterChamp == 25 then LetterChampion = {"Yasuo", "Yorick"}
-					elseif Param.Draw.Skin.LetterChamp == 26 then LetterChampion = {"Zac", "Zed", "Ziggs", "Zilean", "Zyra"}
-				end
+			if VIP_USER then Param.Draw.Skin:addParam("Enable", "Enable Skin Changer : ", SCRIPT_PARAM_ONOFF, false)
+				Param.Draw.Skin:setCallback("Enable", function (nV)
+					if nV then
+						SetSkin(myHero, Param.Draw.Skin.skins -1)
+					else
+						SetSkin(myHero, -1)
+					end
+				end)
+			end				
+			if VIP_USER then Param.Draw.Skin:addParam("skins", 'Which Skin :', SCRIPT_PARAM_LIST, 1, {"Classic", "Blood Moon", "Championship"})
+				Param.Draw.Skin:setCallback("skins", function (nV)
+					if nV then
+						if Param.Draw.Skin.Enable then
+							SetSkin(myHero, Param.Draw.Skin.skins -1)
+						end
+					end
+				end)
 			end
-			if VIP_USER then Param.Draw.Skin:addParam("SelectChamp", "Select you'r Champion :", SCRIPT_PARAM_LIST, 1, LetterChampion) end
-			if VIP_USER then 
-				if Param.Draw.Skin.LetterChamp == 1 then
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Aatrox"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Ahri"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Akali"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Alistar"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Amumu"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Anivia"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Annie"
-						elseif Param.Draw.Skin.SelectChamp == 8 then HeroSkin = "Ashe"
-						elseif Param.Draw.Skin.SelectChamp == 9 then HeroSkin = "Azir"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 2 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Bard"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Blitzcrank"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Brand"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Braum"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 3 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Caitlyn"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Cassiopeia"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Chogath"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Corki"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 4 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Darius"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Diana"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "DrMundo"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Draven"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 5 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Ekko"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Elise"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Evelynn"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Ezreal"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 6 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "FiddleSticks"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Fiora"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Fizz"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 7 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Galio"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Gangplank"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Garen"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Gnar"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Gragas"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Graves"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 8 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Hecarim"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Heimerdinger"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 9 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Illaoi"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Irelia"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 10 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Janna"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "JarvanIV"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Jax"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Jayce"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Jinx"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 11 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Kalista"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Karma"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Karthus"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Kassadin"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Katarina"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Kayle"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Kennen"
-						elseif Param.Draw.Skin.SelectChamp == 8 then HeroSkin = "Khazix"
-						elseif Param.Draw.Skin.SelectChamp == 9 then HeroSkin = "Kindred"
-						elseif Param.Draw.Skin.SelectChamp == 10 then HeroSkin = "KogMaw"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 12 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Leblanc"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "LeeSin"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Leona"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Lissandra"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Lucian"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Lulu"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Lux"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 13 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Malphite"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Malzahar"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Maokai"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "MasterYi"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "MissFortune"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Mordekaiser"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Morgana"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 14 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Nami"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Nasus"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Nautilus"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Nidalee"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Nocturne"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Nunu"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 15 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Olaf"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Orianna"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 16 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Pantheon"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Poppy"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 17 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Quinn"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 18 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Rammus"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Reksai"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Renekton"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Rengar"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Riven"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Rumble"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Ryze"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 19 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Sejuani"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Shaco"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Shen"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Shyvana"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Singed"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Sion"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Sivir"
-						elseif Param.Draw.Skin.SelectChamp == 8 then HeroSkin = "Skarner"
-						elseif Param.Draw.Skin.SelectChamp == 9 then HeroSkin = "Sona"
-						elseif Param.Draw.Skin.SelectChamp == 10 then HeroSkin = "Soraka"
-						elseif Param.Draw.Skin.SelectChamp == 11 then HeroSkin = "Swain"
-						elseif Param.Draw.Skin.SelectChamp == 12 then HeroSkin = "Syndra"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 20 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "TahmKench"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Talon"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Taric"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Teemo"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Tresh"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Tristana"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Trundle"
-						elseif Param.Draw.Skin.SelectChamp == 8 then HeroSkin = "Tryndamere"
-						elseif Param.Draw.Skin.SelectChamp == 9 then HeroSkin = "TwistedFate"
-						elseif Param.Draw.Skin.SelectChamp == 10 then HeroSkin = "Twitch"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 21 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Udyr"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Urgot"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 22 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Varus"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Vayne"
-						elseif Param.Draw.Skin.SelectChamp == 3 then HeroSkin = "Veigar"
-						elseif Param.Draw.Skin.SelectChamp == 4 then HeroSkin = "Velkoz"
-						elseif Param.Draw.Skin.SelectChamp == 5 then HeroSkin = "Vi"
-						elseif Param.Draw.Skin.SelectChamp == 6 then HeroSkin = "Viktor"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Vladimir"
-						elseif Param.Draw.Skin.SelectChamp == 7 then HeroSkin = "Volibear"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 23 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Warwick"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "MonkeyKing"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 24 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Xerath"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "XinZhao"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 25 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Yasuo"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Yorick"
-					end
-				elseif Param.Draw.Skin.LetterChamp == 26 then 
-					if Param.Draw.Skin.SelectChamp == 1 then HeroSkin = "Zac"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Zed"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Ziggs"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Zilean"
-						elseif Param.Draw.Skin.SelectChamp == 2 then HeroSkin = "Zyra"
-					end
-				end
-			end
-			if VIP_USER then Param.Draw.Skin:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, skinMeta[HeroSkin]) end
 
 	------------------------------------------------------------
 	Param:addSubMenu("", "n4")
@@ -465,6 +266,14 @@ function OnLoad()
 		if VIP_USER then Param.Misc:addSubMenu("Auto LVL Spell :", "LVL") end
 			if VIP_USER then Param.Misc.LVL:addParam("Enable", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
 			if VIP_USER then Param.Misc.LVL:addParam("Combo", "LVL Spell Order :", SCRIPT_PARAM_LIST, 1, {"E > W > Q (Max E)", "W > E > Q (Max E)", "Q > E > W (Max E)", "E > Q > W (Max E)"}) end
+			if VIP_USER then Param.Misc.LVL:setCallback("Combo", function (nV)
+				if nV then
+					AutoLvlSpellCombo()
+				else 
+					AutoLvlSpellCombo()
+				end
+			end)
+			end
 			if VIP_USER then Last_LevelSpell = 0 end
 		Param.Misc:addSubMenu("Masteries :", "Masteries")
 			Param.Misc.Masteries:addParam("DoubleEdgedSword", "Double Edeged Sword :", SCRIPT_PARAM_ONOFF, false)
@@ -595,6 +404,12 @@ function CustomLoad()
 			EnvoiMessage("You should bind with an ally!")
 		end
 	end, 300)
+
+	AutoLvlSpellCombo()
+
+	if Param.Draw.Skin.Enable then
+		SetSkin(myHero, Param.Draw.Skin.skins -1)
+	end
 
 end
 
@@ -909,21 +724,28 @@ function OutOfAA()
 	end
 end
 
-function LaneClear()
-	if Param.Jungle.Q then
-		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
-			jungleMinions:update()
-			for i, jungleMinion in pairs(jungleMinions.objects) do
-				if jungleMinion ~= nil and GetDistance(jungleMinion) < SkillQ.range then
-					local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
-					if HitChance >= 2 then
-						--print("Cast Q")
-						CastSpell(_Q, castPos.x, castPos.z)
-					end
-				end
-			end
-		end
+function OnUnload()
+	if Param.Draw.Skin.Enable then
+		SetSkin(myHero, -1)
 	end
+end
+
+
+function LaneClear()
+	-- if Param.Jungle.Q then
+	-- 	if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
+	-- 		jungleMinions:update()
+	-- 		for i, jungleMinion in pairs(jungleMinions.objects) do
+	-- 			if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 and ValidTarget(jungleMinion) then
+	-- 				local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
+	-- 				if HitChance >= 2 then
+	-- 					--print("Cast Q")
+	-- 					CastSpell(_Q, castPos.x, castPos.z)
+	-- 				end
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
 end
 
 function Harass()
@@ -1663,7 +1485,6 @@ end
 function AutoLvlSpell()
 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
 	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-	 		AutoLvlSpellCombo()
 	 		if Param.Misc.LVL.Enable then
 		    	autoLevelSetSequence(levelSequence)
 		    	Last_LevelSpell = os.clock()
@@ -1677,25 +1498,25 @@ function AutoLvlSpell()
 	end
 end
 
-_G.LevelSpell = function(id)
-	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) and Param.Misc.LVL.Enable then
-		local offsets = { 
-			[_Q] = 0x9C,
-			[_W] = 0x7C,
-			[_E] = 0xA5,
-			[_R] = 0xC4,
-		}
-		local p = CLoLPacket(0x0016)
-		p.vTable = 0xE4C8D4
-		p:EncodeF(myHero.networkID)
-		p:Encode4(0x99)
-		p:Encode1(0x83)
-		p:Encode4(0x20)
-		p:Encode1(offsets[id])
-		p:Encode4(0xEB)
-		SendPacket(p)
-	end
-end
+-- _G.LevelSpell = function(id)
+-- 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) and Param.Misc.LVL.Enable then
+-- 		local offsets = { 
+-- 			[_Q] = 0x9C,
+-- 			[_W] = 0x7C,
+-- 			[_E] = 0xA5,
+-- 			[_R] = 0xC4,
+-- 		}
+-- 		local p = CLoLPacket(0x0016)
+-- 		p.vTable = 0xE4C8D4
+-- 		p:EncodeF(myHero.networkID)
+-- 		p:Encode4(0x99)
+-- 		p:Encode1(0x83)
+-- 		p:Encode4(0x20)
+-- 		p:Encode1(offsets[id])
+-- 		p:Encode4(0xEB)
+-- 		SendPacket(p)
+-- 	end
+-- end
 
 function AutoLvlSpellCombo()
 	if Param.Misc.LVL.Enable then
@@ -1710,253 +1531,6 @@ function AutoLvlSpellCombo()
 		end
 	end
 end
-
---======START======--
--- Developers: 
--- Divine (http://forum.botoflegends.com/user/86308-divine/)
--- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
--- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
---==================--
-function DrawSkin()
-	if VIP_USER then 
-		if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
-			lastTimeTickCalled = CurrentTimeInMillis()
-			if (Param.Draw.Skin['changeSkin']) then
-				if (Param.Draw.Skin['selectedSkin'] ~= lastSkin) then
-					lastSkin = Param.Draw.Skin['selectedSkin']
-					SendSkinPacket(HeroSkin, skinsPB[Param.Draw.Skin['selectedSkin']], myHero.networkID) -- Hero
-				end
-			elseif not (Param.Draw.Skin['changeSkin']) then
-				SendSkinPacket(myHero.charName, nil, myHero.networkID) -- Hero
-			elseif (lastSkin ~= 0) then
-				SendSkinPacket(myHero.charName, nil, myHero.networkID)
-				lastSkin = 0
-			end
-		end
-	end
-end
-
-if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
-	skinsPB = {
-		[1] = 0xD4,
-		[10] = 0xAD,
-		[8] = 0xCD,
-		[4] = 0x95,
-		[12] = 0x8D,
-		[5] = 0x94,
-		[9] = 0xCC,
-		[7] = 0xEC,
-		[3] = 0xB4,
-		[11] = 0xAC,
-		[6] = 0xED,
-		[2] = 0xB5,
-	};
-	skinObjectPos = 37;
-	skinHeader = 0x0E
-	dispellHeader = 0x130;
-	skinH = 0xD4;
-	skinHPos = 32;
-  	header = 0x0E
-end
-
-function SendSkinPacket(mObject, skinPB, networkID)
-	if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
-		local mP = CLoLPacket(header);
-		mP.vTable = 0xFB7464;
-		mP:EncodeF(myHero.networkID);
-		mP:Encode1(0x00);
-		for I = 1, string.len(mObject) do
-			mP:Encode1(string.byte(string.sub(mObject, I, I)));
-		end;
-
-		for I = 1, (14 - string.len(mObject)) do
-			mP:Encode1(0x00);
-		end;
-
-		mP:Encode2(0x0000);
-		mP:Encode4(0x0000000D);
-		mP:Encode4(0x0000000F);
-		mP:Encode4(0x00000000);
-		mP:Encode2(0x0000);
-
-		if (skinnedObject) then
-			mP:Encode4(0xD5D5D5D5);
-		else
-			mP:Encode1(skinPB);
-			for I = 1, 3 do
-				mP:Encode1(skinH);
-			end;
-		end
-		mP:Hide();
-		RecvPacket(mP);
-	end
-end
-
-skinMeta = {
-
-  -- A
-	["Aatrox"]       = {"Classic", "Justicar", "Mecha", "Sea Hunter"},
-	["Ahri"]         = {"Classic", "Dynasty", "Midnight", "Foxfire", "Popstar", "Challenger", "Academy"},
-	["Akali"]        = {"Classic", "Stinger", "Crimson", "All-star", "Nurse", "Blood Moon", "Silverfang", "Headhunter"},
-	["Alistar"]      = {"Classic", "Black", "Golden", "Matador", "Longhorn", "Unchained", "Infernal", "Sweeper", "Marauder"},
-	["Amumu"]        = {"Classic", "Pharaoh", "Vancouver", "Emumu", "Re-Gifted", "Almost-Prom King", "Little Knight", "Sad Robot", "Surprise Party"},
-	["Anivia"]       = {"Classic", "Team Spirit", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"},
-	["Annie"]        = {"Classic", "Goth", "Red Riding", "Annie in Wonderland", "Prom Queen", "Frostfire", "Reverse", "FrankenTibbers", "Panda", "Sweetheart"},
-	["Ashe"]         = {"Classic", "Freljord", "Sherwood Forest", "Woad", "Queen", "Amethyst", "Heartseeker", "Marauder"},
-	["Azir"]         = {"Classic", "Galactic", "Gravelord"},
-	  -- B  
-	["Bard"]         = {"Classic", "Elderwood", "Chroma Pack: Marigold", "Chroma Pack: Ivy", "Chroma Pack: Sage"},
-	["Blitzcrank"]   = {"Classic", "Rusty", "Goalkeeper", "Boom Boom", "Piltover Customs", "Definitely Not", "iBlitzcrank", "Riot", "Chroma Pack: Molten", "Chroma Pack: Cobalt", "Chroma Pack: Gunmetal", "Battle Boss"},
-	["Brand"]        = {"Classic", "Apocalyptic", "Vandal", "Cryocore", "Zombie", "Spirit Fire"},
-	["Braum"]        = {"Classic", "Dragonslayer", "El Tigre", "Lionheart"},
-	  -- C  
-	["Caitlyn"]      = {"Classic", "Resistance", "Sheriff", "Safari", "Arctic Warfare", "Officer", "Headhunter", "Chroma Pack: Pink", "Chroma Pack: Green", "Chroma Pack: Blue","Lunar"},
-	["Cassiopeia"]   = {"Classic", "Desperada", "Siren", "Mythic", "Jade Fang", "Chroma Pack: Day", "Chroma Pack: Dusk", "Chroma Pack: Night"},
-	["Chogath"]      = {"Classic", "Nightmare", "Gentleman", "Loch Ness", "Jurassic", "Battlecast Prime", "Prehistoric"},
-	["Corki"]        = {"Classic", "UFO", "Ice Toboggan", "Red Baron", "Hot Rod", "Urfrider", "Dragonwing", "Fnatic"},
-	  -- D
-	["Darius"]       = {"Classic", "Lord", "Bioforge", "Woad King", "Dunkmaster", "Chroma Pack: Black Iron", "Chroma Pack: Bronze", "Chroma Pack: Copper", "Academy"},
-	["Diana"]        = {"Classic", "Dark Valkyrie", "Lunar Goddess"},
-	["DrMundo"]      = {"Classic", "Toxic", "Mr. Mundoverse", "Corporate Mundo", "Mundo Mundo", "Executioner Mundo", "Rageborn Mundo", "TPA Mundo", "Pool Party"},
-	["Draven"]       = {"Classic", "Soul Reaver", "Gladiator", "Primetime", "Pool Party"},
-	  -- E 
-	["Ekko"]         = {"Classic", "Sandstorm", "Academy"},
-	["Elise"]        = {"Classic", "Death Blossom", "Victorious", "Blood Moon"},
-	["Evelynn"]      = {"Classic", "Shadow", "Masquerade", "Tango", "Safecracker"},
-	["Ezreal"]       = {"Classic", "Nottingham", "Striker", "Frosted", "Explorer", "Pulsefire", "TPA", "Debonair", "Ace of Spades"},
-	  -- F 
-	["FiddleSticks"] = {"Classic", "Spectral", "Union Jack", "Bandito", "Pumpkinhead", "Fiddle Me Timbers", "Surprise Party", "Dark Candy", "Risen"},
-	["Fiora"]        = {"Classic", "Royal Guard", "Nightraven", "Headmistress", "PROJECT"},
-	["Fizz"]         = {"Classic", "Atlantean", "Tundra", "Fisherman", "Void", "Chroma Pack: Orange", "Chroma Pack: Black", "Chroma Pack: Red", "Cottontail"},
-	  -- G  
-	["Galio"]        = {"Classic", "Enchanted", "Hextech", "Commando", "Gatekeeper", "Debonair"},
-	["Gangplank"]    = {"Classic", "Spooky", "Minuteman", "Sailor", "Toy Soldier", "Special Forces", "Sultan", "Captain"},
-	["Garen"]        = {"Classic", "Sanguine", "Desert Trooper", "Commando", "Dreadknight", "Rugged", "Steel Legion", "Chroma Pack: Garnet", "Chroma Pack: Plum", "Chroma Pack: Ivory", "Rogue Admiral"},
-	["Gnar"]         = {"Classic", "Dino", "Gentleman"},
-	["Gragas"]       = {"Classic", "Scuba", "Hillbilly", "Santa", "Gragas, Esq.", "Vandal", "Oktoberfest", "Superfan", "Fnatic", "Caskbreaker"},
-	["Graves"]       = {"Classic", "Hired Gun", "Jailbreak", "Mafia", "Riot", "Pool Party", "Cutthroat"},
-	  -- H 
-	["Hecarim"]      = {"Classic", "Blood Knight", "Reaper", "Headless", "Arcade", "Elderwood"},
-	["Heimerdinger"] = {"Classic", "Alien Invader", "Blast Zone", "Piltover Customs", "Snowmerdinger", "Hazmat"},
-	  -- I 
-	["Illaoi"]       = {"Classic", "Void Bringer"},
-	["Irelia"]       = {"Classic", "Nightblade", "Aviator", "Infiltrator", "Frostblade", "Order of the Lotus"},
-	  -- J 
-	["Janna"]        = {"Classic", "Tempest", "Hextech", "Frost Queen", "Victorious", "Forecast", "Fnatic"},
-	["JarvanIV"]     = {"Classic", "Commando", "Dragonslayer", "Darkforge", "Victorious", "Warring Kingdoms", "Fnatic"},
-	["Jax"]          = {"Classic", "The Mighty", "Vandal", "Angler", "PAX", "Jaximus", "Temple", "Nemesis", "SKT T1", "Chroma Pack: Cream", "Chroma Pack: Amber", "Chroma Pack: Brick", "Warden"},
-	["Jayce"]        = {"Classic", "Full Metal", "Debonair", "Forsaken"},
-	["Jinx"]         = {"Classic", "Mafia", "Firecracker", "Slayer"},
-	  -- K 
-	["Kalista"]      = {"Classic", "Blood Moon", "Championship"},
-	["Karma"]        = {"Classic", "Sun Goddess", "Sakura", "Traditional", "Order of the Lotus", "Warden"},
-	["Karthus"]      = {"Classic", "Phantom", "Statue of", "Grim Reaper", "Pentakill", "Fnatic", "Chroma Pack: Burn", "Chroma Pack: Blight", "Chroma Pack: Frostbite"},
-	["Kassadin"]     = {"Classic", "Festival", "Deep One", "Pre-Void", "Harbinger", "Cosmic Reaver"},
-	["Katarina"]     = {"Classic", "Mercenary", "Red Card", "Bilgewater", "Kitty Cat", "High Command", "Sandstorm", "Slay Belle", "Warring Kingdoms"},
-	["Kayle"]        = {"Classic", "Silver", "Viridian", "Unmasked", "Battleborn", "Judgment", "Aether Wing", "Riot"},
-	["Kennen"]       = {"Classic", "Deadly", "Swamp Master", "Karate", "Kennen M.D.", "Arctic Ops"},
-	["Khazix"]       = {"Classic", "Mecha", "Guardian of the Sands"},
-	["Kindred"]      = {"Classic", "Shadowfire"},
-	["KogMaw"]       = {"Classic", "Caterpillar", "Sonoran", "Monarch", "Reindeer", "Lion Dance", "Deep Sea", "Jurassic", "Battlecast"},
-	  -- L 
-	["Leblanc"]      = {"Classic", "Wicked", "Prestigious", "Mistletoe", "Ravenborn"},
-	["LeeSin"]       = {"Classic", "Traditional", "Acolyte", "Dragon Fist", "Muay Thai", "Pool Party", "SKT T1", "Chroma Pack: Black", "Chroma Pack: Blue", "Chroma Pack: Yellow", "Knockout"},
-	["Leona"]        = {"Classic", "Valkyrie", "Defender", "Iron Solari", "Pool Party", "Chroma Pack: Pink", "Chroma Pack: Azure", "Chroma Pack: Lemon", "PROJECT"},
-	["Lissandra"]    = {"Classic", "Bloodstone", "Blade Queen"},
-	["Lucian"]       = {"Classic", "Hired Gun", "Striker", "Chroma Pack: Yellow", "Chroma Pack: Red", "Chroma Pack: Blue", "PROJECT"},
-	["Lulu"]         = {"Classic", "Bittersweet", "Wicked", "Dragon Trainer", "Winter Wonder", "Pool Party"},
-	["Lux"]          = {"Classic", "Sorceress", "Spellthief", "Commando", "Imperial", "Steel Legion", "Star Guardian"},
-	  -- M 
-	["Malphite"]     = {"Classic", "Shamrock", "Coral Reef", "Marble", "Obsidian", "Glacial", "Mecha", "Ironside"},
-	["Malzahar"]     = {"Classic", "Vizier", "Shadow Prince", "Djinn", "Overlord", "Snow Day"},
-	["Maokai"]       = {"Classic", "Charred", "Totemic", "Festive", "Haunted", "Goalkeeper"},
-	["MasterYi"]     = {"Classic", "Assassin", "Chosen", "Ionia", "Samurai Yi", "Headhunter", "Chroma Pack: Gold", "Chroma Pack: Aqua", "Chroma Pack: Crimson", "PROJECT"},
-	["MissFortune"]  = {"Classic", "Cowgirl", "Waterloo", "Secret Agent", "Candy Cane", "Road Warrior", "Mafia", "Arcade", "Captain"},
-	["Mordekaiser"]  = {"Classic", "Dragon Knight", "Infernal", "Pentakill", "Lord", "King of Clubs"},
-	["Morgana"]      = {"Classic", "Exiled", "Sinful Succulence", "Blade Mistress", "Blackthorn", "Ghost Bride", "Victorious", "Chroma Pack: Toxic", "Chroma Pack: Pale", "Chroma Pack: Ebony","Lunar"},
-	  -- N 
-	["Nami"]         = {"Classic", "Koi", "River Spirit", "Urf", "Chroma Pack: Sunbeam", "Chroma Pack: Smoke", "Chroma Pack: Twilight"},
-	["Nasus"]        = {"Classic", "Galactic", "Pharaoh", "Dreadknight", "Riot K-9", "Infernal", "Archduke", "Chroma Pack: Burn", "Chroma Pack: Blight", "Chroma Pack: Frostbite",},
-	["Nautilus"]     = {"Classic", "Abyssal", "Subterranean", "AstroNautilus", "Warden"},
-	["Nidalee"]      = {"Classic", "Snow Bunny", "Leopard", "French Maid", "Pharaoh", "Bewitching", "Headhunter", "Warring Kingdoms"},
-	["Nocturne"]     = {"Classic", "Frozen Terror", "Void", "Ravager", "Haunting", "Eternum"},
-	["Nunu"]         = {"Classic", "Sasquatch", "Workshop", "Grungy", "Nunu Bot", "Demolisher", "TPA", "Zombie"},
-	  -- O 
-	["Olaf"]         = {"Classic", "Forsaken", "Glacial", "Brolaf", "Pentakill", "Marauder"},
-	["Orianna"]      = {"Classic", "Gothic", "Sewn Chaos", "Bladecraft", "TPA", "Winter Wonder"},
-	  -- P 
-	["Pantheon"]     = {"Classic", "Myrmidon", "Ruthless", "Perseus", "Full Metal", "Glaive Warrior", "Dragonslayer", "Slayer"},
-	["Poppy"]        = {"Classic", "Noxus", "Lollipoppy", "Blacksmith", "Ragdoll", "Battle Regalia", "Scarlet Hammer"},
-	  -- Q 
-	["Quinn"]        = {"Classic", "Phoenix", "Woad Scout", "Corsair"},
-	  -- R 
-	["Rammus"]       = {"Classic", "King", "Chrome", "Molten", "Freljord", "Ninja", "Full Metal", "Guardian of the Sands"},
-	["Reksai"]       = {"Classic", "Eternum", "Pool Party"},
-	["Renekton"]     = {"Classic", "Galactic", "Outback", "Bloodfury", "Rune Wars", "Scorched Earth", "Pool Party", "Scorched Earth", "Prehistoric"},
-	["Rengar"]       = {"Classic", "Headhunter", "Night Hunter", "SSW"},
-	["Riven"]        = {"Classic", "Redeemed", "Crimson Elite", "Battle Bunny", "Championship", "Dragonblade", "Arcade"},
-	["Rumble"]       = {"Classic", "Rumble in the Jungle", "Bilgerat", "Super Galaxy"},
-	["Ryze"]         = {"Classic", "Human", "Tribal", "Uncle", "Triumphant", "Professor", "Zombie", "Dark Crystal", "Pirate", "Whitebeard"},
-	  -- S 
-	["Sejuani"]      = {"Classic", "Sabretusk", "Darkrider", "Traditional", "Bear Cavalry", "Poro Rider"},
-	["Shaco"]        = {"Classic", "Mad Hatter", "Royal", "Nutcracko", "Workshop", "Asylum", "Masked", "Wild Card"},
-	["Shen"]         = {"Classic", "Frozen", "Yellow Jacket", "Surgeon", "Blood Moon", "Warlord", "TPA"},
-	["Shyvana"]      = {"Classic", "Ironscale", "Boneclaw", "Darkflame", "Ice Drake", "Championship"},
-	["Singed"]       = {"Classic", "Riot Squad", "Hextech", "Surfer", "Mad Scientist", "Augmented", "Snow Day", "SSW"},
-	["Sion"]         = {"Classic", "Hextech", "Barbarian", "Lumberjack", "Warmonger"},
-	["Sivir"]        = {"Classic", "Warrior Princess", "Spectacular", "Huntress", "Bandit", "PAX", "Snowstorm", "Warden", "Victorious"},
-	["Skarner"]      = {"Classic", "Sandscourge", "Earthrune", "Battlecast Alpha", "Guardian of the Sands"},
-	["Sona"]         = {"Classic", "Muse", "Pentakill", "Silent Night", "Guqin", "Arcade", "DJ"},
-	["Soraka"]       = {"Classic", "Dryad", "Divine", "Celestine", "Reaper", "Order of the Banana"},
-	["Swain"]        = {"Classic", "Northern Front", "Bilgewater", "Tyrant"},
-	["Syndra"]       = {"Classic", "Justicar", "Atlantean", "Queen of Diamonds"},
-	  -- T 
-	["TahmKench"]    = {"Classic", "Master Chef"},
-	["Talon"]        = {"Classic", "Renegade", "Crimson Elite", "Dragonblade", "SSW"},
-	["Taric"]        = {"Classic", "Emerald", "Armor of the Fifth Age", "Bloodstone"},
-	["Teemo"]        = {"Classic", "Happy Elf", "Recon", "Badger", "Astronaut", "Cottontail", "Super", "Panda", "Omega Squad"},
-	["Thresh"]       = {"Classic", "Deep Terror", "Championship", "Blood Moon", "SSW"},
-	["Tristana"]     = {"Classic", "Riot Girl", "Earnest Elf", "Firefighter", "Guerilla", "Buccaneer", "Rocket Girl", "Chroma Pack: Navy", "Chroma Pack: Purple", "Chroma Pack: Orange", "Dragon Trainer"},
-	["Trundle"]      = {"Classic", "Lil' Slugger", "Junkyard", "Traditional", "Constable"},
-	["Tryndamere"]   = {"Classic", "Highland", "King", "Viking", "Demonblade", "Sultan", "Warring Kingdoms", "Nightmare"},
-	["TwistedFate"]  = {"Classic", "PAX", "Jack of Hearts", "The Magnificent", "Tango", "High Noon", "Musketeer", "Underworld", "Red Card", "Cutpurse"},
-	["Twitch"]       = {"Classic", "Kingpin", "Whistler Village", "Medieval", "Gangster", "Vandal", "Pickpocket", "SSW"},
-	  -- U 
-	["Udyr"]         = {"Classic", "Black Belt", "Primal", "Spirit Guard", "Definitely Not"},
-	["Urgot"]        = {"Classic", "Giant Enemy Crabgot", "Butcher", "Battlecast"},
-	  -- V 
-	["Varus"]        = {"Classic", "Blight Crystal", "Arclight", "Arctic Ops", "Heartseeker", "Swiftbolt"},
-	["Vayne"]        = {"Classic", "Vindicator", "Aristocrat", "Dragonslayer", "Heartseeker", "SKT T1", "Arclight", "Chroma Pack: Green", "Chroma Pack: Red", "Chroma Pack: Silver"},
-	["Veigar"]       = {"Classic", "White Mage", "Curling", "Veigar Greybeard", "Leprechaun", "Baron Von", "Superb Villain", "Bad Santa", "Final Boss"},
-	["Velkoz"]       = {"Classic", "Battlecast", "Arclight"},
-	["Vi"]           = {"Classic", "Neon Strike", "Officer", "Debonair", "Demon"},
-	["Viktor"]       = {"Classic", "Full Machine", "Prototype", "Creator"},
-	["Vladimir"]     = {"Classic", "Count", "Marquis", "Nosferatu", "Vandal", "Blood Lord", "Soulstealer", "Academy"},
-	["Volibear"]     = {"Classic", "Thunder Lord", "Northern Storm", "Runeguard", "Captain"},
-	  -- W 
-	["Warwick"]      = {"Classic", "Grey", "Urf the Manatee", "Big Bad", "Tundra Hunter", "Feral", "Firefang", "Hyena", "Marauder"},
-	["MonkeyKing"]   = {"Classic", "Volcanic", "General", "Jade Dragon", "Underworld","Radiant"},
-	  -- X 
-	["Xerath"]       = {"Classic", "Runeborn", "Battlecast", "Scorched Earth", "Guardian of the Sands"},
-	["XinZhao"]      = {"Classic", "Commando", "Imperial", "Viscero", "Winged Hussar", "Warring Kingdoms", "Secret Agent"},
-	  -- Y 
-	["Yasuo"]        = {"Classic", "High Noon", "PROJECT"},
-	["Yorick"]       = {"Classic", "Undertaker", "Pentakill"},
-	  -- Z 
-	["Zac"]          = {"Classic", "Special Weapon", "Pool Party", "Chroma Pack: Orange", "Chroma Pack: Bubblegum", "Chroma Pack: Honey"},
-	["Zed"]          = {"Classic", "Shockblade", "SKT T1", "PROJECT"},
-	["Ziggs"]        = {"Classic", "Mad Scientist", "Major", "Pool Party", "Snow Day", "Master Arcanist"},
-	["Zilean"]       = {"Classic", "Old Saint", "Groovy", "Shurima Desert", "Time Machine", "Blood Moon"},
-	["Zyra"]         = {"Classic", "Wildfire", "Haunted", "SKT T1"},
-
-}
-
---=======END========--
--- Developers: 
--- Divine (http://forum.botoflegends.com/user/86308-divine/)
--- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
--- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
---==================--
 
 function AutoBuy()
 	if VIP_USER and GetGameTimer() < 60 then
