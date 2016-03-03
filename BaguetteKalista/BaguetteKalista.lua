@@ -90,7 +90,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.201"
+local version = "0.202"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -124,7 +124,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Fixed random _Q Cast in JungleClear.")
+		EnvoiMessage("What's new : Fixed random _Q Cast in JungleClear and draw range issue.")
 		whatsnew = 0
 	end
 
@@ -1458,10 +1458,10 @@ function OnDraw()
 				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
 			end
 			if myHero:CanUseSpell(_E) == READY and Param.Draw.E then 
-				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillE.range, 1, 0xFFFFFFFF)
 			end
 			if myHero:CanUseSpell(_R) == READY and Param.Draw.R then
-				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillR.range, 1, 0xFFFFFFFF)
 			end
 			if Param.Draw.AA then
 				DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.range+myHero.boundingRadius, 1, 0xFFFFFFFF)
