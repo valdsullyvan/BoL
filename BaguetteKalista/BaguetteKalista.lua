@@ -77,20 +77,8 @@ local ActualPotData = "None"
 local lastRemove = 0
 -- Kite
 local AAON = 0
--- Skin Changer
-local LetterChampion = {"Kalista", "Karma", "Karthus", "Kassadin", "Katarina", "Kayle", "Kennen", "Khazix", "Kindred", "KogMaw"}
-local HeroSkin = "Kalista"
-local skinsPB = {};
-local skinObjectPos = nil;
-local skinHeader = nil;
-local dispellHeader = nil;
-local skinH = nil;
-local skinHPos = nil;
-local theMenu = nil;
-local lastTimeTickCalled = 0;
-local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.211"
+local version = "0.22"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -291,10 +279,32 @@ function OnLoad()
 			if VIP_USER then Param.Misc.Starter:addParam("TrinketBleu", "Buy a Blue Trinket at lvl.9 :", SCRIPT_PARAM_ONOFF, true) end
 		Param.Misc:addSubMenu("Sentinel Trick :", "WTrick")
 			Param.Misc.WTrick:addParam("Drake", "Cast (W) Spell trick on Drake :", SCRIPT_PARAM_ONOFF, false)
+				Param.Misc.WTrick:setCallback("Drake", function (nV)
+					if nV then
+						CastSpell(_W, 9866.148, -71, 4414.014)
+						Param.Misc.WTrick.Drake = false
+					end
+				end)
 			Param.Misc.WTrick:addParam("DrakeKey", "Cast (W) Spell trick on Drake :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("P"))
+				Param.Misc.WTrick:setCallback("DrakeKey", function (nV)
+					if nV then
+						CastSpell(_W, 9866.148, -71, 4414.014)
+					end
+				end)
 			Param.Misc.WTrick:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.WTrick:addParam("Baron", "Cast (W) Spell trick on Baron :", SCRIPT_PARAM_ONOFF, false)
+				Param.Misc.WTrick:setCallback("Baron", function (nV)
+					if nV then
+						CastSpell(_W, 5007.124, -71, 10471.45)
+						Param.Misc.WTrick.Baron = false
+					end
+				end)
 			Param.Misc.WTrick:addParam("BaronKey", "Cast (W) Spell trick on Baron :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("M"))
+				Param.Misc.WTrick:setCallback("BaronKey", function (nV)
+						if nV then
+							CastSpell(_W, 5007.124, -71, 10471.45)
+						end
+					end)
 		Param.Misc:addSubMenu("Items :", "Items")
 			Param.Misc.Items:addParam("Pot", "Use potions with this script :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.Items:addParam("PotXHP", "At how many %HP :", SCRIPT_PARAM_SLICE, 60, 0, 100)
@@ -646,14 +656,14 @@ function Spell()
 	if Param.Harass.E.Auto then
 		EHarass()
 	end
-	if Param.Misc.WTrick.Drake == true or Param.Misc.WTrick.DrakeKey then
-		CastSpell(_W, 9866.148, -71, 4414.014)
-		Param.Misc.WTrick.Drake = false
-	end
-	if Param.Misc.WTrick.Baron == true or Param.Misc.WTrick.BaronKey then
-		CastSpell(_W, 5007.124, -71, 10471.45)
-		Param.Misc.WTrick.Baron = false
-	end
+	-- if Param.Misc.WTrick.Drake == true or Param.Misc.WTrick.DrakeKey then
+	-- 	CastSpell(_W, 9866.148, -71, 4414.014)
+	-- 	Param.Misc.WTrick.Drake = false
+	-- end
+	-- if Param.Misc.WTrick.Baron == true or Param.Misc.WTrick.BaronKey then
+	-- 	CastSpell(_W, 5007.124, -71, 10471.45)
+	-- 	Param.Misc.WTrick.Baron = false
+	-- end
 	RunnanHurricaneCheck()
 	if Param.Humanizer then
 		Humanizing()
