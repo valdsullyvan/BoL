@@ -90,7 +90,7 @@ local theMenu = nil;
 local lastTimeTickCalled = 0;
 local lastSkin = 0;
 --- Starting AutoUpdate
-local version = "0.21"
+local version = "0.211"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -323,13 +323,6 @@ function OnLoad()
 			Param.Misc.WTrick:addParam("n2info", "to use the wall jump function. ", SCRIPT_PARAM_INFO, "")
 		Param.Misc:addParam("PermaE", "Enable (E) to kill when it's possible :", SCRIPT_PARAM_ONOFF, true)
 
-		-- Use E before your death
-		-- Wall jump
-		-- Explode Key
-		-- Disable E
-		-- Packets features
-		-- Humanizer vision (écran)
-
 	------------------------------------------------------------
 	Param:addSubMenu("", "n5")
 	------------------------------------------------------------
@@ -371,15 +364,6 @@ function CustomLoad()
 	ts.name = "Kalista"
 	Param:addTS(ts)
 	LoadVPred()
-
-	if VIP_USER then
-		if (not Param.Draw.Skin['saveSkin']) then
-			Param.Draw.Skin['changeSkin'] = false
-			Param.Draw.Skin['selectedSkin'] = 1
-		elseif (Param.Draw.Skin['changeSkin']) then
-			SendSkinPacket(myHero.charName, skinsPB[Param.Draw.Skin['selectedSkin']], myHero.networkID)
-		end
-	end
 
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
@@ -527,12 +511,6 @@ function OnTick()
 
 		Consommables()
 
-	end
-
-	if VIP_USER then
-		if Param.Draw.Skin.changeSkin then
-			DrawSkin()
-		end
 	end
 
 end
@@ -1110,7 +1088,6 @@ function AutoEHero()
 										CastSpell(_E)
 									end, Human)
 								end
-								--EnvoiMessage("Blitzcrank Passive DOWN.")
 							end
 						elseif LastBlitz < os.clock() then
 							if D3E1 > unit.health and not Immune(unit) and unit.shield < 1 then
@@ -1174,7 +1151,6 @@ function OnRemoveBuff(unit, buff)
     end
 	 if buff.name == "manabarrier" then
 		LastBlitz = os.clock()+90
-		--EnvoiMessage("Blitzcrank Passive DOWN.")
 	end
 end
 
@@ -1207,9 +1183,6 @@ function OnApplyBuff(source, unit, buff)
 		if buff.name == "SummonerExhaust" and unit.isMe and Param.Misc.Items.QssExhaust then
 			QSS()
 		end
-		--if buff.name == "Taunt" and unit.isMe and Param.Misc.Items.QssTaunt then
-			--QSS()
-		--end
 		if buff.name == "Silence" and unit.isMe and Param.Misc.Items.QssSilence then
 			QSS()
 		end
@@ -1236,7 +1209,6 @@ function OnApplyBuff(source, unit, buff)
 end
 
 function OnProcessSpell(unit, spell)
-	--print(spell.name)
 	if spell.target then 
 		if spell.target.name ~= nil and spell.target.name == bind then
 			if spell.target.health < ((spell.target.maxHealth * Param.Misc.R.Life) / 100 ) then
@@ -1264,10 +1236,6 @@ SkillR = { name = "Fate's Call", range = 1500, delay = nil, speed = nil, width =
 
 function OnDraw()
 	if not myHero.dead and not Param.Draw.Disable then
-
-		-- DEBUG DRAW
-
-			--DrawText3D(""..GetGameTimer().."", myHero.x, myHero.y, myHero.z, 20, 0xFFFFFFFF)
 
 		-- SPELL DRAW
 
@@ -1497,26 +1465,6 @@ function AutoLvlSpell()
 		do return end
 	end
 end
-
--- _G.LevelSpell = function(id)
--- 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) and Param.Misc.LVL.Enable then
--- 		local offsets = { 
--- 			[_Q] = 0x9C,
--- 			[_W] = 0x7C,
--- 			[_E] = 0xA5,
--- 			[_R] = 0xC4,
--- 		}
--- 		local p = CLoLPacket(0x0016)
--- 		p.vTable = 0xE4C8D4
--- 		p:EncodeF(myHero.networkID)
--- 		p:Encode4(0x99)
--- 		p:Encode1(0x83)
--- 		p:Encode4(0x20)
--- 		p:Encode1(offsets[id])
--- 		p:Encode4(0xEB)
--- 		SendPacket(p)
--- 	end
--- end
 
 function AutoLvlSpellCombo()
 	if Param.Misc.LVL.Enable then
