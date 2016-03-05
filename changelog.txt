@@ -1,19 +1,32 @@
+== 05/03/2016 ==
+  *[Beta]BaguetteKalista (http://forum.botoflegends.com/topic/87964-beta-baguette-anivia/) :
+    - Immune buff check. (added)
+    - Skin changer. (reworked)
+    - LvL Spell. (reworked)
+    - Auto buy. (added)
+    - HitBox Draw. (added)
+    - Damages with current spells on health bar. (added)
+    - SpikeLib. (added)
+    - Pewalk integration. (added)
+    - Lag Free draws. (added) - removed the old draw -
+    - AutoBuy Starter. (added)
+    - AutoBuy Blue trinket at lvl 9. (added)
 == 03/03/2016 ==
   *[Beta]BaguetteKalista (http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/) :
-    - Fixed random _Q issue on waveclear / jungleclear
-    - Fixed draws range
+    - Fixed random _Q issue on waveclear / jungleclear.
+    - Fixed draws range.
   *Elo Spike's  (http://spyk.space/projets/lua/p/Elo%20Spike's.php)
     - Added Skin Changer new and much perform system.
     - Starting draw with a bundle logic.
 == 01/03/2016 == 
-  *Adding Core to every script for faster update (On the Elo Spike's system)
-  *Adding less lag draw for every script (Kalista already implemented)
+  *Adding Core to every script for faster update. (On the Elo Spike's system)
+  *Adding less lag draw for every script. (Kalista already implemented)
 == 28/02/2016 ==
   *WebSite (http://lua.spyk.space/) :
       - todo_list.php
   *[Beta]BaguetteKalista (http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/) :
-      - Updated to v0.2 (http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/page-5#entry1090387)
+      - Updated to v0.2. (http://forum.botoflegends.com/topic/90794-beta-baguette-kalista/page-5#entry1090387)
   *Core [IDEA]
       - Developped a librarie to make the updates faster, I'll adapt every scripts during the week.
   *Elo Spike's  (http://spyk.space/projets/lua/p/Elo%20Spike's.php)
-      - PermaShow function
+      - PermaShow function.
