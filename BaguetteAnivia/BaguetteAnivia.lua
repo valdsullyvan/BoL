@@ -65,16 +65,7 @@ local lastElixir = 0
 local lastTP = 0
 local ActualTPTime = 0
 local upoeuf = 1
-local startTime = 0 
-local skinsPB = {};
-local skinObjectPos = nil;
-local skinHeader = nil;
-local dispellHeader = nil;
-local skinH = nil;
-local skinHPos = nil;
-local theMenu = nil;
-local lastTimeTickCalled = 0;
-local lastSkin = 0;
+local startTime = 0
 
 --- Starting AutoUpdate
 local version = "0.6"
