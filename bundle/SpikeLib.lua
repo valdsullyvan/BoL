@@ -35,7 +35,7 @@ end
  --- End Of AutoUpdate
 
 
---{ Custom PermaShow
+--{ CustomPermaShow.lua from https://github.com/Superx321/BoL/blob/master/common/CustomPermaShow.lua
 
 --version = 1.09
 
@@ -202,24 +202,4 @@ function DrawText(Arg1, Arg2, Arg3, Arg4, Arg5)
 end
 
 
--- } CustomPermaShow
-
--- _G.LevelSpell = function(id)
--- 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
--- 		local offsets = {
--- 			[_Q] = 0x9C,
--- 			[_W] = 0x7C,
--- 			[_E] = 0xA5,
--- 			[_R] = 0xC4,
--- 		}
--- 		local p = CLoLPacket(0x0016)
--- 		p.vTable = 0xE4C8D4
--- 		p:EncodeF(myHero.networkID)
--- 		p:Encode4(0x99)
--- 		p:Encode1(0x83)
--- 		p:Encode4(0x20)
--- 		p:Encode1(offsets[id])
--- 		p:Encode4(0xEB)
--- 		SendPacket(p)
--- 	end
--- end
+-- } CustomPermaShow.lua from https://github.com/Superx321/BoL/blob/master/common/CustomPermaShow.lua
