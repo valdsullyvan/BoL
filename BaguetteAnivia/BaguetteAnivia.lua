@@ -16,6 +16,24 @@ local charNames = {
     ['anivia'] = true
 }
 
+local buffs = {
+    ["JudicatorIntervention"] = true,
+    ["UndyingRage"] = true,
+    ["ZacRebirthReady"] = true,
+    ["AatroxPassiveDeath"] = true,
+    ["FerociousHowl"] = true,
+    ["VladimirSanguinePool"] = true,
+    ["ChronoRevive"] = true,
+    ["ChronoShift"] = true,
+    ["KarthusDeathDefiedBuff"] = true,
+    ["zhonyasringshield"] = true,
+    ["lissandrarself"] = true,
+    ["bansheesveil"] = true,
+    ["SivirE"] = true,
+    ["NocturneW"] = true,
+    ["kindredrnodeathbuff"] = true
+}
+
 if not charNames[myHero.charName] then return end
 
 function EnvoiMessage(msg)
@@ -59,7 +77,7 @@ local lastTimeTickCalled = 0;
 local lastSkin = 0;
 
 --- Starting AutoUpdate
-local version = "0.56431"
+local version = "0.6"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -94,7 +112,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Auto LvL Spell.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Update to 0.6, read the changelog.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -177,22 +195,45 @@ function OnLoad()
 			Param.miscellaneous.Pots:addParam("potatxhp", "At how many %hp", SCRIPT_PARAM_SLICE, 60, 0, 100)
 			Param.miscellaneous.Pots:addParam("potonlywithcombo", "Use potions only in ComboMode?", SCRIPT_PARAM_ONOFF, true)
 		--
-		if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "skinchanger") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("saveSkin", "Save the skin?", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("changeSkin", "Apply changes? ", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("selectedSkin", "Which Skin :", SCRIPT_PARAM_LIST, 2, {"Classic", "Baguette", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"}) end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n0", "", SCRIPT_PARAM_INFO,"") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n1", "CREDIT to :", SCRIPT_PARAM_INFO,"Divine") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n2", "CREDIT to :", SCRIPT_PARAM_INFO,"PvPSuite") end
-			if VIP_USER then Param.miscellaneous.skinchanger:addParam("n3", "for :", SCRIPT_PARAM_INFO,"p_skinChanger") end
+				if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "Skin") end
+			if VIP_USER then Param.miscellaneous.Skin:addParam("Enable", "Enable Skin Changer : ", SCRIPT_PARAM_ONOFF, false)
+				Param.miscellaneous.Skin:setCallback("Enable", function (nV)
+					if nV then
+						SetSkin(myHero, Param.miscellaneous.Skin.skins -1)
+					else
+						SetSkin(myHero, -1)
+					end
+				end)
+			end				
+			if VIP_USER then Param.miscellaneous.Skin:addParam("skins", 'Which Skin :', SCRIPT_PARAM_LIST, 2,  {"Classic", "Team Spirit", "Bird of Prey", "Noxus Hunter", "Hextech", "Blackfrost", "Prehistoric"})
+				Param.miscellaneous.Skin:setCallback("skins", function (nV)
+					if nV then
+						if Param.miscellaneous.Skin.Enable then
+							SetSkin(myHero, Param.miscellaneous.Skin.skins -1)
+						end
+					end
+				end)
+			end
 		--
-		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Lvl Spell", "levelspell") end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("EnableAutoLvlSpell", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("ComboAutoLvlSpell", "Choose you'r Auto Level Spell Combo", SCRIPT_PARAM_LIST, 2, {"Q > E > W > E (Max E)", "Q > E > E > W (Max E)"}) end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("n1", "", SCRIPT_PARAM_INFO,"") end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("n2", "Press F9 twice if you change Level Spell Combo.", SCRIPT_PARAM_INFO,"") end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("n3", "If you need more Combo, go on forum and tell me which.", SCRIPT_PARAM_INFO,"") end
+		if VIP_USER then Param.miscellaneous:addSubMenu("Auto LVL Spell :", "LVL") end
+			if VIP_USER then Param.miscellaneous.LVL:addParam("Enable", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.LVL:addParam("Combo", "LVL Spell Order :", SCRIPT_PARAM_LIST, 2, {"Q > E > W > E (Max E)", "Q > E > E > W (Max E)"}) end
+			if VIP_USER then Param.miscellaneous.LVL:setCallback("Combo", function (nV)
+				if nV then
+					AutoLvlSpellCombo()
+				else 
+					AutoLvlSpellCombo()
+				end
+			end)
+			end
 			if VIP_USER then Last_LevelSpell = 0 end
+		--
+		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Buy Starter :", "Starter") end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("Doran", "Buy a doran blade :", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("Pots", "Buy a potion :", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("Trinket", "Buy a Green Trinket :", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("n1blank", "", SCRIPT_PARAM_INFO, "") end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("TrinketBleu", "Buy a Blue Trinket at lvl.9 :", SCRIPT_PARAM_ONOFF, true) end
 		--
 		Param.miscellaneous:addSubMenu("GapCloser", "GapCloser")
 			Param.miscellaneous.GapCloser:addParam("QGapClos", "Use GapCloser (Q)?", SCRIPT_PARAM_ONOFF, true)
@@ -224,6 +265,7 @@ function OnLoad()
 		Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
+		Param.drawing:addParam("hitbox", "Draw HitBox?", SCRIPT_PARAM_ONOFF, true)
 		--
 		Param.drawing:addSubMenu("Charactere Draws","spell")
 			Param.drawing.spell:addParam("Qdraw","Display (Q) Spell draw?", SCRIPT_PARAM_ONOFF, true)
@@ -263,7 +305,7 @@ function OnLoad()
 	
 	Param:addSubMenu("", "nil")
 	--
-	Param:addParam("n4", "Baguette Anvia | Version", SCRIPT_PARAM_INFO, ""..version.."")
+	Param:addParam("n4", "Baguette Anivia | Version", SCRIPT_PARAM_INFO, ""..version.."")
 	Param:permaShow("n4")
 
 	CustomLoad()
@@ -273,11 +315,9 @@ end
 function OnUnload()
 	EnvoiMessage("Unloaded.")
 	EnvoiMessage("There is no bird anymore between us... Ciao!")
-	-- if VIP_USER then
-	-- 	if (Param.miscellaneous.skinchanger['changeSkin']) then
-	-- 		SendSkinPacket(myHero.charName, nil, myHero.networkID);
-	-- 	end
-	-- end
+	if Param.miscellaneous.Skin.Enable then
+		SetSkin(myHero, -1)
+	end
 end
 
 function CustomLoad()
@@ -292,12 +332,16 @@ function CustomLoad()
 	local drawWallSpots = true
 	local MinionNumber = 0
 
+	LoadSpikeLib()
+
 	if VIP_USER then
 		AutoLvlSpellCombo()
 	end
 
+	DelayAction(function()AutoBuy()end, 3)
+
 	PredictionOrbWalkSwitch()
-	Skills()	
+	Skills()
 	GenerateTables()
 	enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
 	jungleMinions = minionManager(MINION_JUNGLE, 700, myHero, MINION_SORT_MAXHEALTH_DEC)
@@ -305,16 +349,11 @@ function CustomLoad()
 	ts.name = "Anivia"
 	Param:addTS(ts)
 	PriorityOnLoad()
-	DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
 
-	if VIP_USER then
-		if (not Param.miscellaneous.skinchanger['saveSkin']) then
-			Param.miscellaneous.skinchanger['changeSkin'] = false
-			Param.miscellaneous.skinchanger['selectedSkin'] = 1
-		elseif (Param.miscellaneous.skinchanger['changeSkin']) then
-			SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
-		end
+	if Param.miscellaneous.Skin.Enable then
+		SetSkin(myHero, Param.miscellaneous.Skin.skins -1)
 	end
+
  end
 
 function PredictionOrbWalkSwitch()
@@ -341,6 +380,8 @@ function PredictionOrbWalkSwitch()
 
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
+   	elseif _Pewalk then
+   		LoadPewalk()
 	elseif Param.orbwalker.n1 == 1 then
 		EnvoiMessage("SxOrbWalk loading..")
 		LoadSXOrb()
@@ -380,11 +421,24 @@ end
 function LoadBFOrb()
 	local LibPath = LIB_PATH.."Big Fat Orbwalker.lua"
 	local ScriptPath = SCRIPT_PATH.."Big Fat Orbwalker.lua"
-	if not (FileExist(ScriptPath) and _G["BigFatOrb_Loaded"] == true) then
+		if not (FileExist(ScriptPath) and _G["BigFatOrb_Loaded"] == true) then
 			local Host = "raw.github.com"
 			local Path = "/BigFatNidalee/BoL-Releases/master/LimitedAccess/Big Fat Orbwalker.lua?rand="..math.random(1,10000)
 			DownloadFile("https://"..Host..Path, LibPath, function ()  end)
 		require "Big Fat Orbwalker"
+	end
+end
+
+function LoadSpikeLib()
+	local LibPath = LIB_PATH.."SpikeLib.lua"
+	if not FileExist(LibPath) then
+		local Host = "raw.github.com"
+		local Path = "/spyk1/BoL/master/bundle/SpikeLib.lua".."?rand="..math.random(1,10000)
+		DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+		DelayAction(function () require("SpikeLib") end, 5)
+	else
+		require("SpikeLib")
+		DelayAction(function ()EnvoiMessage("Loaded Libraries with success!") end, 3)
 	end
 end
 
@@ -419,6 +473,15 @@ function LoadSACR()
 	else
 		DelayAction(function()EnvoiMessage("Failed to Load SAC:R")end, 7)
 	end 
+end
+
+function LoadPewalk()
+	if _Pewalk then
+		EnvoiMessage("Loaded Pewalk")
+		DelayAction(function ()EnvoiMessage("[Pewalk] Disable every spell usage in Pewalk for better performances with my script.")end, 7)
+	elseif not _Pewalk then
+		EnvoiMessage("Pewalk loading error")
+	end
 end
 
 function LoadVPred()
@@ -566,7 +629,7 @@ function GetCustomTarget()
 end
 
 function Combo(unit)
-	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type and not Immune(unit) then
 		if Param.Combo.UseQ then 
 			LogicQ(unit)
 		end	
@@ -584,10 +647,8 @@ function Consommables()
 	AutoSeraphin()
 	AutoFrostQuenn()
 	AutoElixirDuSorcier()
-	if VIP_USER then
-		if Param.miscellaneous.levelspell.EnableAutoLvlSpell then
-	 		AutoLvlSpell()
-		end
+	if VIP_USER and Param.miscellaneous.LVL.Enable then
+	 	AutoLvlSpell()
 	end
 	if Param.miscellaneous.Pots.potswithscript and not Param.miscellaneous.Pots.potonlywithcombo then
 		AutoPotions()
@@ -659,20 +720,6 @@ function DrawFunc()
 		drawWallSpots = true
 	elseif not Param.drawing.wallmenu.active then
 	    drawWallSpots = false
-	end
-	if VIP_USER then 
-		if ((CurrentTimeInMillis() - lastTimeTickCalled) > 200) then
-			lastTimeTickCalled = CurrentTimeInMillis()
-			if (Param.miscellaneous.skinchanger['changeSkin']) then
-				if (Param.miscellaneous.skinchanger['selectedSkin'] ~= lastSkin) then
-					lastSkin = Param.miscellaneous.skinchanger['selectedSkin']
-					SendSkinPacket(myHero.charName, skinsPB[Param.miscellaneous.skinchanger['selectedSkin']], myHero.networkID)
-				end
-			elseif (lastSkin ~= 0) then
-				SendSkinPacket(myHero.charName, nil, myHero.networkID)
-				lastSkin = 0
-			end
-		end
 	end
 end
 
@@ -973,7 +1020,6 @@ function ValidR()
 	end	
 end
 
-
 function CalcSpellDamage(enemy)
 	if not enemy then return end 
 		return ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageQ)) or 0), ((myHero:GetSpellData(_E).level >= 1 and myHero:CalcMagicDamage(enemy, damageE)) or 0), ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageR)) or 0)
@@ -1088,19 +1134,22 @@ end
 function OnDraw()
 	if not myHero.dead and not Param.drawing.disablealldrawings then
 		if myHero:CanUseSpell(_Q) == READY and Param.drawing.spell.Qdraw then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(200, 0, 0))
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
 		end
 		if myHero:CanUseSpell(_W) == READY and Param.drawing.spell.Wdraw then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillW.range, RGB(200, 0, 0))
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillW.range, 1, 0xFFFFFFFF)
 		end
 		if myHero:CanUseSpell(_E) == READY and Param.drawing.spell.Edraw then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, RGB(200, 0, 0))
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillE.range, 1, 0xFFFFFFFF)
 		end
 		if myHero:CanUseSpell(_R) == READY and Param.drawing.spell.Rdraw then
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, RGB(200, 0, 0))
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillR.range, 1, 0xFFFFFFFF)
 		end
 		if Param.drawing.spell.AAdraw then
-			DrawCircle(myHero.x, myHero.y, myHero.z, 660, RGB(200, 0, 0))
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.range+myHero.boundingRadius, 1, 0xFFFFFFFF)
+		end
+		if Param.drawing.hitbox then
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.boundingRadius, 1, 0xFFFFFFFF)
 		end
 		if Param.drawing.spell.EggTimer and OeufTimerDraw == 1 then
 			DrawText3D("REBIRTH :"..math.round(startTime - os.clock(), 2).."s", myHero.x-100, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
@@ -1113,9 +1162,27 @@ function OnDraw()
 		if Param.drawing.spell.Qtravel then
 			if QMissile ~= nil then
 				local Vec2 = Vector(QMissile.pos) + (Vector(myHero.pos) - Vector(QMissile.pos)):normalized()
-				DrawCircle(Vec2.x, Vec2.y, Vec2.z, 200, ARGB(255,255, 255,255))
+				DrawCircle3D(Vec2.x, Vec2.y, Vec2.z, 200, 1, 0xFFFFFFFF)
 			end
 		end
+
+		if Param.drawing.BarH then
+			local Center = GetUnitHPBarPos(unit)
+			local Y3QER = damageQ*2 + damageE*2 + damageR*3
+			if Center.x > -100 and Center.x < WINDOW_W+100 and Center.y > -100 and Center.y < WINDOW_H+100 then
+				local off = GetUnitHPBarOffset(unit)
+				local y=Center.y + (off.y * 53) + 2
+				local xOff = ({['AniviaEgg'] = -0.1,['Darius'] = -0.05,['Renekton'] = -0.05,['Sion'] = -0.05,['Thresh'] = -0.03,})[unit.charName]
+				local x = Center.x + ((xOff or 0) * 140) - 66
+				if not TargetHaveBuff("SummonerExhaust", myHero) then
+					dmg = unit.health - Y3QER
+				elseif TargetHaveBuff("SummonerExhaust", myHero) then
+					dmg = unit.health - (Y3QER-((Y3QER*40)/100))
+				end
+				DrawLine(x + ((unit.health /unit.maxHealth) * 104),y, x+(((dmg > 0 and dmg or 0) / unit.maxHealth) * 104),y,9, GetDistance(unit) < 3000 and 0x6699FFFF)
+			end
+		end
+
 		if Param.drawing.drawKillable then
 			for i = 1, heroManager.iCount do
 				local enemy = heroManager:getHero(i)
@@ -1301,6 +1368,13 @@ function OnRemoveBuff(unit, buff)
 		OeufTimerDraw = 1
 		DelayAction(function() OeufTimerDraw = 0 end, 6)
 	end
+	if buff.name == "recall" and unit.isMe then
+		if myHero.level >= 9 then
+			if Param.miscellaneous.Starter.TrinketBleu then
+				BuyItem(3363)
+			end
+		end
+	end
 end
 
 
@@ -1399,7 +1473,7 @@ function GenerateTables()
 end
 
 function Skills()
-	SkillQ = { name = "Flash Frost", range = 1075, delay = 0.250, speed = 850, width = 110, ready = false }
+	SkillQ = { name = "Flash Frost", range = 1100, delay = 0.25, speed = 850, width = 110, ready = false }
 	SkillW = { name = "Crystallize", range = 1000, delay = 0.25, speed = math.huge, width = 100, ready = false }
 	SkillE = { name = "Frostbite", range = 650, delay = 0.25, speed = 850, width = nil, ready = false }
 	SkillR = { name = "Glacial Storm", range = 625, delay = 0.100, speed = math.huge, width = 350, ready = false }
@@ -1508,7 +1582,7 @@ function Usepot()
 	end
 end
 
-function  AutoElixirDuSorcier()
+function AutoElixirDuSorcier()
 	if (Param.miscellaneous.ElixirduSorcier.elixirwithscript == false) then return end
 		if(Param.miscellaneous.ElixirduSorcier.elixironlywithcombo == true) and (Param.Combo.comboKey == false) then return end
 			if(Param.miscellaneous.ElixirduSorcier.elixirinfight == true) and (myHero.health*100)/myHero.maxHealth > 80 then return end 
@@ -1596,116 +1670,50 @@ function AutoEggTp()
 	end
 end
 
-function AutoLvlSpell()
- 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 and Param.miscellaneous.levelspell.EnableAutoLvlSpell then
-    	autoLevelSetSequence(levelSequence)
-    	Last_LevelSpell = os.clock()
-  	end
+function AutoBuy()
+	if VIP_USER and GetGameTimer() < 60 then
+		if Param.miscellaneous.Starter.Doran then
+			BuyItem(1056)
+		end
+		if Param.miscellaneous.Starter.Pots then
+			BuyItem(2003)
+		end
+		if Param.miscellaneous.Starter.Pots then
+			BuyItem(2003)
+		end
+		if Param.miscellaneous.Starter.Trinket then
+			BuyItem(3340)
+		end
+	end
 end
 
-_G.LevelSpell = function(id)
+function AutoLvlSpell()
 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
-		local offsets = { 
-			[_Q] = 0x9C,
-			[_W] = 0x7C,
-			[_E] = 0xA5,
-			[_R] = 0xC4,
-		}
-		local p = CLoLPacket(0x0016)
-		p.vTable = 0xE4C8D4
-		p:EncodeF(myHero.networkID)
-		p:Encode4(0x99)
-		p:Encode1(0x83)
-		p:Encode4(0x20)
-		p:Encode1(offsets[id])
-		p:Encode4(0xEB)
-		SendPacket(p)
+	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+	 		if Param.miscellaneous.LVL.Enable then
+		    	autoLevelSetSequence(levelSequence)
+		    	Last_LevelSpell = os.clock()
+		    elseif not Param.miscellaneous.LVL.Enable then
+		    	autoLevelSetSequence(nil)
+		    	Last_LevelSpell = os.clock()+10
+		    end
+	  	end
+	else
+		do return end
 	end
 end
 
 function AutoLvlSpellCombo()
-	if Param.miscellaneous.levelspell.ComboAutoLvlSpell == 1 then
+	if Param.miscellaneous.LVL.Combo == 1 then
 		levelSequence =  { 1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
-	elseif Param.miscellaneous.levelspell.ComboAutoLvlSpell == 2 then			
+	elseif Param.miscellaneous.LVL.Combo == 2 then			
 		levelSequence =  { 1,3,3,2,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
 	else return end
 end
 
---======START======--
--- Developers: 
--- Divine (http://forum.botoflegends.com/user/86308-divine/)
--- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
--- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
---==================--
-if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
-	skinsPB = {
-		[1] = 0xD4,
-		[10] = 0xAD,
-		[8] = 0xCD,
-		[4] = 0x95,
-		[12] = 0x8D,
-		[5] = 0x94,
-		[9] = 0xCC,
-		[7] = 0xEC,
-		[3] = 0xB4,
-		[11] = 0xAC,
-		[6] = 0xED,
-		[2] = 0xB5,
-	};
-	skinObjectPos = 37;
-	skinHeader = 0x0E
-	dispellHeader = 0x130;
-	skinH = 0xD4;
-	skinHPos = 32;
-  header = 0x0E
-end
-
-function SendSkinPacket(mObject, skinPB, networkID)
-	if (string.find(GetGameVersion(), 'Releases/6.2') ~= nil) then
-		local mP = CLoLPacket(header);
-
-			mP.vTable = 0xFB7464;
-
-		mP:EncodeF(myHero.networkID);
-    mP:Encode1(0x00);
-		for I = 1, string.len(mObject) do
-			mP:Encode1(string.byte(string.sub(mObject, I, I)));
-		end;
-
-		for I = 1, (14 - string.len(mObject)) do
-			mP:Encode1(0x00);
-		end;
-
-    mP:Encode2(0x0000);
-		mP:Encode4(0x0000000D);
-		mP:Encode4(0x0000000F);
-    mP:Encode4(0x00000000);
-    mP:Encode2(0x0000);
-    
-				if (skinnedObject) then
-			mP:Encode4(0xD5D5D5D5);
-		else
-			mP:Encode1(skinPB);
-			for I = 1, 3 do
-				mP:Encode1(skinH);
-			end;
-		end
-		mP:Hide();
-    RecvPacket(mP);
-	end
-end
-
---=======END========--
--- Developers: 
--- Divine (http://forum.botoflegends.com/user/86308-divine/)
--- PvPSuite (http://forum.botoflegends.com/user/76516-pvpsuite/)
--- https://raw.githubusercontent.com/Nader-Sl/BoLStudio/master/Scripts/p_skinChanger.lua
---==================--
-
 wallSpots = {
 	worksWell = {
-		Locations = {
-		-- Walls Spots -- 
+		Locations = { 
 					{ x = 5050.10,y=5,z= 10514.81},
 					{ x = 4692,  y = -71,z =10032},
 					{ x = 3652,  y = -5, z = 9320},
@@ -2043,207 +2051,12 @@ wallSpots = {
 					{ x = 10132,  y = 100, z = 13388},
 					{ x = 10722,  y = 91, z = 11298},
 					{ x = 11200,  y = 91, z = 10808},
-		--Wall Spots
 					},
  	},
 }
 
---===START UPDATE CLASS===--
-class "ScriptUpdate"
-function ScriptUpdate:__init(LocalVersion,UseHttps, Host, VersionPath, ScriptPath, SavePath, CallbackUpdate, CallbackNoUpdate, CallbackNewVersion,CallbackError)
-    self.LocalVersion = LocalVersion
-    self.Host = Host
-    self.VersionPath = '/BoL/TCPUpdater/GetScript'..(UseHttps and '5' or '6')..'.php?script='..self:Base64Encode(self.Host..VersionPath)..'&rand='..math.random(99999999)
-    self.ScriptPath = '/BoL/TCPUpdater/GetScript'..(UseHttps and '5' or '6')..'.php?script='..self:Base64Encode(self.Host..ScriptPath)..'&rand='..math.random(99999999)
-    self.SavePath = SavePath
-    self.CallbackUpdate = CallbackUpdate
-    self.CallbackNoUpdate = CallbackNoUpdate
-    self.CallbackNewVersion = CallbackNewVersion
-    self.CallbackError = CallbackError
-    AddDrawCallback(function() self:OnDraw() end)
-    self:CreateSocket(self.VersionPath)
-    self.DownloadStatus = 'Connect to Server for VersionInfo'
-    AddTickCallback(function() self:GetOnlineVersion() end)
-end
-
-function ScriptUpdate:print(str)
-    print('<font color="#FFFFFF">'..os.clock()..': '..str)
-end
-
-function ScriptUpdate:OnDraw()
-    if self.DownloadStatus ~= 'Downloading Script (100%)' and self.DownloadStatus ~= 'Downloading VersionInfo (100%)'then
-        DrawText('Download Status: '..(self.DownloadStatus or 'Unknown'),50,10,50,ARGB(0xFF,0xFF,0xFF,0xFF))
-    end
-end
-
-function ScriptUpdate:CreateSocket(url)
-    if not self.LuaSocket then
-        self.LuaSocket = require("socket")
-    else
-        self.Socket:close()
-        self.Socket = nil
-        self.Size = nil
-        self.RecvStarted = false
-    end
-    self.LuaSocket = require("socket")
-    self.Socket = self.LuaSocket.tcp()
-    self.Socket:settimeout(0, 'b')
-    self.Socket:settimeout(99999999, 't')
-    self.Socket:connect('sx-bol.eu', 80)
-    self.Url = url
-    self.Started = false
-    self.LastPrint = ""
-    self.File = ""
-end
-
-function ScriptUpdate:Base64Encode(data)
-    local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    return ((data:gsub('.', function(x)
-        local r,b='',x:byte()
-        for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and '1' or '0') end
-        return r;
-    end)..'0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
-        if (#x < 6) then return '' end
-        local c=0
-        for i=1,6 do c=c+(x:sub(i,i)=='1' and 2^(6-i) or 0) end
-        return b:sub(c+1,c+1)
-    end)..({ '', '==', '=' })[#data%3+1])
-end
-
-function ScriptUpdate:GetOnlineVersion()
-    if self.GotScriptVersion then return end
-
-    self.Receive, self.Status, self.Snipped = self.Socket:receive(1024)
-    if self.Status == 'timeout' and not self.Started then
-        self.Started = true
-        self.Socket:send("GET "..self.Url.." HTTP/1.1\r\nHost: sx-bol.eu\r\n\r\n")
-    end
-    if (self.Receive or (#self.Snipped > 0)) and not self.RecvStarted then
-        self.RecvStarted = true
-        self.DownloadStatus = 'Downloading VersionInfo (0%)'
-    end
-
-    self.File = self.File .. (self.Receive or self.Snipped)
-    if self.File:find('</s'..'ize>') then
-        if not self.Size then
-            self.Size = tonumber(self.File:sub(self.File:find('<si'..'ze>')+6,self.File:find('</si'..'ze>')-1))
-        end
-        if self.File:find('<scr'..'ipt>') then
-            local _,ScriptFind = self.File:find('<scr'..'ipt>')
-            local ScriptEnd = self.File:find('</scr'..'ipt>')
-            if ScriptEnd then ScriptEnd = ScriptEnd - 1 end
-            local DownloadedSize = self.File:sub(ScriptFind+1,ScriptEnd or -1):len()
-            self.DownloadStatus = 'Downloading VersionInfo ('..math.round(100/self.Size*DownloadedSize,2)..'%)'
-        end
-    end
-    if self.File:find('</scr'..'ipt>') then
-        self.DownloadStatus = 'Downloading VersionInfo (100%)'
-        local a,b = self.File:find('\r\n\r\n')
-        self.File = self.File:sub(a,-1)
-        self.NewFile = ''
-        for line,content in ipairs(self.File:split('\n')) do
-            if content:len() > 5 then
-                self.NewFile = self.NewFile .. content
-            end
-        end
-        local HeaderEnd, ContentStart = self.File:find('<scr'..'ipt>')
-        local ContentEnd, _ = self.File:find('</sc'..'ript>')
-        if not ContentStart or not ContentEnd then
-            if self.CallbackError and type(self.CallbackError) == 'function' then
-                self.CallbackError()
-            end
-        else
-            self.OnlineVersion = (Base64Decode(self.File:sub(ContentStart + 1,ContentEnd-1)))
-            self.OnlineVersion = tonumber(self.OnlineVersion)
-            if self.OnlineVersion > self.LocalVersion then
-                if self.CallbackNewVersion and type(self.CallbackNewVersion) == 'function' then
-                    self.CallbackNewVersion(self.OnlineVersion,self.LocalVersion)
-                end
-                self:CreateSocket(self.ScriptPath)
-                self.DownloadStatus = 'Connect to Server for ScriptDownload'
-                AddTickCallback(function() self:DownloadUpdate() end)
-            else
-                if self.CallbackNoUpdate and type(self.CallbackNoUpdate) == 'function' then
-                    self.CallbackNoUpdate(self.LocalVersion)
-                end
-            end
-        end
-        self.GotScriptVersion = true
-    end
-end
-
-function ScriptUpdate:DownloadUpdate()
-    if self.GotScriptUpdate then return end
-    self.Receive, self.Status, self.Snipped = self.Socket:receive(1024)
-    if self.Status == 'timeout' and not self.Started then
-        self.Started = true
-        self.Socket:send("GET "..self.Url.." HTTP/1.1\r\nHost: sx-bol.eu\r\n\r\n")
-    end
-    if (self.Receive or (#self.Snipped > 0)) and not self.RecvStarted then
-        self.RecvStarted = true
-        self.DownloadStatus = 'Downloading Script (0%)'
-    end
-
-    self.File = self.File .. (self.Receive or self.Snipped)
-    if self.File:find('</si'..'ze>') then
-        if not self.Size then
-            self.Size = tonumber(self.File:sub(self.File:find('<si'..'ze>')+6,self.File:find('</si'..'ze>')-1))
-        end
-        if self.File:find('<scr'..'ipt>') then
-            local _,ScriptFind = self.File:find('<scr'..'ipt>')
-            local ScriptEnd = self.File:find('</scr'..'ipt>')
-            if ScriptEnd then ScriptEnd = ScriptEnd - 1 end
-            local DownloadedSize = self.File:sub(ScriptFind+1,ScriptEnd or -1):len()
-            self.DownloadStatus = 'Downloading Script ('..math.round(100/self.Size*DownloadedSize,2)..'%)'
-        end
-    end
-    if self.File:find('</scr'..'ipt>') then
-        self.DownloadStatus = 'Downloading Script (100%)'
-        local a,b = self.File:find('\r\n\r\n')
-        self.File = self.File:sub(a,-1)
-        self.NewFile = ''
-        for line,content in ipairs(self.File:split('\n')) do
-            if content:len() > 5 then
-                self.NewFile = self.NewFile .. content
-            end
-        end
-        local HeaderEnd, ContentStart = self.NewFile:find('<sc'..'ript>')
-        local ContentEnd, _ = self.NewFile:find('</scr'..'ipt>')
-        if not ContentStart or not ContentEnd then
-            if self.CallbackError and type(self.CallbackError) == 'function' then
-                self.CallbackError()
-            end
-        else
-            local newf = self.NewFile:sub(ContentStart+1,ContentEnd-1)
-            local newf = newf:gsub('\r','')
-            if newf:len() ~= self.Size then
-                if self.CallbackError and type(self.CallbackError) == 'function' then
-                    self.CallbackError()
-                end
-                return
-            end
-            local newf = Base64Decode(newf)
-            if type(load(newf)) ~= 'function' then
-                if self.CallbackError and type(self.CallbackError) == 'function' then
-                    self.CallbackError()
-                end
-            else
-                local f = io.open(self.SavePath,"w+b")
-                f:write(newf)
-                f:close()
-                if self.CallbackUpdate and type(self.CallbackUpdate) == 'function' then
-                    self.CallbackUpdate(self.OnlineVersion,self.LocalVersion)
-                end
-            end
-        end
-        self.GotScriptUpdate = true
-    end
-end
---====END UPDATE CLASS====--
-
---==
 function OnNewPath(unit,startPos,endPos,isDash,dashSpeed,dashGravity,dashDistance)
-	if isDash and SkillW.ready and Param.miscellaneous.WdansR then
+	if isDash and myHero:CanUseSpell(_W) == READY and Param.miscellaneous.WdansR then
 		if GetDistance(startPos, endPos) < 0.55 * dashSpeed then
 			castPos = Vector(startPos) + (Vector(endPos) - Vector(startPos)):normalized() * 0.55 * dashSpeed
 		else
@@ -2334,6 +2147,17 @@ function PointsOfIntersection(A, B, C, R)
 	
 	return F, G
 end
---===
 
 DelayAction(function() EnvoiMessage("You have to rightclick on the circles now to cast a Wall.") end, 10)
+
+function Immune(unit)
+    for i = 1, unit.buffCount do
+        local tBuff = unit:getBuff(i)
+        if BuffIsValid(tBuff) then
+            if buffs[tBuff.name] then
+                return true
+            end
+        end
+    end
+    return false
+end
