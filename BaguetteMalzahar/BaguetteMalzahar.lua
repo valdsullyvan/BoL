@@ -16,6 +16,24 @@ local charNames = {
     ['malzahar'] = true
 }
 
+local buffs = {
+    ["JudicatorIntervention"] = true,
+    ["UndyingRage"] = true,
+    ["ZacRebirthReady"] = true,
+    ["AatroxPassiveDeath"] = true,
+    ["FerociousHowl"] = true,
+    ["VladimirSanguinePool"] = true,
+    ["ChronoRevive"] = true,
+    ["ChronoShift"] = true,
+    ["KarthusDeathDefiedBuff"] = true,
+    ["zhonyasringshield"] = true,
+    ["lissandrarself"] = true,
+    ["bansheesveil"] = true,
+    ["SivirE"] = true,
+    ["NocturneW"] = true,
+    ["kindredrnodeathbuff"] = true
+}
+
 if not charNames[myHero.charName] then return end
 
 function EnvoiMessage(msg)
@@ -38,7 +56,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.13231"
+local version = "0.2"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -73,7 +91,7 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteMalzahar]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Auto LvL Spell fixed for the update.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Update with many things, read changelog.")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -136,13 +154,45 @@ function OnLoad()
 	--
 	Param:addSubMenu("Miscellaneous", "miscellaneous")
 	--
-		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Lvl Spell", "levelspell") end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("EnableAutoLvlSpell", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, false) end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("ComboAutoLvlSpell", "Choose you'r Auto Level Spell Combo", SCRIPT_PARAM_LIST, 1, {"Q > E > E > W (Max E)"}) end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("n1", "", SCRIPT_PARAM_INFO,"") end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("n2", "Press F9 twice if you change Level Spell Combo.", SCRIPT_PARAM_INFO,"") end
-			if VIP_USER then Param.miscellaneous.levelspell:addParam("n3", "If you need more Combo, go on forum and tell me which.", SCRIPT_PARAM_INFO,"") end
+		if VIP_USER then Param.miscellaneous:addSubMenu("Auto LVL Spell :", "LVL") end
+			if VIP_USER then Param.miscellaneous.LVL:addParam("Enable", "Enable Auto Level Spell?", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.LVL:addParam("Combo", "LVL Spell Order :", SCRIPT_PARAM_LIST, 1, {"Q > E > E > W (Max E)"}) end
+			if VIP_USER then Param.miscellaneous.LVL:setCallback("Combo", function (nV)
+				if nV then
+					AutoLvlSpellCombo()
+				else 
+					AutoLvlSpellCombo()
+				end
+			end)
+			end
 			if VIP_USER then Last_LevelSpell = 0 end
+		--
+		if VIP_USER then Param.miscellaneous:addSubMenu("Skin Changer", "Skin") end
+			if VIP_USER then Param.miscellaneous.Skin:addParam("Enable", "Enable Skin Changer : ", SCRIPT_PARAM_ONOFF, false)
+				Param.miscellaneous.Skin:setCallback("Enable", function (nV)
+					if nV then
+						SetSkin(myHero, Param.miscellaneous.Skin.skins -1)
+					else
+						SetSkin(myHero, -1)
+					end
+				end)
+			end				
+			if VIP_USER then Param.miscellaneous.Skin:addParam("skins", 'Which Skin :', SCRIPT_PARAM_LIST, 1,  {"Classic", "Vizier", "Shadow Prince", "Djinn", "Overlord", "Snow Day"})
+				Param.miscellaneous.Skin:setCallback("skins", function (nV)
+					if nV then
+						if Param.miscellaneous.Skin.Enable then
+							SetSkin(myHero, Param.miscellaneous.Skin.skins -1)
+						end
+					end
+				end)
+			end
+		--
+		if VIP_USER then Param.miscellaneous:addSubMenu("Auto Buy Starter :", "Starter") end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("Doran", "Buy a doran blade :", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("Pots", "Buy a potion :", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("Trinket", "Buy a Green Trinket :", SCRIPT_PARAM_ONOFF, true) end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("n1blank", "", SCRIPT_PARAM_INFO, "") end
+			if VIP_USER then Param.miscellaneous.Starter:addParam("TrinketBleu", "Buy a Blue Trinket at lvl.9 :", SCRIPT_PARAM_ONOFF, true) end
 		--
 		Param.miscellaneous:addSubMenu("GapCloser", "GapCloser")
 			Param.miscellaneous.GapCloser:addParam("Enable", "Enable GapCloser with R?", SCRIPT_PARAM_ONOFF, true)
@@ -154,6 +204,7 @@ function OnLoad()
 		Param.draw:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.draw:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.draw:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
+		Param.draw:addParam("hitbox", "Draw HitBox?", SCRIPT_PARAM_ONOFF, true)
 		--
 		Param.draw:addSubMenu("Charactere Draws","spell")
 			Param.draw.spell:addParam("Qdraw","Display (Q) Spell draw?", SCRIPT_PARAM_ONOFF, true)
@@ -194,14 +245,20 @@ end
 function OnUnload()
 	EnvoiMessage("Unloaded.")
 	EnvoiMessage("There is no void anymore between us... Ciao!")
+	if Param.miscellaneous.Skin.Enable then
+		SetSkin(myHero, -1)
+	end
 end
 
 function CustomLoad()
+
+	LoadSpikeLib()
 
 	if VIP_USER then
 		AutoLvlSpellCombo()
 	end
 
+	DelayAction(function()AutoBuy()end, 3)
 
 	PredictionOrbWalkSwitch()
 	Skills()
@@ -212,7 +269,9 @@ function CustomLoad()
 	Param:addTS(ts)
 	PriorityOnLoad()
 
-	DelayAction(function()EnvoiMessage("Remember, this is a Beta test. If you find a bug, just report it on the forum thread. This script is gonna improve himself because of you. Thanks guys.")end, 7)
+	if Param.miscellaneous.Skin.Enable then
+		SetSkin(myHero, Param.miscellaneous.Skin.skins -1)
+	end
 end
 
 function PredictionOrbWalkSwitch()
@@ -239,6 +298,8 @@ function PredictionOrbWalkSwitch()
 
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
+   	elseif _Pewalk then
+   		LoadPewalk()
 	elseif Param.orbwalker.n1 == 1 then
 		EnvoiMessage("SxOrbWalk loading..")
 		LoadSXOrb()
@@ -249,6 +310,28 @@ function PredictionOrbWalkSwitch()
 		local neo = 1
 		EnvoiMessage("Nebelwolfi's Orb Walker loading..")
 		LoadNEBOrb()
+	end
+end
+
+function LoadSpikeLib()
+	local LibPath = LIB_PATH.."SpikeLib.lua"
+	if not FileExist(LibPath) then
+		local Host = "raw.github.com"
+		local Path = "/spyk1/BoL/master/bundle/SpikeLib.lua".."?rand="..math.random(1,10000)
+		DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+		DelayAction(function () require("SpikeLib") end, 5)
+	else
+		require("SpikeLib")
+		DelayAction(function ()EnvoiMessage("Loaded Libraries with success!") end, 3)
+	end
+end
+
+function LoadPewalk()
+	if _Pewalk then
+		EnvoiMessage("Loaded Pewalk")
+		DelayAction(function ()EnvoiMessage("[Pewalk] Disable every spell usage in Pewalk for better performances with my script.")end, 7)
+	elseif not _Pewalk then
+		EnvoiMessage("Pewalk loading error")
 	end
 end
   
@@ -396,10 +479,9 @@ function OnTick()
 		KillSteal()
 end
 
-
 function Combo(unit)
 	if ultTimer > CurrentTimeInMillis() then return end
-		if target ~= nil and target.type == myHero.type then
+		if target ~= nil and target.type == myHero.type and not Immune(unit) then
 			if myHero:CanUseSpell(_Q) == READY and Param.Combo.UseQ then
 				LogicQ(unit)
 			elseif myHero:CanUseSpell(_E) == READY and Param.Combo.UseE then
@@ -560,26 +642,22 @@ end
 function OnDraw()
 	if not myHero.dead and not Param.draw.disable then
 		if myHero:CanUseSpell(_Q) == READY and Param.draw.spell.Qdraw then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, 0xFFFFFFFF)
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillQ.range, 1, 0xFFFFFFFF)
 		end
 		if myHero:CanUseSpell(_W) == READY and Param.draw.spell.Wdraw then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillW.range, 0xFFFFFFFF)
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillW.range, 1, 0xFFFFFFFF)
 		end
 		if myHero:CanUseSpell(_E) == READY and Param.draw.spell.Edraw then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, 0xFFFFFFFF)
-		end
-		if Param.draw.spell.PoisonDraw then 
-			for i, enemy in ipairs(GetEnemyHeroes()) do
-				if enemy and ValidTarget(enemy) then
-					DrawEIndicator(enemy)
-				end
-			end
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillE.range, 1, 0xFFFFFFFF)
 		end
 		if myHero:CanUseSpell(_R) == READY and Param.draw.spell.Rdraw then
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, 0xFFFFFFFF)
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, SkillR.range, 1, 0xFFFFFFFF)
 		end
 		if Param.draw.spell.AAdraw then
 			DrawCircle(myHero.x, myHero.y, myHero.z, myHero.range, 0xFFFFFFFF)
+		end
+		if Param.draw.hitbox then
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.boundingRadius, 1, 0xFFFFFFFF)
 		end
 		if target ~= nil and ValidTarget(target) then
 			if Param.draw.tText then
@@ -601,6 +679,28 @@ function OnDraw()
 			for i, enemy in ipairs(GetEnemyHeroes()) do
 				if enemy and ValidTarget(enemy) then
 					DrawIndicator(enemy)
+				end
+			end
+		end
+		if Param.draw.spell.PoisonDraw then 
+			for _, unit in pairs(GetEnemyHeroes()) do
+				if unit ~= nil and GetDistance(unit) < 3000 then
+					local Center = GetUnitHPBarPos(unit)
+					local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
+					Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+					local Y3QER = math.floor(myHero:CalcDamage(unit,Edmg))
+					if Center.x > -100 and Center.x < WINDOW_W+100 and Center.y > -100 and Center.y < WINDOW_H+100 then
+						local off = GetUnitHPBarOffset(unit)
+						local y=Center.y + (off.y * 53) + 2
+						local xOff = ({['AniviaEgg'] = -0.1,['Darius'] = -0.05,['Renekton'] = -0.05,['Sion'] = -0.05,['Thresh'] = -0.03,})[unit.charName]
+						local x = Center.x + ((xOff or 0) * 140) - 66
+						if not TargetHaveBuff("SummonerExhaust", myHero) then
+							dmg = unit.health - Y3QER
+						elseif TargetHaveBuff("SummonerExhaust", myHero) then
+							dmg = unit.health - (Y3QER-((Y3QER*40)/100))
+						end
+						DrawLine(x + ((unit.health /unit.maxHealth) * 104),y, x+(((dmg > 0 and dmg or 0) / unit.maxHealth) * 104),y,9, GetDistance(unit) < 3000 and 0x6699FFFF)
+					end
 				end
 			end
 		end
@@ -646,17 +746,6 @@ function DrawIndicator(enemy)
     DrawText(" | ", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
     DrawText("HP: "..math.floor(enemy.health - damage), 12, math.floor(SPos.x + 25), math.floor(SPos.y - 15), (enemy.health - damage) > 0 and ARGB(255, 0, 255, 0) or  ARGB(255, 255, 0, 0))
 end
-
-function DrawEIndicator(enemy)
-	local Edmg = CalcSpellDamage(enemy)
-	Edmg = damageE
-    local damage = Edmg
-    local SPos, EPos = GetEnemyHPBarPos(enemy)
-    if not SPos then return end
-    local barwidth = EPos.x - SPos.x
-    local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
-    DrawRectangle(math.floor(Position), math.floor(SPos.y + 8), 2, 15, ARGB(255,124,22,158))
-end
  
 function DrawKillable()
 	for i = 1, heroManager.iCount, 1 do
@@ -698,10 +787,10 @@ function DrawKillable()
 end
 
 function Skills()
-	SkillQ = { name = "AlZaharCalloftheVoid", range = 900, delay = 0.250, speed = 850, width = 400, ready = false }
+	SkillQ = { name = "AlZaharCalloftheVoid", range = 1000, delay = 1, speed = math.huge, width = 400, ready = false }
 	SkillW = { name = "AlZaharNullZone", range = 800, delay = 0, speed = math.huge, width = 350, ready = false }
 	SkillE = { name = "AlZaharMaleficVisions", range = 650, delay = 0.25, speed = math.huge, width = nil, ready = false }
-	SkillR = { name = "AlZaharNetherGrasp", range = 700, delay = 0.100, speed = math.huge, width = 350, ready = false }
+	SkillR = { name = "AlZaharNetherGrasp", range = 700, delay = 0.1, speed = math.huge, width = 350, ready = false }
 end
 
 function LogicQ(unit)
@@ -889,37 +978,41 @@ function PriorityOnLoad()
         end
 end
 
-function AutoLvlSpell()
-	if Param.miscellaneous.levelspell.EnableAutoLvlSpell then
-	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-	    	autoLevelSetSequence(levelSequence)
-	    	Last_LevelSpell = os.clock()
-	  	end
+function AutoBuy()
+	if VIP_USER and GetGameTimer() < 60 then
+		if Param.miscellaneous.Starter.Doran then
+			BuyItem(1056)
+		end
+		if Param.miscellaneous.Starter.Pots then
+			BuyItem(2003)
+		end
+		if Param.miscellaneous.Starter.Pots then
+			BuyItem(2003)
+		end
+		if Param.miscellaneous.Starter.Trinket then
+			BuyItem(3340)
+		end
 	end
 end
 
-_G.LevelSpell = function(id)
+function AutoLvlSpell()
 	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
-		local offsets = { 
-			[_Q] = 0x9C,
-			[_W] = 0x7C,
-			[_E] = 0xA5,
-			[_R] = 0xC4,
-		}
-		local p = CLoLPacket(0x0016)
-		p.vTable = 0xE4C8D4
-		p:EncodeF(myHero.networkID)
-		p:Encode4(0x99)
-		p:Encode1(0x83)
-		p:Encode4(0x20)
-		p:Encode1(offsets[id])
-		p:Encode4(0xEB)
-		SendPacket(p)
+	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+	 		if Param.miscellaneous.LVL.Enable then
+		    	autoLevelSetSequence(levelSequence)
+		    	Last_LevelSpell = os.clock()
+		    elseif not Param.miscellaneous.LVL.Enable then
+		    	autoLevelSetSequence(nil)
+		    	Last_LevelSpell = os.clock()+10
+		    end
+	  	end
+	else
+		do return end
 	end
 end
 
 function AutoLvlSpellCombo()
-	if Param.miscellaneous.levelspell.ComboAutoLvlSpell == 1 then
+	if Param.miscellaneous.LVL.Combo == 1 then
 		levelSequence =  { 1,3,3,2,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
 	end
 end
@@ -1022,5 +1115,30 @@ function OnProcessSpell(unit, spell)
 				end
 			end
 		end
+	end
+end
+
+function OnRemoveBuff(unit, buff)
+	if buff.name == "recall" and unit.isMe then
+		if myHero.level >= 9 then
+			if Param.miscellaneous.Starter.TrinketBleu then
+				BuyItem(3363)
+			end
+		end
+	end
+end
+
+function Immune(unit)
+	if unit ~= nil then
+	    for i = 1, unit.buffCount do
+	        local tBuff = unit:getBuff(i)
+	        if BuffIsValid(tBuff) then
+	            if buffs[tBuff.name] then
+	                return true
+	            end
+	        end
+	    end
+	    return false
+
 	end
 end
