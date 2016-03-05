@@ -1,11 +1,23 @@
 == 05/03/2016 ==
-  *[Beta]BaguetteKalista (http://forum.botoflegends.com/topic/87964-beta-baguette-anivia/) :
+  *[Beta]BaguetteAnivia (http://forum.botoflegends.com/topic/87964-beta-baguette-anivia/) :
     - Immune buff check. (added)
     - Skin changer. (reworked)
     - LvL Spell. (reworked)
     - Auto buy. (added)
     - HitBox Draw. (added)
     - Damages with current spells on health bar. (added)
+    - SpikeLib. (added)
+    - Pewalk integration. (added)
+    - Lag Free draws. (added) - removed the old draw -
+    - AutoBuy Starter. (added)
+    - AutoBuy Blue trinket at lvl 9. (added)
+  *[Beta]BaguetteAnivia (http://forum.botoflegends.com/topic/89837-beta-baguette-malzahar/) :
+    - Immune buff check. (added)
+    - Skin changer. (added)
+    - LvL Spell. (reworked)
+    - Auto buy. (added)
+    - HitBox Draw. (added)
+    - Damages with _E dmg on health bar. (added)
     - SpikeLib. (added)
     - Pewalk integration. (added)
     - Lag Free draws. (added) - removed the old draw -
