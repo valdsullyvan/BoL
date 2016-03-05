@@ -256,6 +256,7 @@ function OnLoad()
 		Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
+		Param.drawing:addParam("BarH", "Draw Damages on Health Bar?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("hitbox", "Draw HitBox?", SCRIPT_PARAM_ONOFF, true)
 		--
 		Param.drawing:addSubMenu("Charactere Draws","spell")
@@ -1158,19 +1159,27 @@ function OnDraw()
 		end
 
 		if Param.drawing.BarH then
-			local Center = GetUnitHPBarPos(unit)
-			local Y3QER = damageQ*2 + damageE*2 + damageR*3
-			if Center.x > -100 and Center.x < WINDOW_W+100 and Center.y > -100 and Center.y < WINDOW_H+100 then
-				local off = GetUnitHPBarOffset(unit)
-				local y=Center.y + (off.y * 53) + 2
-				local xOff = ({['AniviaEgg'] = -0.1,['Darius'] = -0.05,['Renekton'] = -0.05,['Sion'] = -0.05,['Thresh'] = -0.03,})[unit.charName]
-				local x = Center.x + ((xOff or 0) * 140) - 66
-				if not TargetHaveBuff("SummonerExhaust", myHero) then
-					dmg = unit.health - Y3QER
-				elseif TargetHaveBuff("SummonerExhaust", myHero) then
-					dmg = unit.health - (Y3QER-((Y3QER*40)/100))
+			for _, unit in pairs(GetEnemyHeroes()) do
+				if unit ~= nil and GetDistance(unit) < 3000 then
+					local Center = GetUnitHPBarPos(unit)
+					local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
+					Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
+					Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+					Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
+					local Y3QER = Qdmg*2 + Edmg*2 + Rdmg*2
+					if Center.x > -100 and Center.x < WINDOW_W+100 and Center.y > -100 and Center.y < WINDOW_H+100 then
+						local off = GetUnitHPBarOffset(unit)
+						local y=Center.y + (off.y * 53) + 2
+						local xOff = ({['AniviaEgg'] = -0.1,['Darius'] = -0.05,['Renekton'] = -0.05,['Sion'] = -0.05,['Thresh'] = -0.03,})[unit.charName]
+						local x = Center.x + ((xOff or 0) * 140) - 66
+						if not TargetHaveBuff("SummonerExhaust", myHero) then
+							dmg = unit.health - Y3QER
+						elseif TargetHaveBuff("SummonerExhaust", myHero) then
+							dmg = unit.health - (Y3QER-((Y3QER*40)/100))
+						end
+						DrawLine(x + ((unit.health /unit.maxHealth) * 104),y, x+(((dmg > 0 and dmg or 0) / unit.maxHealth) * 104),y,9, GetDistance(unit) < 3000 and 0x6699FFFF)
+					end
 				end
-				DrawLine(x + ((unit.health /unit.maxHealth) * 104),y, x+(((dmg > 0 and dmg or 0) / unit.maxHealth) * 104),y,9, GetDistance(unit) < 3000 and 0x6699FFFF)
 			end
 		end
 
