@@ -11,6 +11,8 @@
     - Lag Free draws. (added) - removed the old draw -
     - AutoBuy Starter. (added)
     - AutoBuy Blue trinket at lvl 9. (added)
+    == 
+    - Fixed bugsplats on GapClosing
   *[Beta]BaguetteAnivia (http://forum.botoflegends.com/topic/89837-beta-baguette-malzahar/) :
     - Immune buff check. (added)
     - Skin changer. (added)
