@@ -68,7 +68,7 @@ local upoeuf = 1
 local startTime = 0
 
 --- Starting AutoUpdate
-local version = "0.6"
+local version = "0.61"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -758,7 +758,7 @@ function LaneClear()
 	enemyMinions:update()
 	if not ManaLaneClear() then
 		for i, minion in pairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion ~= nil then
+			if ValidTarget(minion) and minion ~= nil and not minion.dead then
 				if Param.Clear.LaneClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 					LogicQ(minion)
 				end
@@ -778,7 +778,7 @@ function WaveClear()
 	local canonheal = ((CurrentTimeInMillis()/6000)+700)
 	if not ManaWaveClear() then
 		for i, minion in pairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) then
+			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) and not minion.dead then
 				if GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and (minion.maxHealth >= canonheal) then
 					LogicQ(minion)
 				end
@@ -797,7 +797,7 @@ function JungleClear()
 	jungleMinions:update()
 	if not ManaJungleClear() then
 		for i, jungleMinion in pairs(jungleMinions.objects) do
-			if jungleMinion ~= nil then
+			if jungleMinion ~= nil and not jungleMinion.dead then
 				if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
 					LogicE(jungleMinion)
 				end
@@ -814,7 +814,7 @@ end
 
 function LogicQ(unit)
 	if QMissile ~=nil then return end
-	if unit ~= nil and GetDistance(unit) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+	if unit ~= nil and GetDistance(unit) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and not unit.dead then
 		if Param.prediction.n1 == 1 then
 			if ComboKey then 
 				ChanceHit = Param.Combo.HitChance
@@ -856,7 +856,7 @@ function LogicQ(unit)
 end
 
 function LogicW(unit)
-	if unit ~= nil and GetDistance(unit) <= SkillW.range and myHero:CanUseSpell(_W) == READY then
+	if unit ~= nil and GetDistance(unit) <= SkillW.range and myHero:CanUseSpell(_W) == READY and not unit.dead then
 		if Param.prediction.n1 == 1 then
 			CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillW.delay, SkillW.width, SkillW.range, SkillW.speed, myHero, false)
 			if HitChance >= 2 then
@@ -877,7 +877,7 @@ function LogicW(unit)
 end
 
 function LogicE(unit)
-	if JungleClearKey then
+	if JungleClearKey and not unit.dead then
 		if TargetHaveBuff("chilled", unit) then
 			if myHero:CanUseSpell(_E) == READY then
 				CastSpell(_E, unit)
@@ -888,13 +888,13 @@ function LogicE(unit)
 			CastSpell(_E, unit)
 		end
 	end
-	if Param.miscellaneous.EGel then
+	if Param.miscellaneous.EGel and not unit.dead then
 		if TargetHaveBuff("chilled", unit) then
 			if myHero:CanUseSpell(_E) == READY then
 				CastSpell(_E, unit)
 			end
 		end
-	elseif not Param.miscellaneous.EGel then
+	elseif not Param.miscellaneous.EGel and not unit.dead then
 		if myHero:CanUseSpell(_E) == READY then
 			CastSpell(_E, unit)
 		end
@@ -904,7 +904,7 @@ end
 function LogicR(unit)
 	if RMissile ~= nil then return end
 		if JungleClearKey and RMissile ~= nil then return end
-			if unit ~= nil and GetDistance(unit) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
+			if unit ~= nil and GetDistance(unit) <= SkillR.range and myHero:CanUseSpell(_R) == READY and not unit.dead then
 				if Param.prediction.n1 == 1 then
 					CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false)
 					if HitChance >= 2 then
@@ -923,7 +923,7 @@ function LogicR(unit)
 				end
 			end
 		--
-		if unit ~= nil and Param.prediction.n1 == 1 then
+		if unit ~= nil and Param.prediction.n1 == 1 and not unit.dead then
 			if not RMissile and myHero:CanUseSpell(_R) == READY and GetDistance(unit) <= SkillR.range then
 				local point = FindBestCircle(unit, SkillR.range, SkillR.width)
 				CastSpell(_R, point.x, point.z)
@@ -1243,7 +1243,9 @@ function OnProcessSpell(unit, spell)
 	 			local Xtarg = myHero.x+spell.target.x+350
 	 			local Ztarg = myHero.y+spell.target.z+350
 	 			DelayAction(function()
-					CastSpell(_W, Xtarg, Ztarg)
+	 				if not unit.dead then
+						CastSpell(_W, Xtarg, Ztarg)
+					end
 				end, 0.10)
 			end
 		end
@@ -1251,7 +1253,9 @@ function OnProcessSpell(unit, spell)
 	if Param.miscellaneous.Wstop then
 		if unit.team ~= myHero.team then
 	   	 	if isAChampToInterrupt[spell.name] and GetDistanceSqr(unit) <= 715*715 then
-	       	 	CastSpell(_W, unit.x, unit.z)
+	   	 		if not unit.dead then
+	       	 		CastSpell(_W, unit.x, unit.z)
+	       	 	end
 	    	end
 	    end
 	end
@@ -1264,17 +1268,23 @@ function OnProcessSpell(unit, spell)
 		    			CastSpell(_R, myHero.x, myHero.z)
 		    		elseif myHero:CanUseSpell(_R) == READY and myHero.mana < 300 and not RMissile ~= nil and Param.miscellaneous.GapCloser.RGapClos then
 		    			DelayAction(function()
-		    				CastSpell(_R, myHero.x, myHero.z)
+		    				if not unit.dead then
+		    					CastSpell(_R, myHero.x, myHero.z)
+		    				end
 		    			end, 0.50)
 		    		end
 		    		if myHero:CanUseSpell(_Q) == READY then
 		    			DelayAction(function()
-		    				CastSpell(_Q, myHero.x-50, myHero.z-50)
+		    				if not unit.dead then
+		    					CastSpell(_Q, myHero.x-50, myHero.z-50)
+		    				end
 		    			end, 0.80)
 		    		end
 		    		if myHero:CanUseSpell(_E) == READY and Param.miscellaneous.GapCloser.EGapClos then
 		    			DelayAction(function()
-		    				CastSpell(_E, unit)
+		    				if not unit.dead then
+		    					CastSpell(_E, unit)
+		    				end
 		    			end, 1)
 		    		end
 		    	end
@@ -1286,11 +1296,15 @@ function OnProcessSpell(unit, spell)
 	            		CastSpell(_R, myHero.x, myHero.z)
 	            	end
 	            	DelayAction(function()
-	            		CastSpell(_Q, unit)
+	            		if not unit.dead then
+	            			CastSpell(_Q, unit)
+	            		end
 	            	end, 0.05)
 	            	DelayAction(function()
 		            	if Param.miscellaneous.GapCloser.EGapClos and myHero:CanUseSpell(_E) == READY then
-		            		CastSpell(_E, unit)
+		            		if not unit.dead then
+		            			CastSpell(_E, unit)
+		            		end
 		            	end
 		            end, 0.25)
 	            end
@@ -1305,7 +1319,9 @@ function OnProcessSpell(unit, spell)
 	        	end, 0.05)
 	        	DelayAction(function()
 	        		if Param.miscellaneous.GapCloser.EGapClos and myHero:CanUseSpell(_E) == READY then
-	        			CastSpell(_E, unit)
+	        			if not unit.dead then
+	        				CastSpell(_E, unit)
+	        			end
 	        		end
 	        	end, 0.25)
 	       	end
