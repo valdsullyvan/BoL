@@ -56,7 +56,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.2"
+local version = "0.21"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -795,7 +795,7 @@ end
 
 function LogicQ(unit)
 	if ultTimer > CurrentTimeInMillis() then return end
-	if target ~= nil and GetDistance(target) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+	if target ~= nil and GetDistance(target) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY and not target.dead then
 		if ComboKey or HarassKey then
 			if ComboKey then
 				ChanceHit = Param.Combo.HitChance
@@ -832,7 +832,7 @@ end
 
 function LogicW()
 	if ultTimer > CurrentTimeInMillis() then return end
-	if target ~= nil and GetDistance(target) <= SkillW.range and myHero:CanUseSpell(_W) == READY then
+	if target ~= nil and GetDistance(target) <= SkillW.range and myHero:CanUseSpell(_W) == READY and not target.dead then
 		if Param.prediction.n1 == 1 then
 			CastPosition,  HitChance,  Position = VP:GetLineCastPosition(target, SkillW.delay, SkillW.width, SkillW.range, SkillW.speed, myHero, false)
 			if HitChance >= 2 then
@@ -854,14 +854,14 @@ end
 
 function LogicE()
 	if ultTimer > CurrentTimeInMillis() then return end
-	if myHero:CanUseSpell(_E) == READY and GetDistance(target) < SkillE.range then
+	if myHero:CanUseSpell(_E) == READY and GetDistance(target) < SkillE.range and not target.dead then
 		CastSpell(_E, target)
 	end
 end
 
 function LogicR()
 	if ultTimer > CurrentTimeInMillis() then return end
-	if myHero:CanUseSpell(_R) == READY and GetDistance(target) < SkillR.range and target.health > 250 then
+	if myHero:CanUseSpell(_R) == READY and GetDistance(target) < SkillR.range and target.health > 250 and not target.dead then
 		ultTimer = CurrentTimeInMillis() + 2800
 		DisableOrbwalker()
 		DelayAction(function()
