@@ -1,3 +1,21 @@
+== 06/03/2016 ==
+  *All
+    - Added Tracker from bot-tools
+  *[Beta] Baguette Sona (http://forum.botoflegends.com/topic/88896-beta-baguette-sona/) :
+    - Reworked the whole script.
+      - Immune checker (added)
+      - LvL Spell (reworked)
+      - OnRecall check (added)
+      - Summoner 6.x lol update (updated)
+      - InBuild orb (removed)
+      - SxOrb, Big Fat Orb, Nebo Orb, Sac:R, Pewalk (added)
+      - Draw to know how many target you can hit at the same with auto _R (added)
+      - Lag free draw (added)
+      - HitBox, AA draw (added)
+      - _Q + _R damages on health bar (added)
+      - Skin changer (added)
+      - Auto buy (added)
+      - SpikeLib (added) - not currently used by Sona #soon - 
 == 05/03/2016 ==
   *[Beta]BaguetteAnivia (http://forum.botoflegends.com/topic/87964-beta-baguette-anivia/) :
     - Immune buff check. (added)
