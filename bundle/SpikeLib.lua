@@ -3,7 +3,7 @@ function EnvoiMessage(msg)
 end
 
 --- Starting AutoUpdate
-local version = "0.01"
+local version = "0.02"
 local league = "6.4"
 local author = "spyk"
 local SCRIPT_NAME = "SpikeLib"
@@ -12,7 +12,6 @@ local UPDATE_HOST = "raw.githubusercontent.com"
 local UPDATE_PATH = "/spyk1/BoL/master/bundle/SpikeLib.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = LIB_PATH .. "SpikeLib.lua"
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
-local whatsnew = 0
 
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/spyk1/BoL/master/bundle/SpikeLib.version")
