@@ -78,7 +78,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.24"
+local version = "0.25"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -112,7 +112,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Tracker.")
+		EnvoiMessage("What's new : Updated for 6.5.")
 		whatsnew = 0
 	end
 
@@ -1461,7 +1461,7 @@ function Consommables()
 end
 
 function AutoLvlSpell()
-	if (string.find(GetGameVersion(), 'Releases/6.4') ~= nil) then
+	if (string.find(GetGameVersion(), 'Releases/6.5') ~= nil) then
 	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
 	 		if Param.Misc.LVL.Enable then
 		    	autoLevelSetSequence(levelSequence)
