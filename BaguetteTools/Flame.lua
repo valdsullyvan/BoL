@@ -9,7 +9,6 @@ end
 
 function OnTick()
 	SendChat("/mute all")
-	SendChat("gg wp")
 	if os.clock() > Last_MSG_Check then
 		if myHero:GetInt("CHAMPIONS_KILLED") > Last_Kill_Check then
 			local MSG_Rand = math.random(1,8)
