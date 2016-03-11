@@ -55,7 +55,7 @@ local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tris
 local OnRecall = 0
 
 --- Starting AutoUpdate
-local version = "0.22"
+local version = "0.23"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -91,7 +91,7 @@ end
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteSona]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Reworked.'")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : 'Minors fixs.'")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -375,7 +375,7 @@ function Menu()
 		Param.drawing:addParam("AAdraw", "Display Auto Attack draw?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("Current", "Draw text on current target?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
-		Param.drawing:addParam("drawHitbox", "Draw HitBox?", SCRIPT_PARAM_ONOFF, true)
+		Param.drawing:addParam("HitBox", "Draw HitBox?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("BarH", "Draw Damage on health bar?", SCRIPT_PARAM_ONOFF, true)
 	--
 	Param:addSubMenu("", "nil")
@@ -393,12 +393,12 @@ end
 
 function LogicQ()
 	if target and GetDistance(target) < 850 then
-		CastSpell(_Q)
+		CastSpell(_Q) 
 	end
 end
 
 function LogicW()
-	if not OnRecall == 1 then
+	if OnRecall == 0 then
 		if Param.Miscellaneous.WSettings.EnableHeal then
 			for _, unit in pairs(GetAllyHeroes()) do
 				health = unit.health
@@ -421,7 +421,7 @@ function LogicE()
 end
 
 function LogicR()
-	if not Immune(unit) and not OnRecall == 1 then
+	if not Immune(unit) and OnRecall == 0 then
 		if target ~= nil and ValidTarget(target) and GetDistance(target) <= 1000 then
 			local aoeCastPos, hitChance, castInfo, nTargets
 			aoeCastPos, hitChance, nTargets = VP:GetLineAOECastPosition(target, 0.5, 120, 900, 2400, myHero)
@@ -633,7 +633,7 @@ end
 
 function KillSteal()
 	for _, unit in pairs(GetEnemyHeroes()) do
-		if not Immune(unit) and not OnRecall == 1 then
+		if not Immune(unit) and OnRecall == 0 then
 			health = unit.health
 			Qdmg = ((40 * myHero:GetSpellData(_Q).level + 10 * myHero:GetSpellData(_R).level + .5 * myHero.ap) or 0)
 			QmagicDamage = myHero:CalcMagicDamage(unit, Qdmg)
@@ -823,7 +823,7 @@ function Keys()
 end
 
 function Combo()
-	if not Immune(unit) and not OnRecall == 1 then
+	if not Immune(unit) and OnRecall == 0 then
 		if Param.Combo.UseR then
 			LogicR()
 		end
@@ -834,14 +834,14 @@ function Combo()
 			CastSpell(_W)
 			CastSpell(_E)
 		end
-		if Param.Miscellaneous.SummonerSetting.Enable then
+		if Ignite or Exhaust and Param.Miscellaneous.SummonerSetting.Enable then
 			SummonerManager()
 		end
 	end
 end
 
 function Harass()
-	if not Immune(unit) and not OnRecall == 1 then
+	if not Immune(unit) and OnRecall == 0 then
 		if target and GetDistance(target) < 850 then
 			if myHero.mana < (myHero.maxMana * ( Param.Harass.Mana / 100)) then
 				LogicQ()
@@ -851,7 +851,7 @@ function Harass()
 end
 
 function AutoHarass()
-	if not Immune(unit) and not OnRecall == 1 then
+	if not Immune(unit) and OnRecall == 0 then
 		if target and GetDistance(target) < 850 then
 			if myHero.mana < (myHero.maxMana * ( Param.Harass.Mana / 100)) then
 				CastSpell(_Q)
@@ -931,15 +931,19 @@ function OnRemoveBuff(unit, buff)
 end
 
 function Immune(unit)
-    for i = 1, unit.buffCount do
-        local tBuff = unit:getBuff(i)
-        if BuffIsValid(tBuff) then
-            if buffs[tBuff.name] then
-                return true
-            end
-        end
-    end
-    return false
+	if unit ~= nil then
+	    for i = 1, unit.buffCount do
+	        local tBuff = unit:getBuff(i)
+	        if BuffIsValid(tBuff) then
+	            if buffs[tBuff.name] then
+	                return true
+	            end
+	        end
+	    end
+	    return false
+	else
+   		return false
+   	end
 end
 
 function OnApplyBuff(source, unit, buff)
