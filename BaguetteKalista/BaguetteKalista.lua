@@ -59,6 +59,11 @@ local buffs = {
     ["NocturneW"] = true,
     ["kindredrnodeathbuff"] = true
 }
+-- E gather
+local OrbwalkManager_AA = {LastTime = 0, LastTarget = nil, IsAttacking = false, Object = nil}
+local OrbwalkManager_DataUpdated = false
+local OrbwalkManager_BaseWindUpTime = 3
+local OrbwalkManager_BaseAnimationTime = 0.665
 -- E
 local unitStacks = {}
 local LastBlitz = 999999999
@@ -78,7 +83,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.26"
+local version = "0.27"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -112,7 +117,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : _Q Wave & Jungle clear.")
+		EnvoiMessage("What's new : Get last hits.")
 		whatsnew = 0
 	end
 
@@ -156,10 +161,14 @@ function OnLoad()
 	Param:addSubMenu("LastHit Settings", "LastHit")
 		Param.LastHit:addSubMenu("(E) Spell Settings", "E")
 			Param.LastHit.E:addParam("Enable", "Enable (E) Spell to LastHit :", SCRIPT_PARAM_ONOFF, true)
-			Param.LastHit.E:addParam("Count", "How many creeps to kill :", SCRIPT_PARAM_SLICE, 2, 1, 6)
+			Param.LastHit.E:addParam("n0Blank", "", SCRIPT_PARAM_INFO, "")
+			Param.LastHit.E:addParam("Count", "(Auto)How many creeps to kill :", SCRIPT_PARAM_SLICE, 2, 1, 6)
 			Param.LastHit.E:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.LastHit.E:addParam("Hurrican", "Enable Hurrican Check :", SCRIPT_PARAM_ONOFF, false)
 			Param.LastHit.E:addParam("CountHurrican", "How many with Hurrican :", SCRIPT_PARAM_SLICE, 3, 1, 6)
+			Param.LastHit.E:addParam("n2blank", "", SCRIPT_PARAM_INFO, "")
+			Param.LastHit.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			Param.LastHit.E:addParam("n3blank", " to recover missing last hits.", SCRIPT_PARAM_INFO, "")
 	-------------------WAVECLEAR|OPTION-------------------------
 	Param:addSubMenu("WaveClear Settings", "WaveClear")
 		--Param.WaveClear:addParam("Key", "Advanced WaveClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("T"))
@@ -367,6 +376,8 @@ end
 
 function CustomLoad()
 
+	--require("SimpleLib")
+
 	Param.Misc.WTrick.Drake = false
 	Param.Misc.WTrick.Baron = false
 
@@ -540,6 +551,8 @@ function Keys()
 			LaneClear()
 		elseif  _G.AutoCarry.Keys.LastHit then 
 			LastHit()
+		else 
+			LastHit_Gather()
 		end
 
 		if not _G.AutoCarry.Keys.AutoCarry and AAON == 1 then
@@ -557,6 +570,8 @@ function Keys()
 			LaneClear()
 		elseif _G._Pewalk.GetActiveMode().Farm then 
 			LastHit()
+		else
+			LastHit_Gather()
 		end
 
 		if not _G._Pewalk.GetActiveMode().Carry and AAON == 1 then
@@ -574,6 +589,8 @@ function Keys()
 			LaneClear() 
 		elseif  _G.SxOrbMenu.LastHit then 
 			LastHit()
+		else
+			LastHit_Gather()
 		end
 
 		if not _G.SxOrbMenu.AutoCarry and AAON == 1 then
@@ -591,8 +608,10 @@ function Keys()
 			LastHit()
 		elseif _G["BigFatOrb_Mode"] == 'LaneClear' then
 			LaneClear()
+		else
+			LastHit_Gather()
 		end
-
+	
 		if not _G["BigFatOrb_Mode"] == 'Combo' and AAON == 1 then
 		 	_G["BigFatOrb_Mode"] = 'Combo'
 		 	AAON = 0
@@ -608,6 +627,8 @@ function Keys()
 			LastHit()
 		elseif _G.NebelwolfisOrbWalker.Config.k.LaneClear then
 			LaneClear()
+		else 
+			LastHit_Gather()
 		end
 
 		if not _G.NebelwolfisOrbWalker.Config.k.Combo and AAON == 1 then
@@ -716,6 +737,7 @@ end
 
 
 function LaneClear()
+	LastHit_Gather()
 	if Param.Jungle.Q then
 		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
 			jungleMinions:update()
@@ -748,7 +770,105 @@ function LaneClear()
 	end
 end
 
+-- Credits to http://forum.botoflegends.com/topic/64623-library-simplelib/ - iCreative  (http://forum.botoflegends.com/user/137788-icreative/) [start]
+
+function LastHit_Gather()
+	enemyMinions:update()
+	if not ManaELastHit() then
+		for i, minion in pairs(enemyMinions.objects) do
+			if ValidTarget(minion) and minion ~= nil and GetDistance(minion) < SkillE.range then
+				if GetStacks(minion) > 0 then
+  					local health = minion.health
+  					if Param.LastHit.E.Enable then
+
+  						D1 = math.floor(myHero:CalcDamage(minion,dmgE))
+
+						ELvl()
+
+						D2 = math.floor(myHero:CalcDamage(minion,dmgEX))
+						D3 = D1 + ((GetStacks(minion)-1) * D2)
+						if D3 > minion.health-5 then
+							if not CanAttack() then
+								if OrbwalkManager_AA.LastTarget and minion.networkID ~= OrbwalkManager_AA.LastTarget.networkID and not IsAttacking() then
+									CastSpell(_E)
+									--print("Cast")
+						 		end
+						 	end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+function IsAutoAttack(name)
+    return name and ((tostring(name):lower():find("attack")))
+end
+
+function OnProcessAttack(unit, spell)
+    if unit and spell and unit.isMe and spell.name then
+        if IsAutoAttack(spell.name) then
+            if not OrbwalkManager_DataUpdated then
+                 OrbwalkManager_BaseAnimationTime = 1 / (spell.animationTime * myHero.attackSpeed)
+                 OrbwalkManager_BaseWindUpTime = 1 / (spell.windUpTime * myHero.attackSpeed)
+                 OrbwalkManager_DataUpdated = true
+            end
+            OrbwalkManager_AA.LastTarget = spell.target
+            OrbwalkManager_AA.IsAttacking = false
+            OrbwalkManager_AA.LastTime = GetTime() - Latency() - WindUpTime()
+        end
+    end
+end
+
+function GetTime()
+	return 1 * os.clock()
+end
+
+function Latency()
+	return GetLatency() / 2000
+end
+
+function WindUpTime()
+	return (1 / (myHero.attackSpeed *  OrbwalkManager_BaseWindUpTime))
+end
+
+function IsAttacking()
+	return not CanMove()
+end
+
+function CanMove()
+	if _G.AutoCarry and _G.AutoCarry.Keys and _G.Reborn_Loaded ~= nil then
+		return _G.AutoCarry.Orbwalker:CanMove()
+	elseif _Pewalk then
+		return _G._Pewalk.CanMove()
+	elseif _G.SxOrbMenu then
+		return _G.SxOrb:CanMove()
+	elseif _G["BigFatOrb_Loaded"] == true then
+
+	elseif _G.NebelwolfisOrbWalkerLoaded then
+		_G.NOWi:TimeToMove()
+	end
+end
+
+function CanAttack()
+	if _G.AutoCarry and _G.AutoCarry.Keys and _G.Reborn_Loaded ~= nil then
+		return _G.AutoCarry.Orbwalker:CanShoot()
+	elseif _Pewalk then
+		return _G._Pewalk.CanAttack()
+	elseif _G.SxOrbMenu then
+		return _G.SxOrb:CanAttack()
+	elseif _G["BigFatOrb_Loaded"] == true then
+
+	elseif _G.NebelwolfisOrbWalkerLoaded then
+		_G.NOWi:TimeToAttack()
+	end
+end
+
+-- Credits to http://forum.botoflegends.com/topic/64623-library-simplelib/ - iCreative  (http://forum.botoflegends.com/user/137788-icreative/) [end]
+
 function Harass()
+	LastHit_Gather()
 	if Param.Harass.Q then
 		LogicQ()
 	end
@@ -809,6 +929,14 @@ function ManaEHarass()
     end
 end
 
+function ManaELastHit()
+    if myHero.mana < (myHero.maxMana * ( Param.LastHit.E.Mana / 100)) then
+        return true
+    else
+        return false
+    end
+end
+
 function ManaQJungle()
     if myHero.mana < (myHero.maxMana * ( Param.Jungle.QMana / 100)) then
         return true
@@ -826,6 +954,7 @@ function ManaQWaveClear()
 end
 
 function LastHit()
+	LastHit_Gather()
 end
 
 function LogicQ()
