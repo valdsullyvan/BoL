@@ -55,7 +55,7 @@ local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tris
 local OnRecall = 0
 
 --- Starting AutoUpdate
-local version = "0.23"
+local version = "0.24"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -599,7 +599,7 @@ function DrawKillable()
 		local enemy = heroManager:getHero(i)
 		if enemy and ValidTarget(enemy) then
 			if enemy.team ~= myHero.team then 
-				if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+				if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then
 					if (myHero:CanUseSpell(Ignite) == READY) then
 						iDmg = 40 + (20 * myHero.level)
 					elseif (myHero:CanUseSpell(Ignite) ~= READY) then
