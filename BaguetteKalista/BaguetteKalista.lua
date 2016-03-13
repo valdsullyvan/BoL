@@ -78,7 +78,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.25"
+local version = "0.26"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -112,7 +112,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Updated for 6.5.")
+		EnvoiMessage("What's new : _Q Wave & Jungle clear.")
 		whatsnew = 0
 	end
 
@@ -163,6 +163,8 @@ function OnLoad()
 	-------------------WAVECLEAR|OPTION-------------------------
 	Param:addSubMenu("WaveClear Settings", "WaveClear")
 		--Param.WaveClear:addParam("Key", "Advanced WaveClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("T"))
+		Param.WaveClear:addParam("Q", "Enable (Q) Spell in WaveClear :", SCRIPT_PARAM_ONOFF, false)
+		Param.WaveClear:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 	-------------------JUNGLE|OPTIONS---------------------------
 	Param:addSubMenu("Jungle Settings", "Jungle")
 		Param.Jungle:addSubMenu("(E) Spell Settings", "E")
@@ -185,7 +187,7 @@ function OnLoad()
 			Param.Jungle.E:addParam("All", "Use (E) Spell if you has > 1 mobs to kill?", SCRIPT_PARAM_ONOFF, true)
 			Param.Jungle.E:addParam("early", "Enable Early Jungle Help Security?", SCRIPT_PARAM_ONOFF, true)
 
-		--Param.Jungle:addParam("Q", "Enable (Q) Spell in Jungle :", SCRIPT_PARAM_ONOFF, true)
+		Param.Jungle:addParam("Q", "Enable (Q) Spell in Jungle :", SCRIPT_PARAM_ONOFF, true)
 		Param.Jungle:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 	
 	------------------------------------------------------------
@@ -392,6 +394,8 @@ function CustomLoad()
 	end
 
 	DelayAction(function()AutoBuy()end, 3)
+
+	LoadSpikeLib()
 
 	DelayAction(function() 
 		if bind == 0 then 
@@ -656,14 +660,6 @@ function Spell()
 	if Param.Harass.E.Auto then
 		EHarass()
 	end
-	-- if Param.Misc.WTrick.Drake == true or Param.Misc.WTrick.DrakeKey then
-	-- 	CastSpell(_W, 9866.148, -71, 4414.014)
-	-- 	Param.Misc.WTrick.Drake = false
-	-- end
-	-- if Param.Misc.WTrick.Baron == true or Param.Misc.WTrick.BaronKey then
-	-- 	CastSpell(_W, 5007.124, -71, 10471.45)
-	-- 	Param.Misc.WTrick.Baron = false
-	-- end
 	RunnanHurricaneCheck()
 	if Param.Humanizer then
 		Humanizing()
@@ -720,20 +716,36 @@ end
 
 
 function LaneClear()
-	-- if Param.Jungle.Q then
-	-- 	if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
-	-- 		jungleMinions:update()
-	-- 		for i, jungleMinion in pairs(jungleMinions.objects) do
-	-- 			if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 and ValidTarget(jungleMinion) then
-	-- 				local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
-	-- 				if HitChance >= 2 then
-	-- 					--print("Cast Q")
-	-- 					CastSpell(_Q, castPos.x, castPos.z)
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
+	if Param.Jungle.Q then
+		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
+			jungleMinions:update()
+			for i, jungleMinion in pairs(jungleMinions.objects) do
+				if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 then
+					local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+					if HitChance >= 2 then
+						CastSpell(_Q, castPos.x, castPos.z)
+					end
+				end
+			end
+		end
+	end
+	if Param.WaveClear.Q then
+		if not ManaQWaveClear() then
+			enemyMinions:update()
+			for i, minion in pairs(enemyMinions.objects) do
+				if minion ~= nil and not minion.dead then
+					if GetDistance(minion) <= 1150 and myHero:CanUseSpell(_Q) == READY then
+						if minion.health < dmgQ then
+							local castPos, HitChance, pos = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+							if HitChance >= 2 then
+								CastSpell(_Q, castPos.x, castPos.z)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 function Harass()
@@ -799,6 +811,14 @@ end
 
 function ManaQJungle()
     if myHero.mana < (myHero.maxMana * ( Param.Jungle.QMana / 100)) then
+        return true
+    else
+        return false
+    end
+end
+
+function ManaQWaveClear()
+    if myHero.mana < (myHero.maxMana * ( Param.WaveClear.QMana / 100)) then
         return true
     else
         return false
@@ -2433,5 +2453,18 @@ function Humanizing()
 	if Param.Humanizer and Last_Humanizer > 10 then
 		Human = (math.random(250)/1000)
 		Last_Humanizer = os.clock()
+	end
+end
+
+function LoadSpikeLib()
+	local LibPath = LIB_PATH.."SpikeLib.lua"
+	if not FileExist(LibPath) then
+		local Host = "raw.github.com"
+		local Path = "/spyk1/BoL/master/bundle/SpikeLib.lua".."?rand="..math.random(1,10000)
+		DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+		DelayAction(function () require("SpikeLib") end, 5)
+	else
+		require("SpikeLib")
+		DelayAction(function ()EnvoiMessage("Loaded Libraries with success!") end, 3)
 	end
 end
