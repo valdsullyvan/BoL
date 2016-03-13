@@ -68,7 +68,7 @@ local upoeuf = 1
 local startTime = 0
 
 --- Starting AutoUpdate
-local version = "0.63"
+local version = "0.64"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -103,12 +103,12 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Update to 0.6, read the changelog.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Fixed summoner issues.")end, 0)
 		whatsnew = 0
 	end
 	--
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonerteleport") then Teleport = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerteleport") then Teleport = SUMMONER_2 end
+	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then Ignite = SUMMONER_2 end
+	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerTeleport") then Teleport = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerTeleport") then Teleport = SUMMONER_2 end
 	--
 	Param = scriptConfig("[Baguette] Anivia", "BaguetteAniva")
 	--
@@ -563,7 +563,7 @@ function KillSteal()
 				if health <= Rdmg and Param.KillSteal.UseR and myHero:CanUseSpell(_R) == READY and ValidTarget(unit) then
 					LogicR(unit)
 				end
-				if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+				if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then
 					if health <= 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
 						CastSpell(Ignite, unit)
 					end
@@ -1056,7 +1056,7 @@ function DrawKillable()
 		local enemy = heroManager:getHero(i)
 		if enemy and ValidTarget(enemy) then
 			if enemy.team ~= myHero.team then 
-				if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+				if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then
 					if (myHero:CanUseSpell(Ignite) == READY) then
 						iDmg = 40 + (20 * myHero.level)
 					elseif (myHero:CanUseSpell(Ignite) ~= READY) then
