@@ -56,7 +56,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.23"
+local version = "0.24"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -91,11 +91,11 @@ function OnLoad()
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteMalzahar]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Update with many things, read changelog.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Summoner issues.")end, 0)
 		whatsnew = 0
 	end
 	--
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then Ignite = SUMMONER_2 end
+	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then Ignite = SUMMONER_2 end
 	--
 	Param = scriptConfig("[Baguette] Malzahar", "BaguetteMalzahar")
 	--
@@ -752,7 +752,7 @@ function DrawKillable()
 		local enemy = heroManager:getHero(i)
 		if enemy and ValidTarget(enemy) then
 			if enemy.team ~= myHero.team then
-				if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+				if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then
 					if (myHero:CanUseSpell(Ignite) == READY) then
 						iDmg = 40 + (20 * myHero.level)
 					elseif (myHero:CanUseSpell(Ignite) ~= READY) then
