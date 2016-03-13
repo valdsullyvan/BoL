@@ -36,7 +36,7 @@ local DAD, DAD2, DAD3, DAD4, DTT = 0,0,0,0,0
 local GuinsooGet, NashorGet, HurricanGet, Item_Jungle_Get, GuinsooStacks = 0,0,0,0,0
 
 --- Starting AutoUpdate
-local version = "0.02"
+local version = "0.03"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -376,7 +376,6 @@ function KillSteal()
 end
 
 function Spell()
-
 end
 
 function Combo()
@@ -393,6 +392,9 @@ function Combo()
 end
 
 function LastHit()
+end
+
+function LaneClear()
 end
 
 function LogicW()
