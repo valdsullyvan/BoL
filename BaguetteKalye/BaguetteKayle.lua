@@ -6,7 +6,7 @@ Script by spyk for Kayle.
 
 - Github link : https://github.com/spyk1/BoL/blob/master/BaguetteKayle/BaguetteKayle.lua
 
-- Forum Thread : http://forum.botoflegends.com/topic/89837-beta-baguette-malzahar/
+- Forum Thread : http://forum.botoflegends.com/topic/
 
 ]]--
 
@@ -31,18 +31,12 @@ local TextList = {"Ignite = Kill", "Q = Kill"}
 local KillText = {}
 local dmgQ = 10 + 50 * myHero:GetSpellData(_Q).level + .6 * myHero.ap + myHero.addDamage
 local dmgE = (5 + 5 * myHero:GetSpellData(_E).level + 0.15 * myHero.ap) + (10 + 10 * myHero:GetSpellData(_E).level + 0.3 * myHero.ap + (0.15 + 0.5 * myHero:GetSpellData(_E).level) * myHero.totalDamage )
-local Last_LevelSpell = 0
-local DAD = 0
-local DAD2 = 0
-local DAD3 = 0
-local DAD4 = 0
-local DTT = 0
-local GuinsooGet, NashorGet, HurricanGet, Item_Jungle_Get = 0,0,0,0
-local Last_Item_Check = 0
-local GuinsooStacks = 0
+local Last_LevelSpell, Last_Item_Check = 0,0
+local DAD, DAD2, DAD3, DAD4, DTT = 0,0,0,0,0
+local GuinsooGet, NashorGet, HurricanGet, Item_Jungle_Get, GuinsooStacks = 0,0,0,0,0
 
 --- Starting AutoUpdate
-local version = "0.01"
+local version = "0.02"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -173,6 +167,8 @@ function Menu()
 
 		Param.miscellaneous:addParam("AutoHeal", "Auto Heal enable :", SCRIPT_PARAM_ONOFF, true)
 		Param.miscellaneous:addParam("AutoHealMana","Required Mana to AutoHeal :", SCRIPT_PARAM_SLICE, 50, 0, 100)
+
+		Param.miscellaneous:addParam("AutoR", "Auto R at :", SCRIPT_PARAM_SLICE, 30, 0, 100)
 	--
 	Param:addSubMenu("Drawing", "draw")
 		Param.draw:addParam("disable","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
@@ -304,6 +300,8 @@ function OnTick()
 		target = GetCustomTarget()
 		Misc()
 		KillSteal()
+		Keys()
+		LogicR()
 
 	end
 
@@ -367,6 +365,11 @@ function KillSteal()
 				if unit.health < Qdmg and Param.KillSteal.Q and myHero:CanUseSpell(_Q) == READY and ValidTarget(unit) and unit ~= nil then
 					CastSpell(_Q, unit)
 				end
+				if myHero:GetSpellData(SUMMONER_1).name:find("SumonnerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SumonnerDot") then
+					if health <= 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
+						CastSpell(Ignite, unit)
+					end
+				end
 			end
 		end
 	end
@@ -389,6 +392,9 @@ function Combo()
 	end
 end
 
+function LastHit()
+end
+
 function LogicW()
 	if Param.miscellaneous.AutoHeal then
 		for _, unit in pairs(GetAllyHeroes()) do
@@ -401,6 +407,12 @@ function LogicW()
 				CastSpell(_W)
 			end
 		end
+	end
+end
+
+function LogicR()
+	if myHero.health < myHero.maxHealth * Param.miscellaneous.AutoR / 100 then
+		CastSpell(_R, myHero)
 	end
 end
 
@@ -434,7 +446,7 @@ local priorityTable = {
  
     AD_Carry = {
         "Ashe", "Caitlyn", "Corki", "Draven", "Ezreal", "Graves", "Jayce", "KogMaw", "MissFortune", "Pantheon", "Quinn", "Shaco", "Sivir",
-        "Talon", "Tristana", "Twitch", "Urgot", "Varus", "Vayne", "Zed", "Lucian", "Jinx",
+        "Talon", "Tristana", "Twitch", "Urgot", "Varus", "Vayne", "Zed", "Lucian", "Jinx", "Jhin",
  
     },
  
@@ -536,9 +548,11 @@ function DrawKillable()
 				if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") or myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then
 					if (myHero:CanUseSpell(Ignite) == READY) then
 						iDmg = 40 + (20 * myHero.level)
-					elseif (myHero:CanUseSpell(Ignite) ~= READY) then
+					elseif (myHero:CanUseSpell(Ignite) == not READY) then
 						iDmg = 0
 					end
+				else 
+					iDmg = 0
 				end
 				Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
 				if iDmg > enemy.health then
