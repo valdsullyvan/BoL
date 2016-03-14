@@ -83,7 +83,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.271"
+local version = "0.272"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -167,7 +167,7 @@ function OnLoad()
 			Param.LastHit.E:addParam("Hurrican", "Enable Hurrican Check :", SCRIPT_PARAM_ONOFF, false)
 			Param.LastHit.E:addParam("CountHurrican", "How many with Hurrican :", SCRIPT_PARAM_SLICE, 3, 1, 6)
 			Param.LastHit.E:addParam("n2blank", "", SCRIPT_PARAM_INFO, "")
-			--Param.LastHit.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			Param.LastHit.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 			--Param.LastHit.E:addParam("n3blank", " to recover missing last hits.", SCRIPT_PARAM_INFO, "")
 	-------------------WAVECLEAR|OPTION-------------------------
 	Param:addSubMenu("WaveClear Settings", "WaveClear")
