@@ -83,7 +83,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.27"
+local version = "0.271"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -117,7 +117,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Get last hits.")
+		EnvoiMessage("What's new : Minor Fix.")
 		whatsnew = 0
 	end
 
@@ -167,13 +167,13 @@ function OnLoad()
 			Param.LastHit.E:addParam("Hurrican", "Enable Hurrican Check :", SCRIPT_PARAM_ONOFF, false)
 			Param.LastHit.E:addParam("CountHurrican", "How many with Hurrican :", SCRIPT_PARAM_SLICE, 3, 1, 6)
 			Param.LastHit.E:addParam("n2blank", "", SCRIPT_PARAM_INFO, "")
-			Param.LastHit.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
-			Param.LastHit.E:addParam("n3blank", " to recover missing last hits.", SCRIPT_PARAM_INFO, "")
+			--Param.LastHit.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			--Param.LastHit.E:addParam("n3blank", " to recover missing last hits.", SCRIPT_PARAM_INFO, "")
 	-------------------WAVECLEAR|OPTION-------------------------
 	Param:addSubMenu("WaveClear Settings", "WaveClear")
 		--Param.WaveClear:addParam("Key", "Advanced WaveClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("T"))
-		Param.WaveClear:addParam("Q", "Enable (Q) Spell in WaveClear :", SCRIPT_PARAM_ONOFF, false)
-		Param.WaveClear:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
+		--Param.WaveClear:addParam("Q", "Enable (Q) Spell in WaveClear :", SCRIPT_PARAM_ONOFF, false)
+		--Param.WaveClear:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 	-------------------JUNGLE|OPTIONS---------------------------
 	Param:addSubMenu("Jungle Settings", "Jungle")
 		Param.Jungle:addSubMenu("(E) Spell Settings", "E")
@@ -375,8 +375,6 @@ function OnLoad()
 end
 
 function CustomLoad()
-
-	--require("SimpleLib")
 
 	Param.Misc.WTrick.Drake = false
 	Param.Misc.WTrick.Baron = false
@@ -738,36 +736,36 @@ end
 
 function LaneClear()
 	LastHit_Gather()
-	if Param.Jungle.Q then
-		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
-			jungleMinions:update()
-			for i, jungleMinion in pairs(jungleMinions.objects) do
-				if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 then
-					local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
-					if HitChance >= 2 then
-						CastSpell(_Q, castPos.x, castPos.z)
-					end
-				end
-			end
-		end
-	end
-	if Param.WaveClear.Q then
-		if not ManaQWaveClear() then
-			enemyMinions:update()
-			for i, minion in pairs(enemyMinions.objects) do
-				if minion ~= nil and not minion.dead then
-					if GetDistance(minion) <= 1150 and myHero:CanUseSpell(_Q) == READY then
-						if minion.health < dmgQ then
-							local castPos, HitChance, pos = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
-							if HitChance >= 2 then
-								CastSpell(_Q, castPos.x, castPos.z)
-							end
-						end
-					end
-				end
-			end
-		end
-	end
+	-- if Param.Jungle.Q then
+	-- 	if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
+	-- 		jungleMinions:update()
+	-- 		for i, jungleMinion in pairs(jungleMinions.objects) do
+	-- 			if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 then
+	-- 				local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+	-- 				if HitChance >= 2 then
+	-- 					CastSpell(_Q, castPos.x, castPos.z)
+	-- 				end
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+	-- if Param.WaveClear.Q then
+	-- 	if not ManaQWaveClear() then
+	-- 		enemyMinions:update()
+	-- 		for i, minion in pairs(enemyMinions.objects) do
+	-- 			if minion ~= nil and not minion.dead then
+	-- 				if GetDistance(minion) <= 1150 and myHero:CanUseSpell(_Q) == READY then
+	-- 					if minion.health < dmgQ then
+	-- 						local castPos, HitChance, pos = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+	-- 						if HitChance >= 2 then
+	-- 							CastSpell(_Q, castPos.x, castPos.z)
+	-- 						end
+	-- 					end
+	-- 				end
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
 end
 
 -- Credits to http://forum.botoflegends.com/topic/64623-library-simplelib/ - iCreative  (http://forum.botoflegends.com/user/137788-icreative/) [start]
@@ -2568,11 +2566,12 @@ wallSpots = {
 }
 
 function RunnanHurricaneCheck()
-	if Param.LastHit.Hurrican and os.clock()-Last_Hurrican > 60 then
+	if Param.LastHit.Hurrican and os.clock()-Last_Hurrican > 20 then
 		Last_Hurrican = os.clock()
 		for SLOT = ITEM_1, ITEM_6 do
 			if GetInventoryHaveItem(3085) then
 				HurricanGet = 1
+				EnvoiMessage("Found : Runaan's Hurricane")
 			end
 		end
 	end
