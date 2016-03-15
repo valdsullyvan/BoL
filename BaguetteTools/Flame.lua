@@ -14,7 +14,7 @@ function OnTick()
 			local MSG_Rand = math.random(1,8)
 			if MSG_Rand > 0 then
 				if MSG_Rand == 1 then
-					SendChat("Your mother is a whore")
+					SendChat("/ALL Your mother is a whore")
 				elseif MSG_Rand == 2 then
 					SendChat("/ALL Cya stupid noob")
 				elseif MSG_Rand == 3 then
