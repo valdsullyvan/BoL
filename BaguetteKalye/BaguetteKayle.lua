@@ -33,6 +33,7 @@ local dmgQ = 10 + 50 * myHero:GetSpellData(_Q).level + .6 * myHero.ap + myHero.a
 local healW = 15 + 45 * myHero:GetSpellData(_W).level + .45 * myHero.ap 
 local dmgEPassif = 5 + 5 * myHero:GetSpellData(_E).level + .15 * myHero.ap
 local dmgE = dmgEPassif * 2
+local dmgSmite, D_SX = 0,0
 local Last_LevelSpell, Last_Item_Check = 0,0
 local DE_BASE, DH, D_NASH, D_GUIN, D_IJ, DTT_I, DAA_E, DTOT, DAA, DX, D3E1, D4E1, dmg = 0,0,0,0,0,0,0,0,0,0,0,0,0
 local D_GUIN_S = 20 + .15 * myHero.totalDamage + .075 * myHero.ap
@@ -44,7 +45,7 @@ local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
 
 --- Starting AutoUpdate
-local version = "0.1"
+local version = "0.11"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -79,9 +80,11 @@ function OnLoad()
 	--
 	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerSmite") then Smite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerSmite") then Smite = SUMMONER_2 end
 	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then Ignite = SUMMONER_2 end
+	if Ignite then EnvoiMessage("Found : Ignite [SUPPORTED]")
+	if Smite then EnvoiMessage("Found : Smite [SUPPORTED]")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Release.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Minor changes.")end, 0)
 		whatsnew = 0
 	end
 
@@ -128,6 +131,9 @@ function OnTick()
 		AutoR()
 		DrawKillable()
 		AutoLvlSpell()
+		if Smite and Param.JungleClear.Enable then
+			AutoSmite()
+		end
 	end
 end
 
@@ -183,6 +189,9 @@ function Menu()
 		Param.JungleClear:addParam("Mana", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear :" , SCRIPT_PARAM_ONOFF, true)
 		Param.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear :", SCRIPT_PARAM_ONOFF, true)
+		Param.JungleClear:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+		Param.JungleClear:addParam("Enable", "Use auto smite :", SCRIPT_PARAM_ONOFF, true)
+		Param.JungleClear:addParam("Selector", "Choose a mode :", SCRIPT_PARAM_LIST, 1, {"Only Epics", "Only Buffs", "Only Buff & Epics", "Everything"})
 	--
 	Param:addSubMenu("", "n1")
 	--
@@ -274,6 +283,8 @@ function Menu()
 			Param.Draw.S:addParam("Edraw","Display (E) Spell draw :", SCRIPT_PARAM_ONOFF, true)
 			Param.Draw.S:addParam("Rdraw","Display (R) Spell draw :", SCRIPT_PARAM_ONOFF, true)
 			Param.Draw.S:addParam("AAdraw", "Display Auto Attack draw :", SCRIPT_PARAM_ONOFF, true)
+			if Smite then Param.Draw.S:addParam("n1blank", "", SCRIPT_PARAM_INFO, "") end
+			if Smite then Param.Draw.S:addParam("Smite", "Display Smite draw :", SCRIPT_PARAM_ONOFF, true) end
 	--
 	Param:addSubMenu("", "n3")
 	--
@@ -339,10 +350,10 @@ function JungleClear()
 	if not ManaJungleClear() then
 		for i, jungleMinion in pairs(jungleMinions.objects) do
 			if jungleMinion ~= nil and not jungleMinion.dead then
-				if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range+200 and myHero:CanUseSpell(_E) == READY then
+				if Param.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range+200 and myHero:CanUseSpell(_E) == READY then
 					CastSpell(_E)
 				end
-				if Param.Clear.JungleClear.UseQ and GetDistance(jungleMinion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+				if Param.JungleClear.UseQ and GetDistance(jungleMinion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 					CastSpell(_Q, jungleMinion)
 				end
 			end
@@ -363,7 +374,7 @@ function WaveClear()
 	if not ManaWaveClear() then
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil and not minion.dead then
-				if GetDistance(minion) <= SkillE.range+200 and myHero:CanUseSpell(_E) == READY then
+				if GetDistance(minion) <= SkillE.range+200 and myHero:CanUseSpell(_E) == READY and Param.WaveClear.UseE then
 					CastSpell(_E)
 				end
 			end
@@ -814,7 +825,13 @@ function OnDraw()
 		end
 
 		if Param.Draw.S.AAdraw then
-			DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.range+myHero.boundingRadius, 2, 0xFFFFFFFF)
+			DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.range+myHero.boundingRadius, 1, 0xFFFFFFFF)
+		end
+
+		if Smite then
+			if Param.Draw.S.Smite then
+				DrawCircle3D(myHero.x, myHero.y, myHero.z, 500+myHero.boundingRadius, 1, 0xFFFFFFFF)
+			end
 		end
 
 		if Param.Draw.Hitbox then
@@ -940,6 +957,23 @@ function OnDraw()
 				end
 			end
 		end
+
+		-- SMITE
+		if Param.Draw.S.Smite then
+			jungleMinions:update()
+			for i, jungleMinion in pairs(jungleMinions.objects) do
+				if jungleMinion ~= nil and GetDistance(jungleMinion) < 500*4+myHero.boundingRadius and Epiques[jungleMinion.name] or Normal[jungleMinion.name] or Buff[jungleMinion.name] then
+					D_SX = math.round(D_SM() * 100 / jungleMinion.health, 2)
+					if D_SX >= 100 then
+						DrawText3D(">>SMITE.<<", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+					elseif D_SX < 100 and D_SX >= 80 then
+						DrawText3D(D_SX.." %", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
+					elseif D_SX < 80 then
+						DrawText3D(D_SX.." %", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
+					end
+				end
+			end
+		end
 	end
 end
 
@@ -951,4 +985,79 @@ function OnNewPath(unit, startPos, endPos, isDash, dashSpeed, dashGravity, dashD
 			end
 		end
 	end
+end
+
+Epiques = {
+	['SRU_RiftHerald17.1.1'] = {true}, -- Blue | Haut
+	['SRU_Baron12.1.1'] = {true}, -- Blue | Haut
+	['SRU_Dragon6.1.1'] = {true} -- Blue | Bas
+}
+
+Buff = {
+	['SRU_Red4.1.1'] = {true}, -- Blue | Bas
+	['SRU_Blue1.1.1'] = {true}, -- Blue | Haut
+	['SRU_Blue7.1.1'] = {true}, -- Red | Bas
+	['SRU_Red10.1.1'] = {true} -- Red | Haut
+}
+
+Normal = {
+	-- Blue | Bas
+	['SRU_Krug5.1.2'] = {true},
+	['SRU_Razorbeak3.1.1'] = {true},
+	['Sru_Crab15.1.1'] = {true},
+	-- Blue | Haut
+	['SRU_Murkwolf2.1.1'] = {true},
+	['SRU_Gromp13.1.1'] = {true},
+	['Sru_Crab16.1.1'] = {true},
+	-- Red | Bas
+	['SRU_Gromp14.1.1'] = {true},
+	['SRU_Murkwolf8.1.1'] = {true},
+	-- Red | Haut
+	['SRU_Razorbeak9.1.1'] = {true},
+	['SRU_Krug11.1.2'] = {true}
+}
+
+function AutoSmite()
+	if Param.JungleClear.Enable then
+		jungleMinions:update()
+		for i, jungleMinion in pairs(jungleMinions.objects) do
+			if jungleMinion ~= nil and GetDistance(jungleMinion) < 500+myHero.boundingRadius then
+				if jungleMinion.health < D_SM() and myHero:CanUseSpell(Smite) == READY and ValidTarget(jungleMinion) then
+					if Param.JungleClear.Selector == 1 then
+						if Epiques[jungleMinion.name] then
+							CastSpell(Smite, jungleMinion)
+						end
+					elseif Param.JungleClear.Selector == 2 then
+						if Buff[jungleMinion.name] then
+							CastSpell(Smite, jungleMinion)
+						end
+					elseif Param.JungleClear.Selector == 3 then
+						if Epiques[jungleMinion.name] or Buff[jungleMinion.name] then
+							CastSpell(Smite, jungleMinion)
+						end
+					elseif Param.JungleClear.Selector == 4 then
+						if Epiques[jungleMinion.name] or Normal[jungleMinion.name] or Buff[jungleMinion.name] then
+							CastSpell(Smite, jungleMinion)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+function D_SM()
+	if myHero.level <= 4 then
+		dmgSmite = 370 + (myHero.level*20)
+	end
+	if myHero.level > 4 and myHero.level <= 9 then
+		dmgSmite = 330 + (myHero.level*30)
+	end
+	if myHero.level > 9 and myHero.level <= 14 then
+		dmgSmite = 240 + (myHero.level*40)
+	end
+	if myHero.level > 14 then
+		dmgSmite = 100 + (myHero.level*50)
+	end
+	return dmgSmite
 end
