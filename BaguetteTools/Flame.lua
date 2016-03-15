@@ -4,7 +4,7 @@ local Last_Kill_Check = 0
 
 function OnLoad()
 	SendChat("/mute all")
-	print("loaded")
+	PrintChat("<font color=\"#e74c3c\"><b>[Flame]</b></font> <font color=\"#ffffff\">Loaded (by spyk)</font>")
 end
 
 function OnTick()
