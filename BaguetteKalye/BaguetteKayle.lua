@@ -45,7 +45,7 @@ local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
 
 --- Starting AutoUpdate
-local version = "0.121"
+local version = "0.122"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -334,6 +334,9 @@ function Combo() --
 			CastSpell(_E)
 		end
 	end
+end
+
+function Harass()
 end
 
 function LastHit() 
