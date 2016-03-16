@@ -45,7 +45,7 @@ local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
 
 --- Starting AutoUpdate
-local version = "0.12"
+local version = "0.121"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -163,6 +163,7 @@ function Menu()
 			Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true)
 			Param.Combo:addParam("UseW", "Use (W) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true)
 			Param.Combo:addParam("UseWValue", "Use (W) Spell under %life : ", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			Param.Combo:addParam("ManaW", "Mana Manager for (W) :", SCRIPT_PARAM_SLICE, 30, 0, 100)
 			Param.Combo:addParam("UseE", "Use (E) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true)
 		--
 	Param:addSubMenu("Harass Settings","Harass")
@@ -189,9 +190,9 @@ function Menu()
 		Param.JungleClear:addParam("Mana", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear :" , SCRIPT_PARAM_ONOFF, true)
 		Param.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear :", SCRIPT_PARAM_ONOFF, true)
-		Param.JungleClear:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
-		Param.JungleClear:addParam("Enable", "Use auto smite :", SCRIPT_PARAM_ONOFF, true)
-		Param.JungleClear:addParam("Selector", "Choose a mode :", SCRIPT_PARAM_LIST, 1, {"Only Epics", "Only Buffs", "Only Buff & Epics", "Everything"})
+		if Smite then Param.JungleClear:addParam("n1blank", "", SCRIPT_PARAM_INFO, "") end
+		if Smite then Param.JungleClear:addParam("Enable", "Use auto smite :", SCRIPT_PARAM_ONOFF, true) end
+		if Smite then Param.JungleClear:addParam("Selector", "Choose a mode :", SCRIPT_PARAM_LIST, 1, {"Only Epics", "Only Buffs", "Only Buff & Epics", "Everything"}) end
 	--
 	Param:addSubMenu("", "n1")
 	--
@@ -322,8 +323,8 @@ function Combo() --
 		end
 	end
 	if Param.Combo.UseW then
-		if myHero:CanUseSpell(_W) == READY and myHero.mana < (myHero.maxMana * (Param.Combo.UseWValue/100)) then
-			if myHero.maxHealth - myHero.health > healW then
+		if myHero:CanUseSpell(_W) == READY and not ManaWCombo() then
+			if myHero.maxHealth - myHero.health > healW and myHero.health < (myHero.maxHealth * (Param.Combo.UseWValue / 100)) then
 				CastSpell(_W, myHero)
 			end
 		end
@@ -411,6 +412,14 @@ function LastHit_Gather()
 			end
 		end
 	end
+end
+
+function ManaWCombo()
+    if myHero.mana < (myHero.maxMana * ( Param.Combo.ManaW / 100)) then
+        return true
+    else
+        return false
+    end
 end
 
 function ManaLastHit()
@@ -959,7 +968,7 @@ function OnDraw()
 		end
 
 		-- SMITE
-		if Param.Draw.S.Smite then
+		if Param.Draw.S.Smite and Smite then
 			jungleMinions:update()
 			for i, jungleMinion in pairs(jungleMinions.objects) do
 				if jungleMinion ~= nil and GetDistance(jungleMinion) < 500*4+myHero.boundingRadius and Epiques[jungleMinion.name] or Normal[jungleMinion.name] or Buff[jungleMinion.name] then
