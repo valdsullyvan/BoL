@@ -45,7 +45,7 @@ local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
 
 --- Starting AutoUpdate
-local version = "0.11"
+local version = "0.12"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -80,11 +80,11 @@ function OnLoad()
 	--
 	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerSmite") then Smite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerSmite") then Smite = SUMMONER_2 end
 	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then Ignite = SUMMONER_2 end
-	if Ignite then EnvoiMessage("Found : Ignite [SUPPORTED]")
-	if Smite then EnvoiMessage("Found : Smite [SUPPORTED]")
+	if Ignite then EnvoiMessage("Found : Ignite [SUPPORTED]") end
+	if Smite then EnvoiMessage("Found : Smite [SUPPORTED]") end
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Minor changes.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Fix.")end, 0)
 		whatsnew = 0
 	end
 
