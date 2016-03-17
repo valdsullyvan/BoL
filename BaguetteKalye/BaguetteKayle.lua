@@ -45,7 +45,7 @@ local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
 
 --- Starting AutoUpdate
-local version = "0.122"
+local version = "0.123"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -99,7 +99,6 @@ function CustomLoad()
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
 	ts.name = "Kayle"
 	Param:addTS(ts)
-	LoadVPred()
 
 	if _G.Reborn_Loaded ~= nil then
    		LoadSACR()
@@ -640,28 +639,6 @@ function LoadPewalk()
 		DelayAction(function ()EnvoiMessage("[Pewalk] Disable every spell usage in Pewalk for better performances with my script.")end, 7)
 	elseif not _Pewalk then
 		EnvoiMessage("Pewalk loading error")
-	end
-end
-
-function LoadVPred()
-	if FileExist(LIB_PATH .. "/VPrediction.lua") then
-		require("VPrediction")
-		EnvoiMessage("Succesfully loaded VPred")
-		VP = VPrediction()
-	else
-		local ToUpdate = {}
-		ToUpdate.Version = 0.0
-		ToUpdate.UseHttps = true
-		ToUpdate.Name = "VPrediction"
-		ToUpdate.Host = "raw.githubusercontent.com"
-		ToUpdate.VersionPath = "/SidaBoL/Scripts/master/Common/VPrediction.version"
-		ToUpdate.ScriptPath =  "/SidaBoL/Scripts/master/Common/VPrediction.lua"
-		ToUpdate.SavePath = LIB_PATH.."/VPrediction.lua"
-		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
-		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
-		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-		ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
-		ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
 	end
 end
 
