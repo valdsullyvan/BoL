@@ -83,7 +83,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.272"
+local version = "0.273"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -117,7 +117,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Minor Fix.")
+		EnvoiMessage("What's new : Minors Fix.")
 		whatsnew = 0
 	end
 
@@ -845,7 +845,7 @@ function CanMove()
 	elseif _G["BigFatOrb_Loaded"] == true then
 
 	elseif _G.NebelwolfisOrbWalkerLoaded then
-		_G.NOWi:TimeToMove()
+		_G.NebelwolfisOrbWalker:TimeToMove()
 	end
 end
 
@@ -859,7 +859,7 @@ function CanAttack()
 	elseif _G["BigFatOrb_Loaded"] == true then
 
 	elseif _G.NebelwolfisOrbWalkerLoaded then
-		_G.NOWi:TimeToAttack()
+		_G.NebelwolfisOrbWalker:TimeToAttack()
 	end
 end
 
@@ -1296,10 +1296,12 @@ function OnUpdateBuff(unit, buff, Stacks)
 end
  
 function OnRemoveBuff(unit, buff)
-	if buff.name == "recall" and unit.isMe then
-		if myHero.level >= 9 then
-			if Param.Misc.Starter.TrinketBleu then
-				BuyItem(3363)
+	if VIP_USER then
+		if buff.name == "recall" and unit.isMe then
+			if myHero.level >= 9 then
+				if Param.Misc.Starter.TrinketBleu then
+					BuyItem(3363)
+				end
 			end
 		end
 	end
