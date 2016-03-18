@@ -83,7 +83,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.273"
+local version = "0.274"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -1626,15 +1626,17 @@ function AutoLvlSpell()
 end
 
 function AutoLvlSpellCombo()
-	if Param.Misc.LVL.Enable then
-		if Param.Misc.LVL.Combo == 1 then
-			levelSequence =  {3,2,1,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | E > W > Q
-		elseif Param.Misc.LVL.Combo == 2 then
-			levelSequence =  {2,3,1,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | W > E > Q
-		elseif Param.Misc.LVL.Combo == 3 then
-			levelSequence =  {1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | Q > E > W
-		elseif Param.Misc.LVL.Combo == 4 then
-			levelSequence =  {3,1,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | E > Q > W
+	if VIP_USER then
+		if Param.Misc.LVL.Enable then
+			if Param.Misc.LVL.Combo == 1 then
+				levelSequence =  {3,2,1,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | E > W > Q
+			elseif Param.Misc.LVL.Combo == 2 then
+				levelSequence =  {2,3,1,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | W > E > Q
+			elseif Param.Misc.LVL.Combo == 3 then
+				levelSequence =  {1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | Q > E > W
+			elseif Param.Misc.LVL.Combo == 4 then
+				levelSequence =  {3,1,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2} -- Max E | E > Q > W
+			end
 		end
 	end
 end
