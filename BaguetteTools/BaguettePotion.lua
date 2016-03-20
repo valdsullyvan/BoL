@@ -25,7 +25,7 @@ local ActualPotData = "None"
 -- End
 
 --- Starting AutoUpdate.
-local version = "0.11"
+local version = "0.12"
 local author = "spyk"
 local SCRIPT_NAME = "BaguettePotion"
 local AUTOUPDATE = true
