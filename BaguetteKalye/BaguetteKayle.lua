@@ -6,7 +6,7 @@ Script by spyk for Kayle.
 
 - Github link : https://github.com/spyk1/BoL/blob/master/BaguetteKayle/BaguetteKayle.lua
 
-- Forum Thread : http://forum.botoflegends.com/topic/
+- Forum Thread : http://forum.botoflegends.com/topic/92596-beta-baguette-kayle/
 
 ]]--
 
@@ -19,11 +19,13 @@ local charNames = {
 if not charNames[myHero.charName] then return end
 
 function EnvoiMessage(msg)
+
 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteKayle]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
 
 function CurrentTimeInMillis()
-	return (os.clock() * 1000);
+
+	return (os.clock() * 1000)
 end
 
 
@@ -43,9 +45,10 @@ local OrbwalkManager_AA = {LastTime = 0, LastTarget = nil, IsAttacking = false, 
 local OrbwalkManager_DataUpdated = false
 local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
+local recall = 0
 
 --- Starting AutoUpdate
-local version = "0.123"
+local version = "0.13"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -158,7 +161,6 @@ function Menu()
 	Param = scriptConfig("[Baguette] Kayle", "BaguetteKayle")
 	--
 	Param:addSubMenu("Combo Settings","Combo")
-			Param.Combo:addParam("Key", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 			Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true)
 			Param.Combo:addParam("UseW", "Use (W) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true)
 			Param.Combo:addParam("UseWValue", "Use (W) Spell under %life : ", SCRIPT_PARAM_SLICE, 50, 0, 100)
@@ -166,8 +168,6 @@ function Menu()
 			Param.Combo:addParam("UseE", "Use (E) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true)
 		--
 	Param:addSubMenu("Harass Settings","Harass")
-		Param.Harass:addParam("Key", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
-		Param.Harass:addParam("Auto", "Auto Harass (On toggle)", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("Y"))
 		Param.Harass:addParam("Mana", "Required Mana to Harass :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass :" , SCRIPT_PARAM_ONOFF, true)
 		Param.Harass:addParam("UseW", "Use (W) Spell in Harass :" , SCRIPT_PARAM_ONOFF, false)
@@ -180,12 +180,10 @@ function Menu()
 		Param.LastHit:addParam("QMana", "Set a value for Mana (%)", SCRIPT_PARAM_SLICE, 30, 0, 100)
 	--
 	Param:addSubMenu("WaveClear Settings", "WaveClear")
-		Param.WaveClear:addParam("Key", "WaveClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 		Param.WaveClear:addParam("Mana", "Required Mana to WaveClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.WaveClear:addParam("UseE", "Use (E) Spell in WaveClear :" , SCRIPT_PARAM_ONOFF, true)
 	--
 	Param:addSubMenu("JungleClear Settings", "JungleClear")
-		Param.JungleClear:addParam("Key", "JungleClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 		Param.JungleClear:addParam("Mana", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear :" , SCRIPT_PARAM_ONOFF, true)
 		Param.JungleClear:addParam("UseE", "Use (E) Spell in JungleClear :", SCRIPT_PARAM_ONOFF, true)
@@ -228,18 +226,21 @@ function Menu()
 			Param.Misc.W:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.W:addParam("LifeH", "For yourself with life under :", SCRIPT_PARAM_SLICE, 30, 0, 100)
 			Param.Misc.W:addParam("ManaH", "Until (%) Mana", SCRIPT_PARAM_SLICE, 50, 0, 100)
-		--
-		Param.Misc:addSubMenu("_E Settings", "E")
-			Param.Misc.E:addParam("Fast", "Fast comeback to the lane :", SCRIPT_PARAM_ONOFF, true)
+			Param.Misc.W:addParam("", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.W:addParam("Fast", "Fast comeback to the lane :", SCRIPT_PARAM_ONOFF, true)
 		--
 		Param.Misc:addSubMenu("_R Settings", "R")
 			Param.Misc.R:addParam("Enable", "Enable Auto _R :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.R:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
-			Param.Misc.R:addParam("EnableA", "Use auto _R on allys :", SCRIPT_PARAM_ONOFF, false)
-			Param.Misc.R:addParam("LifeA", "Use under X Life :", SCRIPT_PARAM_SLICE, 10, 0, 100)
-			Param.Misc.R:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.R:addParam("EnableH", "Use auto _R on yourself :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.R:addParam("LifeH", "Use under X Life :", SCRIPT_PARAM_SLICE, 15, 0, 100)
+			Param.Misc.R:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.R:addParam("EnableA", "Use auto _R on allys :", SCRIPT_PARAM_ONOFF, false)
+			Param.Misc.R:addParam("LifeA", "Use under X Life :", SCRIPT_PARAM_SLICE, 10, 0, 100)
+			Param.Misc.R:addParam("","", SCRIPT_PARAM_INFO, "")
+			for _, unit in pairs(GetAllyHeroes()) do
+				Param.Misc.R:addParam(unit.charName, "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
+			end
 	--
 	Param:addSubMenu("", "n2")
 	--
@@ -283,6 +284,8 @@ function Menu()
 			Param.Draw.S:addParam("Edraw","Display (E) Spell draw :", SCRIPT_PARAM_ONOFF, true)
 			Param.Draw.S:addParam("Rdraw","Display (R) Spell draw :", SCRIPT_PARAM_ONOFF, true)
 			Param.Draw.S:addParam("AAdraw", "Display Auto Attack draw :", SCRIPT_PARAM_ONOFF, true)
+			Param.Draw.S:addParam("", "", SCRIPT_PARAM_INFO, "")
+			Param.Draw.S:addParam("L", "Display you'r life under Kayle :", SCRIPT_PARAM_ONOFF, true)
 			if Smite then Param.Draw.S:addParam("n1blank", "", SCRIPT_PARAM_INFO, "") end
 			if Smite then Param.Draw.S:addParam("Smite", "Display Smite draw :", SCRIPT_PARAM_ONOFF, true) end
 	--
@@ -336,9 +339,37 @@ function Combo() --
 end
 
 function Harass()
+	if not ManaHarass() then
+		if Param.Harass.UseQ then
+			if target ~= nil and myHero:CanUseSpell(_Q) == READY and GetDistance(target) < SkillQ.range then
+				CastSpell(_Q, target)
+			end
+		end
+		if Param.Harass.UseW then
+			if myHero:CanUseSpell(_W) == READY and not ManaWCombo() then
+				if myHero.maxHealth - myHero.health > healW and myHero.health < (myHero.maxHealth * (Param.Combo.UseWValue / 100)) then
+					CastSpell(_W, myHero)
+				end
+			end
+		end
+		if Param.Harass.UseE then
+			if target ~= nil and myHero:CanUseSpell(_E) == READY and GetDistance(target) < SkillE.range+100 then
+				CastSpell(_E)
+			end
+		end
+	end
+end
+
+function ManaHarass()
+    if myHero.mana < (myHero.maxMana * ( Param.Harass.Mana / 100)) then
+        return true
+    else
+        return false
+    end
 end
 
 function LastHit() 
+
 	LastHit_Gather()
 end
 
@@ -433,6 +464,7 @@ function ManaLastHit()
 end
 
 function IsAutoAttack(name)
+
     return name and ((tostring(name):lower():find("attack")))
 end
 
@@ -452,18 +484,22 @@ function OnProcessAttack(unit, spell)
 end
 
 function GetTime()
+
 	return 1 * os.clock()
 end
 
 function Latency()
+
 	return GetLatency() / 2000
 end
 
 function WindUpTime()
+
 	return (1 / (myHero.attackSpeed *  OrbwalkManager_BaseWindUpTime))
 end
 
 function IsAttacking()
+
 	return not CanMove()
 end
 
@@ -497,23 +533,39 @@ end
 
 function AutoHeal()
 	if myHero:CanUseSpell(_W) == READY then
-		if Param.Misc.W.Enable then
+		if Param.Misc.W.Enable and recall == 0 then
 			for _, unit in pairs(GetAllyHeroes()) do
-				if GetDistance(unit) < SkillW.range and myHero.mana < (myHero.maxMana * ( Param.Misc.W.ManaA / 100)) then
+				if GetDistance(unit) < SkillW.range and not ManaAA() then
 					if unit.health < (unit.maxHealth * (Param.Misc.W.LifeA/100)) then
 						CastSpell(_W, unit)
 					end
 				end
 			end
-			if myHero.health < (myHero.maxHealth * (Param.Misc.W.LifeH/100)) and myHero.mana < (myHero.maxMana * ( Param.Misc.W.ManaH / 100)) then
+			if myHero.health < (myHero.maxHealth * (Param.Misc.W.LifeH/100)) and not ManaHH() then
 				CastSpell(_W, myHero)
 			end
 		end
 	end
 end
 
+function ManaHH()
+    if myHero.mana < (myHero.maxMana * ( Param.Misc.W.ManaH / 100)) then
+        return true
+    else
+        return false
+    end
+end
+
+function ManaAA()
+    if myHero.mana < (myHero.maxMana * ( Param.Misc.W.ManaA / 100)) then
+        return true
+    else
+        return false
+    end
+end
+
 function AutoR()
-	if myHero:CanUseSpell(_R) == READY then
+	if myHero:CanUseSpell(_R) == READY and recall == 0 then
 		if Param.Misc.R.Enable then
 			if Param.Misc.R.EnableH then
 				if myHero.health < myHero.maxHealth * Param.Misc.R.LifeH / 100 then
@@ -522,9 +574,12 @@ function AutoR()
 			end
 			if Param.Misc.R.EnableA then
 				for _, unit in pairs(GetAllyHeroes()) do
-					if GetDistance(unit) < SkillR.range then
-						if unit.health < (unit.maxHealth * (Param.Misc.R.LifeA / 100)) then
-							CastSpell(_R, unit)
+					t = unit.charName
+					if Param.Misc.R.t then
+						if GetDistance(unit) < SkillR.range then
+							if unit.health < (unit.maxHealth * (Param.Misc.R.LifeA / 100)) then
+								CastSpell(_R, unit)
+							end
 						end
 					end
 				end
@@ -716,6 +771,7 @@ function OnRemoveBuff(unit, buff)
 		GuinsooStacks = 0
 	end
 	if buff.name == "recall" and unit.isMe then
+		recall = 0
 		if myHero.level >= 9 then
 			if Param.Misc.Buy.TrinketBleu then
 				BuyItem(3363)
@@ -725,6 +781,9 @@ function OnRemoveBuff(unit, buff)
 end
 
 function OnUpdateBuff(unit, buff, Stacks)
+	if buff.name == "recall" and unit.isMe then
+		recall = 1
+	end
 	if buff.name == "rageblade" and unit.isMe then
 		if Stacks > 0 then
 			GuinsooStacks = Stacks
@@ -827,7 +886,9 @@ function OnDraw()
 			DrawCircle3D(myHero.x, myHero.y, myHero.z, myHero.boundingRadius, 1, 0xFFFFFFFF)
 		end
 
-		DrawText3D("% "..math.ceil(myHero.health*100/myHero.maxHealth, 2),myHero.x-10, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
+		if Param.Draw.S.L then
+			DrawText3D("% "..math.ceil(myHero.health*100/myHero.maxHealth, 2),myHero.x-10, myHero.y-50, myHero.z, 20, 0xFFFFFFFF)
+		end
 
 		-- TARGET DRAW
 		if target ~= nil and ValidTarget(target) then
@@ -967,7 +1028,7 @@ function OnDraw()
 end
 
 function OnNewPath(unit, startPos, endPos, isDash, dashSpeed, dashGravity, dashDistance)
-	if unit.isMe and Param.Misc.E.Fast then
+	if unit.isMe and Param.Misc.W.Fast then
 		if myHero:CanUseSpell(_W) == READY then
 			if GetGame().map.shortName == "summonerRift" and GetDistance(myHero.endPath) > 3569 then
 				CastSpell(_W, myHero)
