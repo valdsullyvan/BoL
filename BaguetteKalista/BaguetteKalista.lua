@@ -83,7 +83,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.274"
+local version = "0.28"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -1610,19 +1610,15 @@ function Consommables()
 end
 
 function AutoLvlSpell()
-	if (string.find(GetGameVersion(), 'Releases/6.5') ~= nil) then
-	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-	 		if Param.Misc.LVL.Enable then
-		    	autoLevelSetSequence(levelSequence)
-		    	Last_LevelSpell = os.clock()
-		    elseif not Param.Misc.LVL.Enable then
-		    	autoLevelSetSequence(nil)
-		    	Last_LevelSpell = os.clock()+10
-		    end
-	  	end
-	else
-		do return end
-	end
+ 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+ 		if Param.Misc.LVL.Enable then
+	    	autoLevelSetSequence(levelSequence)
+	    	Last_LevelSpell = os.clock()
+	    elseif not Param.Misc.LVL.Enable then
+	    	autoLevelSetSequence(nil)
+	    	Last_LevelSpell = os.clock()+10
+	    end
+  	end
 end
 
 function AutoLvlSpellCombo()
