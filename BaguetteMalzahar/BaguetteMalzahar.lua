@@ -56,7 +56,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.24"
+local version = "0.25"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -203,7 +203,6 @@ function OnLoad()
 		Param.draw:addParam("disable","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
 		Param.draw:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.draw:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
-		Param.draw:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
 		Param.draw:addParam("hitbox", "Draw HitBox?", SCRIPT_PARAM_ONOFF, true)
 		--
 		Param.draw:addSubMenu("Charactere Draws","spell")
@@ -662,6 +661,7 @@ function OnDraw()
 		if target ~= nil and ValidTarget(target) then
 			if Param.draw.tText then
 				DrawText3D("ACTUAL BITCH",target.x-100, target.y-50, target.z, 20, 0xFFFFFFFF) -- Acknowledgments to http://forum.botoflegends.com/user/25371-big-fat-corki/ and his Mark IV script for giving me the idea of the target name.
+				DrawText(""..target.charName.."", 50, 50, 200, 0xFFFFFFFF)
 			end
 		end
 		if Param.draw.drawKillable then
@@ -675,19 +675,11 @@ function OnDraw()
 				end 
 			end 
 		end 
-		if Param.draw.drawDamage then 
-			for i, enemy in ipairs(GetEnemyHeroes()) do
-				if enemy and ValidTarget(enemy) then
-					DrawIndicator(enemy)
-				end
-			end
-		end
 		if Param.draw.spell.PoisonDraw then 
 			for _, unit in pairs(GetEnemyHeroes()) do
 				if unit ~= nil and GetDistance(unit) < 3000 then
 					local Center = GetUnitHPBarPos(unit)
-					local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-					Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
+					Edmg = ((myHero:CanUseSpell(_E) == READY and myHero:CalcMagicDamage(unit,damageE)) or 0)
 					local Y3QER = math.floor(myHero:CalcDamage(unit,Edmg))
 					if Center.x > -100 and Center.x < WINDOW_W+100 and Center.y > -100 and Center.y < WINDOW_H+100 then
 						local off = GetUnitHPBarOffset(unit)
@@ -707,14 +699,6 @@ function OnDraw()
 	end
 end
 
-function CalcSpellDamage(enemy)
-	if not enemy then return end 
-		return ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageQ)) or 0), ((myHero:GetSpellData(_E).level >= 1 and myHero:CalcMagicDamage(enemy, damageE)) or 0), ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageR)) or 0)
-	end 
-	for i, enemy in ipairs(GetEnemyHeroes()) do
-    	enemy.barData = {PercentageOffset = {x = 0, y = 0} }
-	end
-
 function GetEnemyHPBarPos(enemy)
     if not enemy.barData then return end
     local barPos = GetUnitHPBarPos(enemy)
@@ -732,20 +716,7 @@ function GetEnemyHPBarPos(enemy)
     return Point(StartPos.x, StartPos.y), Point(EndPos.x, EndPos.y)
 end
 
-function DrawIndicator(enemy)
-	local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-	Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-	Wdmg = ((0.5 * myHero:GetSpellData(_W).level + 3.5 + 0.01 * myHero.ap) or 0)
-	Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-	Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
-    local damage = Qdmg + Edmg + Rdmg + (Wdmg * 2.5)
-    local SPos, EPos = GetEnemyHPBarPos(enemy)
-    if not SPos then return end
-    local barwidth = EPos.x - SPos.x
-    local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
-    DrawText(" | ", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
-    DrawText("HP: "..math.floor(enemy.health - damage), 12, math.floor(SPos.x + 25), math.floor(SPos.y - 15), (enemy.health - damage) > 0 and ARGB(255, 0, 255, 0) or  ARGB(255, 255, 0, 0))
-end
+
  
 function DrawKillable()
 	for i = 1, heroManager.iCount, 1 do
@@ -759,11 +730,10 @@ function DrawKillable()
 						iDmg = 0
 					end
 				end
-				local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-				Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-				Wdmg = ((0.5 * myHero:GetSpellData(_W).level + 3.5 + 0.01 * myHero.ap) or 0)
-				Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-				Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
+				Qdmg = ((myHero:CanUseSpell(_Q) == READY and myHero:CalcMagicDamage(enemy,damageQ)) or 0)
+				Wdmg = ((myHero:CanUseSpell(_Q) == READY and myHero:CalcMagicDamage(enemy,0.5 * myHero:GetSpellData(_W).level + 3.5 + 0.01 * myHero.ap)) or 0)
+				Edmg = ((myHero:CanUseSpell(_E) == READY and myHero:CalcMagicDamage(enemy,damageE)) or 0)
+				Rdmg = ((myHero:CanUseSpell(_R) == READY and myHero:CalcMagicDamage(enemy,damageR)) or 0)
 				if iDmg > enemy.health then
 					KillText[i] = 1
 				elseif Qdmg > enemy.health then
@@ -996,19 +966,15 @@ function AutoBuy()
 end
 
 function AutoLvlSpell()
-	if (string.find(GetGameVersion(), 'Releases/6.5') ~= nil) then
-	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-	 		if Param.miscellaneous.LVL.Enable then
-		    	autoLevelSetSequence(levelSequence)
-		    	Last_LevelSpell = os.clock()
-		    elseif not Param.miscellaneous.LVL.Enable then
-		    	autoLevelSetSequence(nil)
-		    	Last_LevelSpell = os.clock()+10
-		    end
-	  	end
-	else
-		do return end
-	end
+ 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+ 		if Param.miscellaneous.LVL.Enable then
+	    	autoLevelSetSequence(levelSequence)
+	    	Last_LevelSpell = os.clock()
+	    elseif not Param.miscellaneous.LVL.Enable then
+	    	autoLevelSetSequence(nil)
+	    	Last_LevelSpell = os.clock()+10
+	    end
+  	end
 end
 
 function AutoLvlSpellCombo()
