@@ -55,7 +55,7 @@ local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tris
 local OnRecall = 0
 
 --- Starting AutoUpdate
-local version = "0.24"
+local version = "0.25"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -445,16 +445,14 @@ function AutoR()
 end
 
 function AutoLvlSpell()
-	if (string.find(GetGameVersion(), 'Releases/6.5') ~= nil) then
-	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-	 		if Param.Miscellaneous.LVL.Enable then
-		    	autoLevelSetSequence(levelSequence)
-		    	Last_LevelSpell = os.clock()
-		    elseif not Param.Miscellaneous.LVL.Enable then
-		    	autoLevelSetSequence(nil)
-		    	Last_LevelSpell = os.clock()+10
-		    end
-	  	end
+	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+		if Param.Miscellaneous.LVL.Enable then
+			autoLevelSetSequence(levelSequence)
+			Last_LevelSpell = os.clock()
+		elseif not Param.Miscellaneous.LVL.Enable then
+			autoLevelSetSequence(nil)
+			Last_LevelSpell = os.clock()+10
+		end
 	end
 end
 
