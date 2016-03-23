@@ -83,7 +83,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.28"
+local version = "0.29"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -1588,7 +1588,7 @@ function OnDraw()
 				for i,group in pairs(wallSpots) do
 					for x, wallSpot in pairs(group.Locations) do
 						if GetDistance(wallSpot) < 1000 then
-							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z, 0xFFFFFF)
+							DrawCircle3D(wallSpot.x, wallSpot.y, wallSpot.z, 50, 1, 0xFFFFFFFF)
 						end
 					end
 				end
