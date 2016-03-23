@@ -37,11 +37,13 @@ local buffs = {
 if not charNames[myHero.charName] then return end
 
 function EnvoiMessage(msg)
+
 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteAnivia]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
 
 function CurrentTimeInMillis()
-	return (os.clock() * 1000);
+
+	return (os.clock() * 1000)
 end
 
 local ts
@@ -68,7 +70,7 @@ local upoeuf = 1
 local startTime = 0
 
 --- Starting AutoUpdate
-local version = "0.64"
+local version = "0.69"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteAnivia"
 local AUTOUPDATE = true
@@ -255,7 +257,6 @@ function OnLoad()
 		Param.drawing:addParam("disablealldrawings","Disable all draws?", SCRIPT_PARAM_ONOFF, false)
 		Param.drawing:addParam("tText", "Draw Current Target Text?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("drawKillable", "Draw Killable Text?", SCRIPT_PARAM_ONOFF, true)
-		Param.drawing:addParam("drawDamage", "Draw Damage?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("BarH", "Draw Damages on Health Bar?", SCRIPT_PARAM_ONOFF, true)
 		Param.drawing:addParam("hitbox", "Draw HitBox?", SCRIPT_PARAM_ONOFF, true)
 		--
@@ -273,7 +274,6 @@ function OnLoad()
 			Param.drawing.wallmenu:permaShow("active")
 			Param.drawing.wallmenu:addParam("radius", "Ajust precision of Circle Diameter : ", SCRIPT_PARAM_SLICE, 25, 0, 200, 0)
 			Param.drawing.wallmenu:permaShow("radius")
-			Param.drawing.wallmenu:addParam("color", "Choose a color for Circles :", SCRIPT_PARAM_LIST, 1, {"Normal (Lite Blue)", "Red", "Green", "White"})
 	--end
 	Param:addSubMenu("", "nil")
 	--
@@ -589,10 +589,6 @@ function OnTick()
 
 		Consommables()
 	--
-end
-
-function drawCircles(x,y,z,color)
-    DrawCircle(x, y, z, Param.drawing.wallmenu.radius, color)
 end
 
 function WdansR(unit)
@@ -1011,45 +1007,6 @@ function ValidR()
 		return false 
 	end	
 end
-
-function CalcSpellDamage(enemy)
-	if not enemy then return end 
-		return ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageQ)) or 0), ((myHero:GetSpellData(_E).level >= 1 and myHero:CalcMagicDamage(enemy, damageE)) or 0), ((myHero:GetSpellData(_Q).level >= 1 and myHero:CalcMagicDamage(enemy, damageR)) or 0)
-	end 
-	for i, enemy in ipairs(GetEnemyHeroes()) do
-    	enemy.barData = {PercentageOffset = {x = 0, y = 0} }
-	end
-
-function GetEnemyHPBarPos(enemy)
-    if not enemy.barData then return end
-    local barPos = GetUnitHPBarPos(enemy)
-    local barPosOffset = GetUnitHPBarOffset(enemy)
-    local barOffset = Point(enemy.barData.PercentageOffset.x, enemy.barData.PercentageOffset.y)
-    local barPosPercentageOffset = Point(enemy.barData.PercentageOffset.x, enemy.barData.PercentageOffset.y)
-    local BarPosOffsetX = 169
-    local BarPosOffsetY = 47
-    local CorrectionX = 16
-    local CorrectionY = 4
-    barPos.x = barPos.x + (barPosOffset.x - 0.5 + barPosPercentageOffset.x) * BarPosOffsetX + CorrectionX
-    barPos.y = barPos.y + (barPosOffset.y - 0.5 + barPosPercentageOffset.y) * BarPosOffsetY + CorrectionY 
-    local StartPos = Point(barPos.x, barPos.y)
-    local EndPos = Point(barPos.x + 103, barPos.y)
-    return Point(StartPos.x, StartPos.y), Point(EndPos.x, EndPos.y)
-end
-
-function DrawIndicator(enemy)
-	local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-	Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-	Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-	Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
-    local damage = Qdmg + Edmg + Rdmg
-    local SPos, EPos = GetEnemyHPBarPos(enemy)
-    if not SPos then return end
-    local barwidth = EPos.x - SPos.x
-    local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth * barwidth)
-    DrawText("=", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
-    DrawText("HP: "..math.floor(enemy.health - damage), 12, math.floor(SPos.x + 25), math.floor(SPos.y - 15), (enemy.health - damage) > 0 and ARGB(255, 0, 255, 0) or  ARGB(255, 255, 0, 0))
-end 
  
 function DrawKillable()
 	for i = 1, heroManager.iCount, 1 do
@@ -1063,10 +1020,9 @@ function DrawKillable()
 						iDmg = 0
 					end
 				end
-				local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-				Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-				Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-				Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
+				Qdmg = ((myHero:CanUseSpell(_Q) == READY and myHero:CalcMagicDamage(enemy,damageQ)) or 0)
+				Edmg = ((myHero:CanUseSpell(_E) == READY and myHero:CalcMagicDamage(enemy,damageE)) or 0)
+				Rdmg = ((myHero:CanUseSpell(_R) == READY and myHero:CalcMagicDamage(enemy,damageR)) or 0)
 				if iDmg > enemy.health then
 					KillText[i] = 1
 				elseif Qdmg > enemy.health then
@@ -1162,10 +1118,9 @@ function OnDraw()
 			for _, unit in pairs(GetEnemyHeroes()) do
 				if unit ~= nil and GetDistance(unit) < 3000 then
 					local Center = GetUnitHPBarPos(unit)
-					local Qdmg, Edmg, Rdmg = CalcSpellDamage(enemy)
-					Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0)
-					Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0)
-					Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0)
+					Qdmg = ((myHero:CanUseSpell(_Q) == READY and myHero:CalcMagicDamage(unit,damageQ)) or 0)
+					Edmg = ((myHero:CanUseSpell(_E) == READY and myHero:CalcMagicDamage(unit,damageE)) or 0)
+					Rdmg = ((myHero:CanUseSpell(_R) == READY and myHero:CalcMagicDamage(unit,damageR)) or 0)
 					local Y3QER = Qdmg*2 + Edmg*2 + Rdmg*2
 					if Center.x > -100 and Center.x < WINDOW_W+100 and Center.y > -100 and Center.y < WINDOW_H+100 then
 						local off = GetUnitHPBarOffset(unit)
@@ -1194,31 +1149,13 @@ function OnDraw()
 				end 
 			end 
 		end 
-		if Param.drawing.drawDamage then 
-			for i, enemy in ipairs(GetEnemyHeroes()) do
-				if enemy and ValidTarget(enemy) then
-					DrawIndicator(enemy)
-				end
-			end
-		end
 
 		if GetGame().map.shortName == "summonerRift" then
 			if Param.drawing.wallmenu.active then
 				for i,group in pairs(wallSpots) do
 					for x, wallSpot in pairs(group.Locations) do
 						if GetDistance(wallSpot) < 1500 then
-							if GetDistance(wallSpot, mousePos) <= 1500 then
-								if Param.drawing.wallmenu.color == 1 then
-									color = 0xCCFFFF
-								elseif Param.drawing.wallmenu.color == 2 then
-									color = 0xFF0000
-								elseif Param.drawing.wallmenu.color == 3 then
-									color = 0x009900
-								elseif Param.drawing.wallmenu.color == 4 then
-									color = 0xFFFFFF
-								end
-							end
-							drawCircles(wallSpot.x, wallSpot.y, wallSpot.z,color)
+							DrawCircle3D(wallSpot.x, wallSpot.y, wallSpot.z, Param.drawing.wallmenu.radius, 1, 0xFFFFFFFF)
 						end
 					end
 				end
@@ -1704,19 +1641,15 @@ function AutoBuy()
 end
 
 function AutoLvlSpell()
-	if (string.find(GetGameVersion(), 'Releases/6.5') ~= nil) then
-	 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
-	 		if Param.miscellaneous.LVL.Enable then
-		    	autoLevelSetSequence(levelSequence)
-		    	Last_LevelSpell = os.clock()
-		    elseif not Param.miscellaneous.LVL.Enable then
-		    	autoLevelSetSequence(nil)
-		    	Last_LevelSpell = os.clock()+10
-		    end
-	  	end
-	else
-		do return end
-	end
+ 	if VIP_USER and os.clock()-Last_LevelSpell > 0.5 then
+ 		if Param.miscellaneous.LVL.Enable then
+	    	autoLevelSetSequence(levelSequence)
+	    	Last_LevelSpell = os.clock()
+	    elseif not Param.miscellaneous.LVL.Enable then
+	    	autoLevelSetSequence(nil)
+	    	Last_LevelSpell = os.clock()+10
+	    end
+  	end
 end
 
 function AutoLvlSpellCombo()
@@ -1724,7 +1657,9 @@ function AutoLvlSpellCombo()
 		levelSequence =  { 1,3,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
 	elseif Param.miscellaneous.LVL.Combo == 2 then			
 		levelSequence =  { 1,3,3,2,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
-	else return end
+	else 
+		return 
+	end
 end
 
 wallSpots = {
