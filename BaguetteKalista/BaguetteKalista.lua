@@ -66,7 +66,6 @@ local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
 -- E
 local unitStacks = {}
-local LastBlitz = 999999999
 -- Jgl security
 local LastMSG = 0
 local Dragons = 0
@@ -83,7 +82,7 @@ local lastRemove = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.29"
+local version = "0.291"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -117,7 +116,7 @@ function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
 
 	if whatsnew == 1 then
-		EnvoiMessage("What's new : Minors Fix.")
+		EnvoiMessage("What's new : Q/E added.")
 		whatsnew = 0
 	end
 
@@ -143,6 +142,9 @@ function OnLoad()
 			Param.Harass.E:addParam("AAHero", "have to be on Hero :", SCRIPT_PARAM_SLICE, 1, 0, 10)
 			Param.Harass.E:addParam("n4blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Harass.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
+		Param.Harass:addSubMenu("Q/E Harass :", "QE")
+			Param.Harass.QE:addParam("Enable", "Enable Q/E On Harass:", SCRIPT_PARAM_ONOFF, true)
+			Param.Harass.QE:addParam("Stacks", "Min. stacks to Q/E :", SCRIPT_PARAM_SLICE, 2, 1, 10)
 	------------------------------------------------------------
 	Param:addSubMenu("", "n1")
 	------------------------------------------------------------
@@ -167,6 +169,8 @@ function OnLoad()
 			Param.LastHit.E:addParam("Hurrican", "Enable Hurrican Check :", SCRIPT_PARAM_ONOFF, false)
 			Param.LastHit.E:addParam("CountHurrican", "How many with Hurrican :", SCRIPT_PARAM_SLICE, 3, 1, 6)
 			Param.LastHit.E:addParam("n2blank", "", SCRIPT_PARAM_INFO, "")
+			Param.LastHit.E:addParam("Gather", "Enable anti AA fail last hit :", SCRIPT_PARAM_ONOFF, true)
+			Param.LastHit.E:addParam("n3Blank", "", SCRIPT_PARAM_INFO, "")
 			Param.LastHit.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 			--Param.LastHit.E:addParam("n3blank", " to recover missing last hits.", SCRIPT_PARAM_INFO, "")
 	-------------------WAVECLEAR|OPTION-------------------------
@@ -650,7 +654,7 @@ end
 function KillSteal()
 	if Param.KillSteal.Enable then
 		for _, unit in pairs(GetEnemyHeroes()) do
-			Qdmg = ((myHero:CanUseSpell(_Q) == READY and dmgQ) or 0)
+			Qdmg = ((myHero:CanUseSpell(_Q) == READY and myHero:CalcDamage(unit,dmgQ)) or 0)
 			if GetDistance(unit) < SkillQ.range then
 				if unit.health < Qdmg and Param.KillSteal.Q and myHero:CanUseSpell(_Q) == READY and ValidTarget(unit) and unit ~= nil then
 					local castPos, HitChance, pos = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
@@ -676,7 +680,7 @@ function Spell()
 	if Param.Jungle.E.Enable then
 		AutoEMob()
 	end
-	if Param.Harass.E.Auto then
+	if Param.Harass.E and Param.Harass.E.Auto then
 		EHarass()
 	end
 	RunnanHurricaneCheck()
@@ -772,9 +776,9 @@ end
 
 function LastHit_Gather()
 	enemyMinions:update()
-	if not ManaELastHit() then
+	if not ManaELastHit() and Param.LastHit.E.Gather then
 		for i, minion in pairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion ~= nil and GetDistance(minion) < SkillE.range then
+			if ValidTarget(minion) and minion ~= nil and GetDistance(minion) < SkillE.range and not minion.dead then
 				if GetStacks(minion) > 0 then
   					local health = minion.health
   					if Param.LastHit.E.Enable then
@@ -801,6 +805,7 @@ function LastHit_Gather()
 end
 
 function IsAutoAttack(name)
+
     return name and ((tostring(name):lower():find("attack")))
 end
 
@@ -820,18 +825,22 @@ function OnProcessAttack(unit, spell)
 end
 
 function GetTime()
+
 	return 1 * os.clock()
 end
 
 function Latency()
+
 	return GetLatency() / 2000
 end
 
 function WindUpTime()
+
 	return (1 / (myHero.attackSpeed *  OrbwalkManager_BaseWindUpTime))
 end
 
 function IsAttacking()
+
 	return not CanMove()
 end
 
@@ -866,6 +875,9 @@ end
 -- Credits to http://forum.botoflegends.com/topic/64623-library-simplelib/ - iCreative  (http://forum.botoflegends.com/user/137788-icreative/) [end]
 
 function Harass()
+	if Param.Harass.QE.Enable then
+		QEHarass()
+	end
 	LastHit_Gather()
 	if Param.Harass.Q then
 		LogicQ()
@@ -952,6 +964,7 @@ function ManaQWaveClear()
 end
 
 function LastHit()
+
 	LastHit_Gather()
 end
 
@@ -1219,7 +1232,7 @@ function AutoEHero()
 					elseif TargetHaveBuff("SummonerExhaust", myHero) and not TargetHaveBuff("meditate", unit) then
 						D3E1 = (D3 - ((D3 * 40)/100))
 					elseif TargetHaveBuff("meditate", unit) then
-						dmgmajoration = (UnitHaveBuff(target, "meditate") and 1-(target:GetSpellData(_W).level * 0.05 + 0.5) or 1)
+						dmgmajoration = (UnitHaveBuff(unit, "meditate") and 1-(unit:GetSpellData(_W).level * 0.05 + 0.5) or 1)
 						if not TargetHaveBuff("SummonerExhaust", myHero) then
 							D3E1 = D3*dmgmajoration
 						elseif TargetHaveBuff("SummonerExhaust", myHero) then
@@ -1228,7 +1241,7 @@ function AutoEHero()
 					end
 
 					if unit.charName == "Blitzcrank" then
-						if LastBlitz > os.clock() then
+						if TargetHaveBuff("manabarrier", myHero) then
 							if (D3E1 > (unit.health+((unit.mana*50)/100))) and not Immune(unit) and unit.shield < 1 then
 								if not Param.Humanizer then 
 									CastSpell(_E)
@@ -1246,7 +1259,7 @@ function AutoEHero()
 									end, Human)
 								end
 							end
-						elseif LastBlitz < os.clock() then
+						elseif not TargetHaveBuff("manabarrier", myHero) then
 							if D3E1 > unit.health and not Immune(unit) and unit.shield < 1 then
 								if not Param.Humanizer then 
 									CastSpell(_E)
@@ -1308,9 +1321,6 @@ function OnRemoveBuff(unit, buff)
     if buff.name == "kalistaexpungemarker" then
       unitStacks[unit.networkID] = nil
     end
-	 if buff.name == "manabarrier" then
-		LastBlitz = os.clock()+90
-	end
 end
 
 function OnApplyBuff(source, unit, buff)
@@ -1385,13 +1395,14 @@ function OnProcessSpell(unit, spell)
 end
 
 function GetStacks(unit)
+
 	return unitStacks[unit.networkID] or 0
 end
 
 SkillQ = { name = "Pierce", range = 1150, delay = 0.25, speed = 1750, width = 70, ready = false}
 SkillW = { name = "Sentinel", range = 5000, delay = 0.25, speed = math.huge, width = 250, ready = false }
 SkillE = { name = "Rend", range = 1000, delay = 0.50, speed = nil, width = nil, ready = false }
-SkillR = { name = "Fate's Call", range = 1500, delay = nil, speed = nil, width = nil, ready = false }
+SkillR = { name = "Fate's Call", range = 1100, delay = nil, speed = nil, width = nil, ready = false }
 
 function OnDraw()
 	if not myHero.dead and not Param.Draw.Disable then
@@ -1423,6 +1434,7 @@ function OnDraw()
 		-- TARGET DRAW
 		if Target ~= nil and ValidTarget(Target) then
 			if Param.Draw.Target then
+				DrawText(""..Target.charName.."", 50, 50, 200, 0xFFFFFFFF)
 				DrawText3D(">> Current |Target <<",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFFFF)
 			end
 		end
@@ -1595,6 +1607,40 @@ function OnDraw()
 			end
 		end
 
+	end
+end
+
+function QEHarass()
+	if Target ~= nil and not Target.dead then
+		if GetDistance(Target) < SkillQ.range and Param.Harass.QE.Enable then
+			enemyMinions:update()
+			local minion_on_vector = 0
+			local minion_killable = 0
+			local minion_stack = 0
+			for i, minion in pairs(enemyMinions.objects) do
+				if ValidTarget(minion) and minion ~= nil then
+					AB = math.sqrt((Target.x-myHero.x)*(Target.x-myHero.x)+(Target.y-myHero.y)*(Target.y-myHero.y)+(Target.z-myHero.z)*(Target.z-myHero.z))
+					AP = math.sqrt((minion.x-myHero.x)*(minion.x-myHero.x)+(minion.y-myHero.y)*(minion.y-myHero.y)+(minion.z-myHero.z)*(minion.z-myHero.z))
+					PB = math.sqrt((Target.x-minion.x)*(Target.x-minion.x)+(Target.y-minion.y)*(Target.y-minion.y)+(Target.z-minion.z)*(Target.z-minion.z))
+					if AB > AP+PB-5 or AB > AP+PB+5 then
+						minion_on_vector = minion_on_vector + 1
+						--print("On Line "..minion_on_vector)
+						if GetStacks(minion) > -1 then
+							D_Q = ((myHero:CanUseSpell(_Q) == READY and myHero:CalcDamage(minion,dmgQ)) or 0)
+							if D_Q > minion.health then
+								minion_killable = minion_killable + 1
+								--print("Killable :"..minion_killable)
+								minion_stack = minion_stack + GetStacks(minion)
+								--print("Stacks :"..minion_stack)
+							end
+							if minion_killable == minion_on_vector and minion_stack > Param.Harass.QE.Stacks then
+								CastSpell(_Q, Target.x, Target.z)
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 end
 
