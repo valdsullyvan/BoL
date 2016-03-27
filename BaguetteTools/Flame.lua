@@ -3,12 +3,11 @@ local Last_MSG_Check = 0
 local Last_Kill_Check = 0
 
 function OnLoad()
-	SendChat("/mute all")
+	--SendChat("/mute all")
 	PrintChat("<font color=\"#e74c3c\"><b>[Flame]</b></font> <font color=\"#ffffff\">Loaded (by spyk)</font>")
 end
 
 function OnTick()
-	SendChat("/mute all")
 	if os.clock() > Last_MSG_Check then
 		if myHero:GetInt("CHAMPIONS_KILLED") > Last_Kill_Check then
 			local MSG_Rand = math.random(1,8)
