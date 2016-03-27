@@ -4,7 +4,7 @@ local Last_MSG_Check = 0
 local Last_Kill_Check = 0
 
 function OnLoad()
-	--SendChat("/mute all")
+	Last_Kill_Check = myHero:GetInt("CHAMPIONS_KILLED")
 	PrintChat("<font color=\"#e74c3c\"><b>[Flame]</b></font> <font color=\"#ffffff\">Loaded (by spyk)</font>")
 end
 
