@@ -25,7 +25,7 @@ local ActualPotData = "None"
 -- End
 
 --- Starting AutoUpdate.
-local version = "0.12"
+local version = "0.13"
 local author = "spyk"
 local SCRIPT_NAME = "BaguettePotion"
 local AUTOUPDATE = true
@@ -126,7 +126,7 @@ end
 function Usepot()
 	for SLOT = ITEM_1, ITEM_6 do -- Slot checking.
 		if myHero:GetSpellData(SLOT).name == ActualPotData then -- If my Hero got a slot who can been used then, this slot is ActualPotData(Autopotion()).
-			if myHero:CanUseSpell(SLOT) == READY and (myHero.health*100)/myHero.maxHealth < Pots.PotsAtXHP then -- If my Hero can use this slot now (like if you can't because of CD) and if Hero got x% < HP set.
+			if myHero:CanUseSpell(SLOT) == READY and (myHero.health*100)/myHero.maxHealth < Pots.PotsAtXHP and not InFountain() then -- If my Hero can use this slot now (like if you can't because of CD) and if Hero got x% < HP set.
 				CastSpell(SLOT) -- Cast potion.
 				lastPotion = os.clock()	-- Make a new value with the time when a potion works.
 				EnvoiMessage("1x "..ActualPotName.." => Used.") -- Print which potion was casted.
