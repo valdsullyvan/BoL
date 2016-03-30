@@ -10,24 +10,21 @@ Script by spyk for Kalista.
 
 ]]--
 
-local charNames = {
-    
-    ['Kalista'] = true,
-    ['kalista'] = true
-}
-
-if not charNames[myHero.charName] then return end
+if myHero.charName ~= "Kalista" then return end
 
 function EnvoiMessage(msg)
+
 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteKalista]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
 
 function drawCircles(x,y,z,color)
+
     DrawCircle(x, y, z, 50, color)
 end
 
 function CurrentTimeInMillis()
-	return (os.clock() * 1000);
+
+	return (os.clock() * 1000)
 end
 
 -- Misc
@@ -77,12 +74,15 @@ local lastPotion = 0
 local ActualPotTime = 15
 local ActualPotName = "None"
 local ActualPotData = "None"
--- Qss
+-- QSS
+local Last_Item_Check = 0
 local lastRemove = 0
+local MercurialGet = 0
+local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.291"
+local version = "0.295"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -176,8 +176,8 @@ function OnLoad()
 	-------------------WAVECLEAR|OPTION-------------------------
 	Param:addSubMenu("WaveClear Settings", "WaveClear")
 		--Param.WaveClear:addParam("Key", "Advanced WaveClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("T"))
-		--Param.WaveClear:addParam("Q", "Enable (Q) Spell in WaveClear :", SCRIPT_PARAM_ONOFF, false)
-		--Param.WaveClear:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
+		Param.WaveClear:addParam("Q", "Enable (Q) Spell in WaveClear :", SCRIPT_PARAM_ONOFF, false)
+		Param.WaveClear:addParam("QMana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
 	-------------------JUNGLE|OPTIONS---------------------------
 	Param:addSubMenu("Jungle Settings", "Jungle")
 		Param.Jungle:addSubMenu("(E) Spell Settings", "E")
@@ -324,15 +324,24 @@ function OnLoad()
 			Param.Misc.Items:addParam("Pot", "Use potions with this script :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.Items:addParam("PotXHP", "At how many %HP :", SCRIPT_PARAM_SLICE, 60, 0, 100)
 			Param.Misc.Items:addParam("PotCombo", "Use potions only in ComboMode :", SCRIPT_PARAM_ONOFF, true)
-			Param.Misc.Items:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
-			Param.Misc.Items:addParam("Qss", "Use Qss with this script :", SCRIPT_PARAM_ONOFF, true)
-			Param.Misc.Items:addParam("Qssdelay", "Humanizer (ms)", SCRIPT_PARAM_SLICE, 0, 0, 1000)
-			Param.Misc.Items:addParam("QssZedR", "Clean Zed (R) Spell :", SCRIPT_PARAM_ONOFF, true)
-			Param.Misc.Items:addParam("QssStun", "Clean on 'Stun': ", SCRIPT_PARAM_ONOFF, true)
-			Param.Misc.Items:addParam("QssRoot", "Clean on 'Root' :", SCRIPT_PARAM_ONOFF, true)
-			Param.Misc.Items:addParam("QssSilence", "Clean on 'Silence' :", SCRIPT_PARAM_ONOFF, false)
-			Param.Misc.Items:addParam("QssTaunt", "Clean on 'Taunt' :", SCRIPT_PARAM_ONOFF, false)
-			Param.Misc.Items:addParam("QssExhaust", "Clean on Summoner spell 'Exhaust' :", SCRIPT_PARAM_ONOFF, true)
+		Param.Misc:addSubMenu("Auto QSS", "QSS")
+				Param.Misc.QSS:addParam("Enable", "Enable the Auto Qss :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Humanizer", "Set a value for humanize QSS :", SCRIPT_PARAM_SLICE, 0,0,250)
+				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+				Param.Misc.QSS:addParam("n1blank", "------------------------- Buff To QSS ------------------------", SCRIPT_PARAM_INFO, "")
+				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+				Param.Misc.QSS:addParam("Exhaust", "On Exhaust :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+				Param.Misc.QSS:addParam("Stun", "On Stun :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Taunt", "On Taunt :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Slow", "On Slow :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Trap", "On Trap :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Fear", "On Fear :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Charm", "On Charm :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Blind", "On Blind :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
+				Param.Misc.QSS:addParam("Zed", "On Zed Ult :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("BlitzQ", "On BlitzQ :", SCRIPT_PARAM_ONOFF, true)
 		Param.Misc:addSubMenu("Balista / Tahmista :", "Blitz")
 			Param.Misc.Blitz:addParam("Blitz", "Enable Balista Combo :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.Blitz:addParam("BlitzRangeMin", "Set the minimum range to use :", SCRIPT_PARAM_SLICE, 400, 0, 1400)
@@ -383,9 +392,9 @@ function CustomLoad()
 	Param.Misc.WTrick.Drake = false
 	Param.Misc.WTrick.Baron = false
 
-	enemyMinions = minionManager(MINION_ENEMY, 3000, myHero, MINION_SORT_HEALTH_ASC)
-	jungleMinions = minionManager(MINION_JUNGLE, 3000, myHero, MINION_SORT_MAXHEALTH_DEC)
-	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
+	enemyMinions = minionManager(MINION_ENEMY, 1150, myHero, MINION_SORT_HEALTH_ASC)
+	jungleMinions = minionManager(MINION_JUNGLE, 1150, myHero, MINION_SORT_MAXHEALTH_DEC)
+	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1150, DAMAGE_MAGIC)
 	ts.name = "Kalista"
 	Param:addTS(ts)
 	LoadVPred()
@@ -506,24 +515,11 @@ function LoadVPred()
 		EnvoiMessage("Succesfully loaded VPred")
 		VP = VPrediction()
 	else
-		local ToUpdate = {}
-		ToUpdate.Version = 0.0
-		ToUpdate.UseHttps = true
-		ToUpdate.Name = "VPrediction"
-		ToUpdate.Host = "raw.githubusercontent.com"
-		ToUpdate.VersionPath = "/SidaBoL/Scripts/master/Common/VPrediction.version"
-		ToUpdate.ScriptPath =  "/SidaBoL/Scripts/master/Common/VPrediction.lua"
-		ToUpdate.SavePath = LIB_PATH.."/VPrediction.lua"
-		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
-		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
-		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-		ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
-		ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+		EnvoiMessage("Download VPrediction!")
 	end
 end
 
 function OnTick()
-
 	if not myHero.dead then
 
 		ts:update()
@@ -539,7 +535,6 @@ function OnTick()
 		Consommables()
 
 	end
-
 end
 
 function Keys()
@@ -641,7 +636,6 @@ function Keys()
 	end
 end
 
-
 function GetCustomTarget()
 	ts:update()	
 	if ValidTarget(ts.target) and ts.target.type == myHero.type then
@@ -683,6 +677,7 @@ function Spell()
 	if Param.Harass.E and Param.Harass.E.Auto then
 		EHarass()
 	end
+	ItemCheck()
 	RunnanHurricaneCheck()
 	if Param.Humanizer then
 		Humanizing()
@@ -737,42 +732,39 @@ function OnUnload()
 	end
 end
 
-
 function LaneClear()
 	LastHit_Gather()
-	-- if Param.Jungle.Q then
-	-- 	if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
-	-- 		jungleMinions:update()
-	-- 		for i, jungleMinion in pairs(jungleMinions.objects) do
-	-- 			if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 then
-	-- 				local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
-	-- 				if HitChance >= 2 then
-	-- 					CastSpell(_Q, castPos.x, castPos.z)
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-	-- if Param.WaveClear.Q then
-	-- 	if not ManaQWaveClear() then
-	-- 		enemyMinions:update()
-	-- 		for i, minion in pairs(enemyMinions.objects) do
-	-- 			if minion ~= nil and not minion.dead then
-	-- 				if GetDistance(minion) <= 1150 and myHero:CanUseSpell(_Q) == READY then
-	-- 					if minion.health < dmgQ then
-	-- 						local castPos, HitChance, pos = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
-	-- 						if HitChance >= 2 then
-	-- 							CastSpell(_Q, castPos.x, castPos.z)
-	-- 						end
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
+	if Param.Jungle.Q then
+		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
+			jungleMinions:update()
+			for i, jungleMinion in pairs(jungleMinions.objects) do
+				if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 then
+					local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+					if HitChance >= 2 then
+						CastSpell(_Q, castPos.x, castPos.z)
+					end
+				end
+			end
+		end
+	end
+	if Param.WaveClear.Q then
+		if not ManaQWaveClear() then
+			enemyMinions:update()
+			for i, minion in pairs(enemyMinions.objects) do
+				if minion ~= nil and not minion.dead then
+					if GetDistance(minion) <= 1150 and myHero:CanUseSpell(_Q) == READY then
+						if minion.health < dmgQ then
+							local castPos, HitChance, pos = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+							if HitChance >= 2 then
+								CastSpell(_Q, castPos.x, castPos.z)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 end
-
--- Credits to http://forum.botoflegends.com/topic/64623-library-simplelib/ - iCreative  (http://forum.botoflegends.com/user/137788-icreative/) [start]
 
 function LastHit_Gather()
 	enemyMinions:update()
@@ -871,8 +863,6 @@ function CanAttack()
 		_G.NebelwolfisOrbWalker:TimeToAttack()
 	end
 end
-
--- Credits to http://forum.botoflegends.com/topic/64623-library-simplelib/ - iCreative  (http://forum.botoflegends.com/user/137788-icreative/) [end]
 
 function Harass()
 	if Param.Harass.QE.Enable then
@@ -1342,20 +1332,64 @@ function OnApplyBuff(source, unit, buff)
 		Dragons = 5
 	end
 
-	if unit ~= nil then
-		if buff.name == "DarkBindingMissile" and unit.isMe and Param.Misc.Items.QssRoot then
+	if unit ~= nil and unit.isMe and Param.Misc.QSS.Enable and not source.charName:lower():find("baron") and not source.charName:lower():find("spiderboss") then
+			-- BUFF_Internal = 0
+			-- BUFF_Aura = 1
+			-- BUFF_CombatEnchancer = 2
+			-- BUFF_CombatDehancer = 3
+			-- BUFF_SpellShield = 4
+			-- BUFF_Invisibility = 5
+			-- BUFF_Stun = 6
+			-- BUFF_Silence = 7
+			-- BUFF_Taunt = 8
+			-- BUFF_Polymorph = 9
+			-- BUFF_Slow = 10
+			-- BUFF_Snare = 11
+			-- BUFF_Damage = 12
+			-- BUFF_Heal = 13
+			-- BUFF_Haste = 14
+			-- BUFF_SpellImmunity = 15
+			-- BUFF_PhysicalImmunity = 16
+			-- BUFF_Invulnerability = 17
+			-- BUFF_Sleep = 18
+			-- BUFF_NearSight = 19
+			-- BUFF_Fear = 20
+			-- BUFF_Charm = 21
+			-- BUFF_Poison = 22
+			-- BUFF_Suppression = 23
+			-- BUFF_Blind = 24
+			-- BUFF_Counter = 25
+			-- BUFF_Currency = 26
+			-- BUFF_Shred = 27
+			-- BUFF_Flee = 28
+			-- BUFF_Knockup = 29
+			-- BUFF_Knockback = 30
+			-- BUFF_Disarm = 31
+		if buff.name == "SummonerExhaust" and Param.Misc.QSS.Exhaust then
 			QSS()
 		end
-		if buff.name == "Stun" and unit.isMe and Param.Misc.Items.QssStun then
+		if buff.name == "rocketgrab2" and Param.Misc.QSS.BlitzQ then
 			QSS()
 		end
-		if buff.name == "SummonerExhaust" and unit.isMe and Param.Misc.Items.QssExhaust then
+		if buff.type == 6 and Param.Misc.QSS.Stun then
 			QSS()
 		end
-		if buff.name == "Silence" and unit.isMe and Param.Misc.Items.QssSilence then
+		if buff.type == 8 and Param.Misc.QSS.Taunt then
 			QSS()
 		end
-		if buff.name == "Root" and unit.isMe and Param.Mics.Items.QssRoot then
+		if buff.type == 10 and Param.Misc.QSS.Slow then
+			QSS()
+		end
+		if buff.type == 11 and Param.Misc.QSS.Trap then
+			QSS()
+		end
+		if buff.type == 20 and Param.Misc.QSS.Fear then
+			QSS()
+		end
+		if buff.type == 21 and Param.Misc.QSS.Charm then
+			QSS()
+		end
+		if buff.type == 24 and Param.Misc.QSS.Blind then
 			QSS()
 		end
 	end
@@ -1385,8 +1419,8 @@ function OnProcessSpell(unit, spell)
 			end
 		end
     end
-	if spell.name == "ZedR" and spell.target and spell.target.networkID == myHero.networkID then
-		if Param.Misc.Items.QssZedR then
+	if unit ~= nil and unit.isMe and spell.target and spell.target.networkID == myHero.networkID and Param.Misc.QSS.Enable then
+		if spell.name == "ZedR" and Param.Misc.QSS.Zed then
 			DelayAction(function()
 				QSS()
 			end, 2.8)
@@ -1750,16 +1784,24 @@ Items = {
 }
 
 function QSS()
-	if os.clock() - lastRemove < 1 then return end
-		for i, Item in pairs(Items) do
-			if Item.id ==  3140 or Item.id == 3139 then
-				lastRemove = os.clock()+90
-				DelayAction(function()
-					CastItem(Item.id)
-				end, Param.Misc.Items.Qssdelay/1000)
+	if lastRemove > os.clock() then return end
+		for SLOT = ITEM_1, ITEM_6 do
+			if QSSGet == 1 or MercurialGet == 1 and not myHero.dead then
+				if myHero:GetSpellData(SLOT).name == "QuicksilverSash" or myHero:GetSpellData(SLOT).name == "ItemMercurial" then
+					lastRemove = os.clock()+90
+					DelayAction(function()
+						if QSSGet == 1 then
+							CastItem(3140)
+							EnvoiMessage("Casted : Quicksilver Sash")
+						elseif MercurialGet == 1 then
+							CastItem(3139)
+							EnvoiMessage("Casted : Mercurial Scimitar")
+						end
+					end, Param.Misc.QSS.Humanizer/1000)
+				end
 			end
-		--
-	end
+		end
+	--
 end
 
 function Immune(unit)
@@ -2618,6 +2660,25 @@ function RunnanHurricaneCheck()
 			if GetInventoryHaveItem(3085) then
 				HurricanGet = 1
 				EnvoiMessage("Found : Runaan's Hurricane")
+			end
+		end
+	end
+end
+
+function ItemCheck()
+	if os.clock()-Last_Item_Check > 20 then
+		Last_Item_Check = os.clock()
+		for SLOT = ITEM_1, ITEM_6 do
+			if GetInventoryHaveItem(3140) and QSSGet == 0 then
+				QSSGet = 1
+				EnvoiMessage("Found : Quicksilver Sash")
+			end
+			if GetInventoryHaveItem(3139) and MercurialGet == 0 then
+				MercurialGet = 1
+				if QSSGet == 1 then
+					QSSGet = 0
+				end
+				EnvoiMessage("Found : Mercurial Scimitar")
 			end
 		end
 	end
