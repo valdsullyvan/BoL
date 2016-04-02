@@ -82,7 +82,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.295"
+local version = "0.296"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -1481,7 +1481,7 @@ function OnDraw()
 
 				for _, unit in pairs(GetEnemyHeroes()) do
 
-					if unit ~= nil and GetDistance(unit) < 3000 then
+					if unit ~= nil and GetDistance(unit) < 3000 and unit.visible and not unit.dead then
 
 						if GetStacks(unit) > 0 then
 
