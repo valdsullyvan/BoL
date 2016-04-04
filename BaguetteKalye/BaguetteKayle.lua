@@ -48,7 +48,7 @@ local OrbwalkManager_BaseAnimationTime = 0.665
 local recall = 0
 
 --- Starting AutoUpdate
-local version = "0.13"
+local version = "0.131"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -914,7 +914,7 @@ function OnDraw()
 
 		if Param.Draw.D.AA or Param.Draw.D.Perc or Param.Draw.D.D or Param.Draw.D.blank then
 			for _, unit in pairs(GetEnemyHeroes()) do
-				if unit ~= nil and GetDistance(unit) < 3000 and not unit.dead then
+				if unit ~= nil and GetDistance(unit) < 3000 and not unit.dead and unit.visible then
 					DE_BASE = math.floor(myHero:CalcDamage(unit,dmgE))
 
 					ItemCheck()
