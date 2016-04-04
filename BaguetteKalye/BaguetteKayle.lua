@@ -53,7 +53,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.14"
+local version = "0.141"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -249,9 +249,6 @@ function Menu()
 			Param.Misc.R:addParam("EnableA", "Use auto _R on allys :", SCRIPT_PARAM_ONOFF, false)
 			Param.Misc.R:addParam("LifeA", "Use under X Life :", SCRIPT_PARAM_SLICE, 10, 0, 100)
 			Param.Misc.R:addParam("","", SCRIPT_PARAM_INFO, "")
-			for _, unit in pairs(GetAllyHeroes()) do
-				Param.Misc.R:addParam(unit.charName, "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
-			end
 			for _, unit in pairs(GetAllyHeroes()) do
 				if T1 == 0 then
 					Param.Misc.R:addParam("A", "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
