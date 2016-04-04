@@ -46,9 +46,14 @@ local OrbwalkManager_DataUpdated = false
 local OrbwalkManager_BaseWindUpTime = 3
 local OrbwalkManager_BaseAnimationTime = 0.665
 local recall = 0
+local Hero1 = ""
+local Hero2 = ""
+local Hero3 = ""
+local Hero4 = ""
+local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.131"
+local version = "0.14"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -234,12 +239,37 @@ function Menu()
 			Param.Misc.R:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.R:addParam("EnableH", "Use auto _R on yourself :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.R:addParam("LifeH", "Use under X Life :", SCRIPT_PARAM_SLICE, 15, 0, 100)
+			Param.Misc.R:addParam("Cast", "Cast _R on yourself :", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("R"))
+			Param.Misc.R:setCallback("Cast", function (nB)
+				if nB then
+					CastSpell(_R, myHero)
+				end
+			end)
 			Param.Misc.R:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.R:addParam("EnableA", "Use auto _R on allys :", SCRIPT_PARAM_ONOFF, false)
 			Param.Misc.R:addParam("LifeA", "Use under X Life :", SCRIPT_PARAM_SLICE, 10, 0, 100)
 			Param.Misc.R:addParam("","", SCRIPT_PARAM_INFO, "")
 			for _, unit in pairs(GetAllyHeroes()) do
 				Param.Misc.R:addParam(unit.charName, "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
+			end
+			for _, unit in pairs(GetAllyHeroes()) do
+				if T1 == 0 then
+					Param.Misc.R:addParam("A", "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
+					T1 = 1
+					Hero1 = unit.charName
+				elseif T1 == 1 then
+					Param.Misc.R:addParam("B", "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
+					T1 = 2
+					Hero2 = unit.charName
+				elseif T1 == 2 then
+					Param.Misc.R:addParam("C", "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
+					T1 = 3
+					Hero3 = unit.charName
+				elseif T1 == 3 then
+					Param.Misc.R:addParam("D", "Enable _R on : "..unit.charName, SCRIPT_PARAM_ONOFF, true)
+					T1 = 4
+					Hero4 = unit.charName
+				end
 			end
 	--
 	Param:addSubMenu("", "n2")
@@ -578,7 +608,21 @@ function AutoR()
 					if Param.Misc.R.t then
 						if GetDistance(unit) < SkillR.range then
 							if unit.health < (unit.maxHealth * (Param.Misc.R.LifeA / 100)) then
-								CastSpell(_R, unit)
+								for _, eney in pairs(GetAllyHeroes()) do
+									if eney == unit then
+										if eney.charName == Hero1 and Param.Misc.R.A then
+											CastSpell(_R, eney)
+										elseif eney.charName == Hero2 and Param.Misc.R.B then
+											CastSpell(_R, eney)
+										elseif eney.charName == Hero3 and Param.Misc.R.C then
+											CastSpell(_R, eney)
+										elseif eney.charName == Hero4 and Param.Misc.R.D then
+											CastSpell(_R, eney)
+										elseif eney.charName == Hero5 and Param.Misc.R.E then
+											CastSpell(_R, eney)
+										end
+									end
+								end
 							end
 						end
 					end
