@@ -10,13 +10,7 @@ Script by spyk for Kayle.
 
 ]]--
 
-local charNames = {
-    
-    ['Kayle'] = true,
-    ['kayle'] = true
-}
-
-if not charNames[myHero.charName] then return end
+if myHero.charName ~= "Kayle" then return end
 
 function EnvoiMessage(msg)
 
@@ -53,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.141"
+local version = "0.142"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -92,7 +86,7 @@ function OnLoad()
 	if Smite then EnvoiMessage("Found : Smite [SUPPORTED]") end
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Fix.")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : Tweaks.")end, 0)
 		whatsnew = 0
 	end
 
@@ -102,8 +96,8 @@ function OnLoad()
 end
 
 function CustomLoad()
-	enemyMinions = minionManager(MINION_ENEMY, 3000, myHero, MINION_SORT_HEALTH_ASC)
-	jungleMinions = minionManager(MINION_JUNGLE, 3000, myHero, MINION_SORT_MAXHEALTH_DEC)
+	enemyMinions = minionManager(MINION_ENEMY, 900, myHero, MINION_SORT_HEALTH_ASC)
+	jungleMinions = minionManager(MINION_JUNGLE, 900, myHero, MINION_SORT_MAXHEALTH_DEC)
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, 1000, DAMAGE_MAGIC)
 	ts.name = "Kayle"
 	Param:addTS(ts)
