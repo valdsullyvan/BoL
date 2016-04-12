@@ -1,10 +1,13 @@
+-- 13/04 | My stats system is taking much time than I expected.
+
 function EnvoiMessage(msg)
+	
 	PrintChat("<b><font color=\"#c0392b\">[</font><i><font color=\"#27ae60\">Spike</font> <font color=\"#2980b9\">Lib</font><font color=\"#c0392b\">'</font><font color=\"#27ae60\">s</font></i><font color=\"#c0392b\">]</font></b> <font color=\"#c5eff7\"> : " .. msg .. "</font>")
 end
 
 --- Starting AutoUpdate
-local version = "0.04"
-local league = "6.6"
+local version = "0.05"
+local league = "6.7"
 local author = "spyk"
 local SCRIPT_NAME = "SpikeLib"
 local AUTOUPDATE = true
