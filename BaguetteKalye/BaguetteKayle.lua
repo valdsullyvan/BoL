@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.142"
+local version = "0.143"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -108,7 +108,7 @@ function CustomLoad()
    		LoadPewalk()
 	else
 		EnvoiMessage("Nebelwolfi's Orb Walker loading..")
-		LoadNEBOrb()
+		NebelOrb()
 	end
 
 	LoadSpikeLib()
@@ -690,7 +690,8 @@ function Keys()
 	end
 end
 
-function LoadNEBOrb()
+function NebelOrb()
+	local function LoadOrb()
 		if not _G.NebelwolfisOrbWalkerLoaded then
 			require "Nebelwolfi's Orb Walker"
 			NebelwolfisOrbWalkerClass()
@@ -698,21 +699,20 @@ function LoadNEBOrb()
 	end
 	if not FileExist(LIB_PATH.."Nebelwolfi's Orb Walker.lua") then
 		DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
-			LoadNEBOrb()
+			LoadOrb()
 		end)
 	else
 		local f = io.open(LIB_PATH.."Nebelwolfi's Orb Walker.lua")
 		f = f:read("*all")
 		if f:sub(1,4) == "func" then
 			DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
-				LoadNEBOrb()
+				LoadOrb()
 			end)
 		else
-			if neo == 1 then
-				LoadNEBOrb()
-			end
+			LoadOrb()
 		end
 	end
+end
 
 function LoadSACR()
 	if _G.Reborn_Initialised then
