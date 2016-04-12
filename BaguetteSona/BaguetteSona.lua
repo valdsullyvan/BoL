@@ -55,7 +55,7 @@ local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tris
 local OnRecall = 0
 
 --- Starting AutoUpdate
-local version = "0.25"
+local version = "0.26"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -91,7 +91,7 @@ end
 	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteSona]</b></font> <font color=\"#ffffff\">by spyk</font>")
 	--
 	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : 'Minors fixs.'")end, 0)
+		DelayAction(function() EnvoiMessage("What's new : 'Fixed Nebelwolfi Orbwalker.'")end, 0)
 		whatsnew = 0
 	end
 	--
@@ -141,7 +141,7 @@ function CustomLoad()
 	elseif Param.orbwalker.n1 == 3 then
 		local neo = 1
 		EnvoiMessage("Nebelwolfi's Orb Walker loading..")
-		LoadNEBOrb()
+		NebelOrb()
 	end
 	LoadSpikeLib()
 end
@@ -701,7 +701,8 @@ function LoadBFOrb()
 	end
 end
 
-function LoadNEBOrb()
+function NebelOrb()
+	local function LoadOrb()
 		if not _G.NebelwolfisOrbWalkerLoaded then
 			require "Nebelwolfi's Orb Walker"
 			NebelwolfisOrbWalkerClass()
@@ -709,21 +710,20 @@ function LoadNEBOrb()
 	end
 	if not FileExist(LIB_PATH.."Nebelwolfi's Orb Walker.lua") then
 		DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
-			LoadNEBOrb()
+			LoadOrb()
 		end)
 	else
 		local f = io.open(LIB_PATH.."Nebelwolfi's Orb Walker.lua")
 		f = f:read("*all")
 		if f:sub(1,4) == "func" then
 			DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
-				LoadNEBOrb()
+				LoadOrb()
 			end)
 		else
-			if neo == 1 then
-				LoadNEBOrb()
-			end
+			LoadOrb()
 		end
 	end
+end
 
 function LoadSACR()
 	if _G.Reborn_Initialised then
