@@ -5,6 +5,9 @@ AddLoadCallback(function()
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerSnowball") then Ball = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerSnowball") then Ball = SUMMONER_2 end
 
+	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerPoroThrow") then Poro = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerPoroThrow") then Poro = SUMMONER_2 end
+
+
 	require("VPrediction")
 
 	VP = VPrediction()
@@ -24,7 +27,11 @@ function CastSnowball()
 		if GetDistance(unit) < 1600 then
 			local castPos, HitChance, pos = VP:GetLineCastPosition(unit, 0.33, 50, 1600, 1600, myHero, true)
 			if HitChance >= 2 then
-				CastSpell(Ball, castPos.x, castPos.z)
+				if Ball then
+					CastSpell(Ball, castPos.x, castPos.z)
+				elseif Poro then
+					CastSpell(Poro, castPos.x, castPos.z)
+				end
 			end
 		end
 	end
