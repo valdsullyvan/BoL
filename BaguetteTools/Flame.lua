@@ -1,6 +1,7 @@
 -- 11/03 SendChat() broken need to do with packets 
 -- 27/03 Working
 -- 30/03 Added comment in the code if you want to add anothers messages.
+-- 21/04 Also, This script was requested by discord people's, then, I took message from them, I'm not a flamer Kappa
 
 -- You can also do this script with a tab, but it's more easy for new peoples to understand how flame.lua is working with this way, tabs are usefull with many values.
 local Last_MSG_Check = 0
