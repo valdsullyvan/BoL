@@ -6,8 +6,8 @@ function EnvoiMessage(msg)
 end
 
 --- Starting AutoUpdate
-local version = "0.05"
-local league = "6.7"
+local version = "0.06"
+local league = "6.8"
 local author = "spyk"
 local SCRIPT_NAME = "SpikeLib"
 local AUTOUPDATE = true
@@ -36,6 +36,56 @@ if AUTOUPDATE then
 end
  --- End Of AutoUpdate
 
+class 'Gold'
+
+	function Gold:Hero(unit)
+
+		return unit.gold
+	end
+
+class 'Stats'
+
+	function Stats:Kills(unit)
+
+		return unit:GetInt("CHAMPIONS_KILLED")
+	end
+
+	function Stats:Farm(unit)
+
+		return unit:GetInt("MINIONS_KILLED")
+	end
+
+	function Stats:Death(unit)
+
+		return unit:GetInt("NUM_DEATHS")
+	end
+
+	function Stats:Assits(unit)
+
+		return unit:GetInt("ASSISTS")
+	end
+
+class 'Item'
+
+	function Item:Buy(id)
+
+		BuyItem(id)
+	end
+
+	function Item:Sell(SLOT)
+
+		SellItem(SLOT)
+	end
+
+	function Item:FullSell()
+
+		SellItem(0)
+		SellItem(1)
+		SellItem(2)
+		SellItem(3)
+		SellItem(4)
+		SellItem(5)
+	end
 
 --{ CustomPermaShow.lua from https://github.com/Superx321/BoL/blob/master/common/CustomPermaShow.lua
 
