@@ -1,0 +1,7 @@
+AddTickCallback(function()
+    if myHero:CanUseSpell(_W) == READY then
+      CastSpell(_W, myHero)
+    end
+end)
+
+-- For Identity
