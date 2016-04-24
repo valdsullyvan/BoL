@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.143"
+local version = "0.15"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -83,7 +83,14 @@ function OnLoad()
 	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerSmite") then Smite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerSmite") then Smite = SUMMONER_2 end
 	if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") then Ignite = SUMMONER_1 elseif myHero:GetSpellData(SUMMONER_2).name:find("SummonerDot") then Ignite = SUMMONER_2 end
 	if Ignite then EnvoiMessage("Found : Ignite [SUPPORTED]") end
-	if Smite then EnvoiMessage("Found : Smite [SUPPORTED]") end
+	if Smite then 
+		EnvoiMessage("Found : Smite [SUPPORTED]") 
+		AddTickCallback(function() 
+			if Param.JungleClear.Enable then
+				AutoSmite()
+			end
+		end)
+	end
 	--
 	if whatsnew == 1 then
 		DelayAction(function() EnvoiMessage("What's new : Tweaks.")end, 0)
@@ -131,10 +138,7 @@ function OnTick()
 		AutoHeal()
 		AutoR()
 		DrawKillable()
-		AutoLvlSpell()
-		if Smite and Param.JungleClear.Enable then
-			AutoSmite()
-		end
+		AutoLvlSpell())
 	end
 end
 
@@ -217,6 +221,29 @@ function Menu()
 		--
 		if VIP_USER then Param.Misc:addSubMenu("Auto Buy :", "Buy") end
 			if VIP_USER then Param.Misc.Buy:addParam("TrinketBleu", "Buy a Blue Trinket at lvl.9 :", SCRIPT_PARAM_ONOFF, true) end
+		--
+		Param.Misc:addSubMenu("Flee Settings", "Flee")
+			Param.Misc.Flee:addParam("Key", "Flee Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("G"))
+			Param.Misc.Flee:setCallback("Key", function (xD)
+				if xD then
+					if myHero:CanUseSpell(_W) == READY and Param.Misc.Flee.UseW then 
+						CastSpell(_W, myHero) 
+					end
+					if Param.Misc.Flee.Move then
+						player:MoveTo(mousePos.x, mousePos.z)
+					end
+					if Param.Misc.Flee.UseQ then
+						for _, unit in pairs(GetEnemyHeroes()) do
+							if GetDistance(unit) < SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+								CastSpell(_Q, unit)
+							end
+						end
+					end
+				end
+			Param.Misc.Flee:addParam("n1", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.Flee:addParam("Move", "Move to Mouse Position while flee :", SCRIPT_PARAM_ONOFF, true)
+			Param.Misc.Flee:addParam("UseQ", "Use Spell (Q) while flee :", SCRIPT_PARAM_ONOFF, true)
+			Param.Misc.Flee:addParam("UseW", "Use Spell (W) while flee :", SCRIPT_PARAM_ONOFF, true)
 		--
 		Param.Misc:addSubMenu("_W Settings", "W")
 			Param.Misc.W:addParam("Enable", "Use Auto Healing :", SCRIPT_PARAM_ONOFF, true)
