@@ -138,7 +138,8 @@ function OnTick()
 		AutoHeal()
 		AutoR()
 		DrawKillable()
-		AutoLvlSpell())
+		AutoLvlSpell()
+		FleeMod()
 	end
 end
 
@@ -224,22 +225,6 @@ function Menu()
 		--
 		Param.Misc:addSubMenu("Flee Settings", "Flee")
 			Param.Misc.Flee:addParam("Key", "Flee Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("G"))
-			Param.Misc.Flee:setCallback("Key", function (xD)
-				if xD then
-					if myHero:CanUseSpell(_W) == READY and Param.Misc.Flee.UseW then 
-						CastSpell(_W, myHero) 
-					end
-					if Param.Misc.Flee.Move then
-						player:MoveTo(mousePos.x, mousePos.z)
-					end
-					if Param.Misc.Flee.UseQ then
-						for _, unit in pairs(GetEnemyHeroes()) do
-							if GetDistance(unit) < SkillQ.range and myHero:CanUseSpell(_Q) == READY then
-								CastSpell(_Q, unit)
-							end
-						end
-					end
-				end
 			Param.Misc.Flee:addParam("n1", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.Flee:addParam("Move", "Move to Mouse Position while flee :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.Flee:addParam("UseQ", "Use Spell (Q) while flee :", SCRIPT_PARAM_ONOFF, true)
@@ -403,6 +388,24 @@ function Harass()
 		if Param.Harass.UseE then
 			if target ~= nil and myHero:CanUseSpell(_E) == READY and GetDistance(target) < SkillE.range+100 then
 				CastSpell(_E)
+			end
+		end
+	end
+end
+
+function FleeMod()
+	if Param.Misc.Flee.Key then
+		if myHero:CanUseSpell(_W) == READY and Param.Misc.Flee.UseW then 
+			CastSpell(_W, myHero) 
+		end
+		if Param.Misc.Flee.Move then
+			player:MoveTo(mousePos.x, mousePos.z)
+		end
+		if Param.Misc.Flee.UseQ then
+			for _, unit in pairs(GetEnemyHeroes()) do
+				if GetDistance(unit) < SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+					CastSpell(_Q, unit)
+				end
 			end
 		end
 	end
