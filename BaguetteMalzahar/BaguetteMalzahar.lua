@@ -56,7 +56,7 @@ local AutoKillTimer = 0
 local ultTimer = 0
 
 --- Starting AutoUpdate
-local version = "0.251"
+local version = "0.252"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteMalzahar"
 local AUTOUPDATE = true
@@ -479,7 +479,7 @@ end
 
 function Combo(unit)
 	if ultTimer > CurrentTimeInMillis() then return end
-		if target ~= nil and target.type == myHero.type and not Immune(unit) then
+		if target ~= nil and target.type == myHero.type and not Immune(unit) and not unit.dead then
 			if myHero:CanUseSpell(_Q) == READY and Param.Combo.UseQ then
 				LogicQ(unit)
 			elseif myHero:CanUseSpell(_E) == READY and Param.Combo.UseE then
@@ -496,7 +496,7 @@ end
 function Harass()
 	if ultTimer > CurrentTimeInMillis() then return end
 	ts:update()
-	if ValidTarget(target) and target ~= nil and target.type == myHero.type then
+	if ValidTarget(target) and target ~= nil and target.type == myHero.type and not target.dead then
 		if(myHero:CanUseSpell(_Q) == READY and (myHero.mana / myHero.maxMana > Param.Harass.Mana /100 ) and ts.target ~= nil and Param.Harass.UseQ ) then 
 	  		LogicQ(target)
 		end
@@ -548,7 +548,7 @@ function WaveClear()
 	local canonheal = ((CurrentTimeInMillis()/6000)+700)
 	if not ManaWaveClear() then
 		for i, minion in pairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) then
+			if ValidTarget(minion) and minion ~= nil and (minion.maxHealth >= canonheal) and not minion.dead then
 				if GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY and (minion.maxHealth >= canonheal) and Param.Clear.WaveClear.UseE then
 					CastSpell(_E, minion)
 				elseif GetDistance(minion) <= SkillW.range and myHero:CanUseSpell(_W) == READY and (minion.maxHealth >= canonheal) and Param.Clear.WaveClear.UseW then
@@ -598,7 +598,7 @@ function JungleClear()
 	jungleMinions:update()
 		if not ManaJungleClear() then
 			for i, jungleMinion in pairs(jungleMinions.objects) do
-				if jungleMinion ~= nil then
+				if jungleMinion ~= nil and not jungleMinion.dead then
 					if Param.Clear.JungleClear.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
 						CastSpell(_E, jungleMinion)
 					elseif Param.Clear.JungleClear.UseW and GetDistance(jungleMinion) <= SkillW.range and myHero:CanUseSpell(_W) == READY then 
