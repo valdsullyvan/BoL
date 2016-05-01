@@ -82,7 +82,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.297"
+local version = "0.298"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -90,7 +90,6 @@ local UPDATE_HOST = "raw.githubusercontent.com"
 local UPDATE_PATH = "/spyk1/BoL/master/BaguetteKalista/BaguetteKalista.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
-local whatsnew = 0
 
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/spyk1/BoL/master/BaguetteKalista/BaguetteKalista.version")
@@ -101,7 +100,6 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-				whatsnew = 1
 			else
 				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
@@ -114,11 +112,6 @@ end
 
 function OnLoad()
  	print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteKalista]</b></font> <font color=\"#ffffff\">by spyk</font>")
-
-	if whatsnew == 1 then
-		EnvoiMessage("What's new : Q/E added.")
-		whatsnew = 0
-	end
 
  	-------------------MENU|PARAMETRES--------------------------
 	Param = scriptConfig("[Baguette] Kalista", "BaguetteKalista")
@@ -738,10 +731,10 @@ function LaneClear()
 		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
 			jungleMinions:update()
 			for i, jungleMinion in pairs(jungleMinions.objects) do
-				if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 then
-					local castPos, HitChance, pos = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+				if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 and not jungleMinion.dead then
+					CastPosition,  HitChance,  Position = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
 					if HitChance >= 2 then
-						CastSpell(_Q, castPos.x, castPos.z)
+						CastSpell(_Q, CastPosition.x, CastPosition.z)
 					end
 				end
 			end
@@ -754,9 +747,9 @@ function LaneClear()
 				if minion ~= nil and not minion.dead then
 					if GetDistance(minion) <= 1150 and myHero:CanUseSpell(_Q) == READY then
 						if minion.health < dmgQ then
-							local castPos, HitChance, pos = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
+							CastPosition,  HitChance,  Position = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
 							if HitChance >= 2 then
-								CastSpell(_Q, castPos.x, castPos.z)
+								CastSpell(_Q, CastPosition.x, CastPosition.z)
 							end
 						end
 					end
@@ -959,7 +952,7 @@ function LastHit()
 end
 
 function LogicQ()
-	if Target ~= nil and myHero:CanUseSpell(_Q) == READY then
+	if Target ~= nil and myHero:CanUseSpell(_Q) == READY and not Target.dead then
 		local castPos, HitChance, pos = VP:GetLineCastPosition(Target, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
 		if HitChance >= 2 then
 			CastSpell(_Q, castPos.x, castPos.z)
@@ -972,7 +965,7 @@ function AutoEMinion()
 		enemyMinions:update()
 		local ccount = 0
 		for i, minion in pairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion ~= nil then
+			if ValidTarget(minion) and minion ~= nil and not minion.dead then
 				if GetStacks(minion) > 0 then
 
 					D1 = math.floor(myHero:CalcDamage(minion,dmgE))
@@ -1057,7 +1050,7 @@ function AutoEMob()
 			local ccount = 0
 			for i, jungleMinion in pairs(jungleMinions.objects) do
 				if jungleMinion ~= nil then
-					if GetStacks(jungleMinion) > 0 and GetDistance(jungleMinion) < SkillE.range then
+					if GetStacks(jungleMinion) > 0 and GetDistance(jungleMinion) < SkillE.range and not jungleMinion.dead then
 
 						D1 = math.floor(myHero:CalcDamage(jungleMinion,dmgE))
 
@@ -1658,14 +1651,11 @@ function QEHarass()
 					PB = math.sqrt((Target.x-minion.x)*(Target.x-minion.x)+(Target.y-minion.y)*(Target.y-minion.y)+(Target.z-minion.z)*(Target.z-minion.z))
 					if AB > AP+PB-5 or AB > AP+PB+5 then
 						minion_on_vector = minion_on_vector + 1
-						--print("On Line "..minion_on_vector)
 						if GetStacks(minion) > -1 then
 							D_Q = ((myHero:CanUseSpell(_Q) == READY and myHero:CalcDamage(minion,dmgQ)) or 0)
 							if D_Q > minion.health then
 								minion_killable = minion_killable + 1
-								--print("Killable :"..minion_killable)
 								minion_stack = minion_stack + GetStacks(minion)
-								--print("Stacks :"..minion_stack)
 							end
 							if minion_killable == minion_on_vector and minion_stack > Param.Harass.QE.Stacks then
 								CastSpell(_Q, Target.x, Target.z)
