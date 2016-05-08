@@ -82,7 +82,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.2981"
+local version = "0.2982"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -1081,7 +1081,7 @@ function AutoEMob()
 							end
 						end
 
-						if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name == "SRU_Dragon6.1.1" then
+						if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name == charName:find("dragon") then
 							if Dragons ~= 0 then
 								if (D3-(((D3*7)/100)*Dragons)) > jungleMinion.health then
 									if not Param.Humanizer then 
