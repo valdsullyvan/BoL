@@ -82,7 +82,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.298"
+local version = "0.2981"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -712,7 +712,12 @@ function OutOfAA()
 			elseif Param.orbwalker.n1 == 2 and _G["BigFatOrb_Loaded"] == true then
 				_G["BigFatOrb_Mode"] = 'LaneClear'
 			elseif Param.orbwalker.n1 == 3 and _G.NebelwolfisOrbWalkerLoaded then
-				_G.NebelwolfisOrbWalker.Config.k.LaneClear = true
+				enemyMinions:update()
+				for i, minion in pairs(enemyMinions.objects) do
+					if _G.NebelwolfisOrbWalker:GetTarget() ~= "minion" then
+						_G.NebelwolfisOrbWalker:SetTarget(minion)
+					end
+				end
 			end
 			AAON = 1
 		end
@@ -1170,7 +1175,11 @@ end
 IsSpecialAMobToE = {
 	['SRU_RiftHerald17.1.1'] = {true}, -- Blue | Haut
 	['SRU_Baron12.1.1'] = {true}, -- Blue | Haut
-	['SRU_Dragon6.1.1'] = {true} -- Blue | Bas
+	['SRU_Dragon_Water'] = {true} -- Blue | Bas
+	['SRU_Dragon_Fire'] = {true} -- Blue | Bas
+	['SRU_Dragon_Earth'] = {true} -- Blue | Bas
+	['SRU_Dragon_Air'] = {true} -- Blue | Bas
+	['SRU_Dragon_Elder'] = {true} -- Blue | Bas
 }
 
 IsABuffMobToE = {
@@ -1326,38 +1335,6 @@ function OnApplyBuff(source, unit, buff)
 	end
 
 	if unit ~= nil and unit.isMe and Param.Misc.QSS.Enable and not source.charName:lower():find("baron") and not source.charName:lower():find("spiderboss") then
-			-- BUFF_Internal = 0
-			-- BUFF_Aura = 1
-			-- BUFF_CombatEnchancer = 2
-			-- BUFF_CombatDehancer = 3
-			-- BUFF_SpellShield = 4
-			-- BUFF_Invisibility = 5
-			-- BUFF_Stun = 6
-			-- BUFF_Silence = 7
-			-- BUFF_Taunt = 8
-			-- BUFF_Polymorph = 9
-			-- BUFF_Slow = 10
-			-- BUFF_Snare = 11
-			-- BUFF_Damage = 12
-			-- BUFF_Heal = 13
-			-- BUFF_Haste = 14
-			-- BUFF_SpellImmunity = 15
-			-- BUFF_PhysicalImmunity = 16
-			-- BUFF_Invulnerability = 17
-			-- BUFF_Sleep = 18
-			-- BUFF_NearSight = 19
-			-- BUFF_Fear = 20
-			-- BUFF_Charm = 21
-			-- BUFF_Poison = 22
-			-- BUFF_Suppression = 23
-			-- BUFF_Blind = 24
-			-- BUFF_Counter = 25
-			-- BUFF_Currency = 26
-			-- BUFF_Shred = 27
-			-- BUFF_Flee = 28
-			-- BUFF_Knockup = 29
-			-- BUFF_Knockback = 30
-			-- BUFF_Disarm = 31
 		if buff.name == "SummonerExhaust" and Param.Misc.QSS.Exhaust then
 			QSS()
 		end
