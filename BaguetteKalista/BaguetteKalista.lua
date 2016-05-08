@@ -688,7 +688,7 @@ function Combo()
 		AutoPotions()
 	end
 	if Param.Combo.Kite then
-		OutOfAA()
+		-- OutOfAA()
 	end
 end
 
@@ -712,12 +712,7 @@ function OutOfAA()
 			elseif Param.orbwalker.n1 == 2 and _G["BigFatOrb_Loaded"] == true then
 				_G["BigFatOrb_Mode"] = 'LaneClear'
 			elseif Param.orbwalker.n1 == 3 and _G.NebelwolfisOrbWalkerLoaded then
-				enemyMinions:update()
-				for i, minion in pairs(enemyMinions.objects) do
-					if _G.NebelwolfisOrbWalker:GetTarget() ~= "minion" then
-						_G.NebelwolfisOrbWalker:SetTarget(minion)
-					end
-				end
+				_G.NebelwolfisOrbWalker.Config.k.LaneClear = true
 			end
 			AAON = 1
 		end
