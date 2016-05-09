@@ -143,7 +143,6 @@ function OnUnload()
 	if Param.Draw.Skin.Enable then
 		SetSkin(myHero, -1)
 	end
-
 end
 
 function Skills()
@@ -238,6 +237,7 @@ function Menu()
 			Param.Misc.R:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.R:addParam("EnableH", "Use auto _R on yourself :", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.R:addParam("LifeH", "Use under X Life :", SCRIPT_PARAM_SLICE, 15, 0, 100)
+			Param.Misc.R:addParam("Number", "Do not Cast R if enemy in range are :", SCRIPT_PARAM_SLICE, 0, 0, 6)
 			Param.Misc.R:addParam("Cast", "Cast _R on yourself :", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("R"))
 			Param.Misc.R:setCallback("Cast", function (nB)
 				if nB then
@@ -610,7 +610,7 @@ end
 
 function AutoR()
 	if myHero:CanUseSpell(_R) == READY and recall == 0 then
-		if Param.Misc.R.Enable then
+		if Param.Misc.R.Enable and ERange() > Param.Misc.R.Number then
 			if Param.Misc.R.EnableH then
 				if myHero.health < myHero.maxHealth * Param.Misc.R.LifeH / 100 then
 					CastSpell(_R, myHero)
@@ -1172,4 +1172,16 @@ function D_SM()
 		dmgSmite = 100 + (myHero.level*50)
 	end
 	return dmgSmite
+end
+
+function ERange() 
+	EnnemyInRange = 0
+	for _, unit in pairs(GetEnemyHeroes()) do
+		if unit.visible and not unit.dead then
+			if GetDistance(unit) < 2000 then
+				EnnemyInRange = EnnemyInRange + 1
+			end
+		end
+	end
+	return EnnemyInRange
 end
