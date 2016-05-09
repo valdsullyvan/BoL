@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.15"
+local version = "0.16"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -55,7 +55,6 @@ local UPDATE_HOST = "raw.githubusercontent.com"
 local UPDATE_PATH = "/spyk1/BoL/master/BaguetteKayle/BaguetteKayle.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
-local whatsnew = 0
 
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/spyk1/BoL/master/BaguetteKayle/BaguetteKayle.version")
@@ -66,7 +65,6 @@ if AUTOUPDATE then
 				EnvoiMessage("New version available "..ServerVersion)
 				EnvoiMessage(">>Updating, please don't press F9<<")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-				whatsnew = 1
 			else
 				DelayAction(function() EnvoiMessage("Hello, "..GetUser()..". You got the latest version! :) ("..ServerVersion..")") end, 3)
 			end
@@ -90,11 +88,6 @@ function OnLoad()
 				AutoSmite()
 			end
 		end)
-	end
-	--
-	if whatsnew == 1 then
-		DelayAction(function() EnvoiMessage("What's new : Tweaks.")end, 0)
-		whatsnew = 0
 	end
 
 	Menu()
@@ -351,7 +344,7 @@ function KillSteal()
 	end
 end
 
-function Combo() --
+function Combo()
 	if Param.Combo.UseQ then
 		if target ~= nil and myHero:CanUseSpell(_Q) == READY and GetDistance(target) < SkillQ.range then
 			CastSpell(_Q, target)
@@ -1105,7 +1098,11 @@ end
 Epiques = {
 	['SRU_RiftHerald17.1.1'] = {true}, -- Blue | Haut
 	['SRU_Baron12.1.1'] = {true}, -- Blue | Haut
-	['SRU_Dragon6.1.1'] = {true} -- Blue | Bas
+	['SRU_Dragon_Water'] = {true}, -- Blue | Bas
+	['SRU_Dragon_Fire'] = {true}, -- Blue | Bas
+	['SRU_Dragon_Earth'] = {true}, -- Blue | Bas
+	['SRU_Dragon_Air'] = {true}, -- Blue | Bas
+	['SRU_Dragon_Elder'] = {true} -- Blue | Bas
 }
 
 Buff = {
