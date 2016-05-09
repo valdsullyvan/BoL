@@ -1,4 +1,4 @@
--- 13/04 | My stats system is taking much time than I expected.
+-- Updated for MetaBuild SoonTM
 
 function EnvoiMessage(msg)
 	
@@ -7,7 +7,7 @@ end
 
 --- Starting AutoUpdate
 local version = "0.06"
-local league = "6.8"
+local league = "6.9"
 local author = "spyk"
 local SCRIPT_NAME = "SpikeLib"
 local AUTOUPDATE = true
@@ -25,7 +25,6 @@ if AUTOUPDATE then
 				DelayAction(function()EnvoiMessage("New version found for Libraries "..ServerVersion) end, 3)
 				DelayAction(function()EnvoiMessage(">>Updating, please don't press F9<<") end, 4)
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Libs updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 5)
-				whatsnew = 1
 			else
 				DelayAction(function() EnvoiMessage("Libraries updated for League "..league.." on ("..ServerVersion..")") end, 4)
 			end
