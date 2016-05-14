@@ -82,7 +82,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.2983"
+local version = "0.2984"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -120,7 +120,6 @@ function OnLoad()
 		Param.Combo:addParam("Q", "Use (Q) Spell in Combo :", SCRIPT_PARAM_ONOFF, true)
 		Param.Combo:addParam("E", "Use (E) Spell in Combo :", SCRIPT_PARAM_ONOFF, true)
 		Param.Combo:addParam("Kite", "Kite on minion if the target is outrange :", SCRIPT_PARAM_ONOFF, true)
-		-- Bush Revealer - http://forum.botoflegends.com/topic/53449-hi-i-dont-understand-item-slot-please-help/?hl=%2Bbush+%2Brevealer
 	-------------------HARASS|OPTION----------------------------
 	Param:addSubMenu("Harass Settings", "Harass")
 		Param.Harass:addParam("Q", "Use (Q) Spell in Harass :", SCRIPT_PARAM_ONOFF, true)
@@ -165,7 +164,6 @@ function OnLoad()
 			Param.LastHit.E:addParam("Gather", "Enable anti AA fail last hit :", SCRIPT_PARAM_ONOFF, true)
 			Param.LastHit.E:addParam("n3Blank", "", SCRIPT_PARAM_INFO, "")
 			Param.LastHit.E:addParam("Mana", "Set a value for the Mana (%)", SCRIPT_PARAM_SLICE, 50, 0, 100)
-			--Param.LastHit.E:addParam("n3blank", " to recover missing last hits.", SCRIPT_PARAM_INFO, "")
 	-------------------WAVECLEAR|OPTION-------------------------
 	Param:addSubMenu("WaveClear Settings", "WaveClear")
 		--Param.WaveClear:addParam("Key", "Advanced WaveClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("T"))
@@ -202,10 +200,9 @@ function OnLoad()
 
 	-------------------DRAW|OPTIONS-----------------------------------
 	Param:addSubMenu("Draw", "Draw")
-		Param.Draw:addParam("Disable", "Disable every Draws :", SCRIPT_PARAM_ONOFF, false)
-		Param.Draw:addParam("AA", "Display (AA) Range :", SCRIPT_PARAM_ONOFF, true)
+		Param.Draw:addParam("AA", "Display (AA) Range :", SCRIPT_PARAM_ONOFF, false)
 		Param.Draw:addParam("HitBox", "Display (HitBox) of Kalista :", SCRIPT_PARAM_ONOFF, true)
-		Param.Draw:addParam("Q", "Display (Q) Spell Range :", SCRIPT_PARAM_ONOFF, true)
+		Param.Draw:addParam("Q", "Display (Q) Spell Range :", SCRIPT_PARAM_ONOFF, false)
 		Param.Draw:addParam("W", "Display (W) Spell Range :", SCRIPT_PARAM_ONOFF, false)
 		Param.Draw:addParam("E", "Display (E) Spell Range :", SCRIPT_PARAM_ONOFF, true)
 		Param.Draw:addSubMenu("Special Draw Settings for (E) Spell :", "EDraw")
@@ -219,13 +216,14 @@ function OnLoad()
 			Param.Draw.EDraw:addParam("Mob3", "Display current damages for (E) Spell on Mob :", SCRIPT_PARAM_ONOFF, true)
 			Param.Draw.EDraw:addParam("n3Blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Draw.EDraw:addParam("HeroBlock", "Display damages on health bar :", SCRIPT_PARAM_ONOFF, true)
-		Param.Draw:addParam("R", "Display (R) Spell Range :", SCRIPT_PARAM_ONOFF, true)
+		Param.Draw:addParam("R", "Display (R) Spell Range :", SCRIPT_PARAM_ONOFF, false)
 		Param.Draw:addParam("Target", "Display Target Draw :", SCRIPT_PARAM_ONOFF, true)
 		Param.Draw:addParam("n1Blank", "", SCRIPT_PARAM_INFO, "")
 		Param.Draw:addParam("LagFree", "Enable LagFree Draws :", SCRIPT_PARAM_ONOFF, true)
+		Param.Draw:addParam("n2blank", "", SCRIPT_PARAM_INFO, "")
+		Param.Draw:addParam("Disable", "Disable every Draws :", SCRIPT_PARAM_ONOFF, false)
 		Param.Draw:addSubMenu("WallJump", "WallJump")
 			Param.Draw.WallJump:addParam("Enable", " Enable WallJump :", SCRIPT_PARAM_ONOFF, true)
-
 
 		if VIP_USER then Param.Draw:addSubMenu("Skin Changer", "Skin") end
 			if VIP_USER then Param.Draw.Skin:addParam("Enable", "Enable Skin Changer : ", SCRIPT_PARAM_ONOFF, false)
