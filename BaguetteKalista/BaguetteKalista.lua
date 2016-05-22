@@ -82,7 +82,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.2984"
+local version = "0.2985"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -425,25 +425,13 @@ function CustomLoad()
 end
 
 function LoadSXOrb()
-
 	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
 		require("SxOrbWalk")
 		EnvoiMessage("Loaded SxOrbWalk")
 		Param:addSubMenu("SxOrbWalk", "SXMenu")
 		SxOrb:LoadToMenu(Param.SXMenu)
 	else
-		local ToUpdate = {}
-		    ToUpdate.Version = 1
-		   	ToUpdate.UseHttps = true
-		    ToUpdate.Host = "raw.githubusercontent.com"
-		   	ToUpdate.VersionPath = "/Superx321/BoL/master/common/SxOrbWalk.Version"
-		   	ToUpdate.ScriptPath =  "/Superx321/BoL/master/common/SxOrbWalk.lua"
-		    ToUpdate.SavePath = LIB_PATH.."/SxOrbWalk.lua"
-		   	ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". </b></font>") end
-		    ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
-		    ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-		   	ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
-		   	ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+		EnvoiMessage("Download a Fresh BoL Folder.")
 	end
 end
 
@@ -506,7 +494,14 @@ function LoadVPred()
 		EnvoiMessage("Succesfully loaded VPred")
 		VP = VPrediction()
 	else
-		EnvoiMessage("Download VPrediction!")
+		local Host = "raw.githubusercontent.com"
+		local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua".."?rand="..math.random(1,10000)
+		EnvoiMessage("VPred not found!")
+		DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+		DelayAction(function () 
+			require("VPrediction") 
+			VP = VPrediction() 
+		end, 5)
 	end
 end
 
@@ -2662,4 +2657,4 @@ function LoadSpikeLib()
 		require("SpikeLib")
 		DelayAction(function ()EnvoiMessage("Loaded Libraries with success!") end, 3)
 	end
-end
+en
