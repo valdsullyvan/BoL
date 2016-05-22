@@ -36,8 +36,6 @@ local HurricanGet = 0
 local Last_Hurrican = 120
 local Human = 0
 local Last_Humanizer = 10
--- Evadeee 
--- local Evadeee = 0
 -- Immune check
 local buffs = {
     ["JudicatorIntervention"] = true,
@@ -69,6 +67,7 @@ local Dragons = 0
 -- Pred dmgs
 local dmgQ = 60 * myHero:GetSpellData(_Q).level + 10 + myHero.totalDamage
 local dmgE = 15 * myHero:GetSpellData(_E).level + 5 + .6 * myHero.totalDamage
+local Exhausted = 0
 -- Potions
 local lastPotion = 0
 local ActualPotTime = 15
@@ -82,7 +81,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.2985"
+local version = "0.3"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -291,7 +290,7 @@ function OnLoad()
 						Param.Misc.WTrick.Drake = false
 					end
 				end)
-			Param.Misc.WTrick:addParam("DrakeKey", "Cast (W) Spell trick on Drake :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("P"))
+			Param.Misc.WTrick:addParam("DrakeKey", "Cast (W) Spell trick on Drake :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("Y"))
 				Param.Misc.WTrick:setCallback("DrakeKey", function (nV)
 					if nV then
 						CastSpell(_W, 9866.148, -71, 4414.014)
@@ -317,7 +316,6 @@ function OnLoad()
 			Param.Misc.Items:addParam("PotCombo", "Use potions only in ComboMode :", SCRIPT_PARAM_ONOFF, true)
 		Param.Misc:addSubMenu("Auto QSS", "QSS")
 				Param.Misc.QSS:addParam("Enable", "Enable the Auto Qss :", SCRIPT_PARAM_ONOFF, true)
-				Param.Misc.QSS:addParam("Humanizer", "Set a value for humanize QSS :", SCRIPT_PARAM_SLICE, 0,0,250)
 				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 				Param.Misc.QSS:addParam("n1blank", "------------------------- Buff To QSS ------------------------", SCRIPT_PARAM_INFO, "")
 				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
@@ -325,13 +323,12 @@ function OnLoad()
 				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 				Param.Misc.QSS:addParam("Stun", "On Stun :", SCRIPT_PARAM_ONOFF, true)
 				Param.Misc.QSS:addParam("Taunt", "On Taunt :", SCRIPT_PARAM_ONOFF, true)
-				Param.Misc.QSS:addParam("Slow", "On Slow :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Slow", "On Slow :", SCRIPT_PARAM_ONOFF, false)
 				Param.Misc.QSS:addParam("Trap", "On Trap :", SCRIPT_PARAM_ONOFF, true)
 				Param.Misc.QSS:addParam("Fear", "On Fear :", SCRIPT_PARAM_ONOFF, true)
 				Param.Misc.QSS:addParam("Charm", "On Charm :", SCRIPT_PARAM_ONOFF, true)
-				Param.Misc.QSS:addParam("Blind", "On Blind :", SCRIPT_PARAM_ONOFF, true)
+				Param.Misc.QSS:addParam("Blind", "On Blind :", SCRIPT_PARAM_ONOFF, false)
 				Param.Misc.QSS:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
-				Param.Misc.QSS:addParam("Zed", "On Zed Ult :", SCRIPT_PARAM_ONOFF, true)
 				Param.Misc.QSS:addParam("BlitzQ", "On BlitzQ :", SCRIPT_PARAM_ONOFF, true)
 		Param.Misc:addSubMenu("Balista / Tahmista :", "Blitz")
 			Param.Misc.Blitz:addParam("Blitz", "Enable Balista Combo :", SCRIPT_PARAM_ONOFF, true)
@@ -354,7 +351,7 @@ function OnLoad()
 
 	-------------------ORBWALKER & PREDICTION-------------------------
 	Param:addSubMenu("OrbWalker", "orbwalker")
-		Param.orbwalker:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 3, {"SxOrbWalk", "BigFat OrbWalker", "Nebelwolfi's Orb Walker"})
+		Param.orbwalker:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 3, {"SxOrbWalk", "BigFat OrbWalker", "Nebelwolfi's Orb Walker", "Simple Orbwalker"})
 		Param.orbwalker:addParam("n2", "If you want to change OrbWalker,", SCRIPT_PARAM_INFO, "")
 		Param.orbwalker:addParam("n3", "Then, change it and press double F9.", SCRIPT_PARAM_INFO, "")
 		Param.orbwalker:addParam("n4", "", SCRIPT_PARAM_INFO, "")
@@ -406,22 +403,40 @@ function CustomLoad()
 		NebelOrb()
 	end
 
-	DelayAction(function()AutoBuy()end, 3)
+	DelayAction(function() AutoBuy() end, 3)
 
 	LoadSpikeLib()
 
-	DelayAction(function() 
-		if bind == 0 then 
-			EnvoiMessage("You should bind with an ally!")
+	local BlackSpearCheck = 0
+
+	for SLOT = ITEM_1, ITEM_6 do
+		if GetInventoryHaveItem(3599) then
+			BlackSpearCheck = 1
 		end
-	end, 300)
+	end
+	if BlackSpearCheck == 1 then
+		DelayAction(function()
+			local BlackSpear = 0
+			for SLOT = ITEM_1, ITEM_6 do
+				if GetInventoryHaveItem(3599) then
+					BlackSpear = 1
+				end
+			end
+			if bind == 0 and BlackSpear == 1 then 
+				EnvoiMessage("You should bind with an ally!")
+			end
+		end, 300)
+	else
+		local file = assert(io.open(LIB_PATH .. "BaguetteKalista.key","r"))
+		local userKey = file:read("*l")
+		bind = userKey
+	end
 
 	AutoLvlSpellCombo()
 
-	if Param.Draw.Skin.Enable then
+	if Param.Draw.Skin.Enable and VIP_USER then
 		SetSkin(myHero, Param.Draw.Skin.skins -1)
 	end
-
 end
 
 function LoadSXOrb()
@@ -432,6 +447,21 @@ function LoadSXOrb()
 		SxOrb:LoadToMenu(Param.SXMenu)
 	else
 		EnvoiMessage("Download a Fresh BoL Folder.")
+	end
+end
+
+function LoadSimpleOrb()
+	if FileExist(LIB_PATH.."/S1mpleorbWalker.lua") then
+		require("S1mpleOrbWalker")
+		EnvoiMessage("Loaded Simple OrbWalker")
+	else
+		local Host = "scarjit.de"
+		local Path = "/S1mpleScripts/Scripts/BolStudio/OrbWalker/S1Loader.lua".."?rand="..math.random(1,10000)
+		EnvoiMessage("Simple OrbWalker not found!")
+		DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+		DelayAction(function () 
+			require("S1mpleOrbWalker") 
+		end, 5)
 	end
 end
 
@@ -713,8 +743,19 @@ function OutOfAA()
 end
 
 function OnUnload()
-	if Param.Draw.Skin.Enable then
+	if Param.Draw.Skin.Enable and VIP_USER then
 		SetSkin(myHero, -1)
+	end
+	if bind ~= 0 then
+		if not FileExist(LIB_PATH .. "BaguetteKalista.key") then
+			local file =  assert(io.open(LIB_PATH .. "BaguetteKalista.key", "w"))
+			file:write(bind)
+			file:close()
+		else
+			local file =  assert(io.open(LIB_PATH .. "BaguetteKalista.key", "w"))
+			file:write(bind)
+			file:close()
+		end
 	end
 end
 
@@ -724,7 +765,7 @@ function LaneClear()
 		if not ManaQJungle() and myHero:CanUseSpell(_Q) == READY then
 			jungleMinions:update()
 			for i, jungleMinion in pairs(jungleMinions.objects) do
-				if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 and not jungleMinion.dead then
+				if jungleMinion ~= nil and GetDistance(jungleMinion) < 1150 and not jungleMinion.dead and not CPASBOJEU[jungleMinion.name] then
 					CastPosition,  HitChance,  Position = VP:GetLineCastPosition(jungleMinion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
 					if HitChance >= 2 then
 						CastSpell(_Q, CastPosition.x, CastPosition.z)
@@ -737,7 +778,7 @@ function LaneClear()
 		if not ManaQWaveClear() then
 			enemyMinions:update()
 			for i, minion in pairs(enemyMinions.objects) do
-				if minion ~= nil and not minion.dead then
+				if minion ~= nil and not minion.dead and not CPASBOJEU[minion.name] then
 					if GetDistance(minion) <= 1150 and myHero:CanUseSpell(_Q) == READY then
 						if minion.health < dmgQ then
 							CastPosition,  HitChance,  Position = VP:GetLineCastPosition(minion, SkillQ.delay, 70, 1150, SkillQ.speed, myHero, true)
@@ -771,7 +812,6 @@ function LastHit_Gather()
 							if not CanAttack() then
 								if OrbwalkManager_AA.LastTarget and minion.networkID ~= OrbwalkManager_AA.LastTarget.networkID and not IsAttacking() then
 									CastSpell(_E)
-									--print("Cast")
 						 		end
 						 	end
 						end
@@ -1052,9 +1092,9 @@ function AutoEMob()
 						D2 = math.floor(myHero:CalcDamage(jungleMinion,dmgEX))
 						D3 = D1 + ((GetStacks(jungleMinion)-1) * D2)
 
-						if not TargetHaveBuff("SummonerExhaust", myHero) then
+						if Exhausted == 0 then
 							D3E1 = D3
-						elseif TargetHaveBuff("SummonerExhaust", myHero) then
+						elseif Exhausted == 1 then
 							D3E1 = (D3 - ((D3 * 40)/100))
 						end
 
@@ -1074,7 +1114,7 @@ function AutoEMob()
 							end
 						end
 
-						if (D3 > (jungleMinion.health)) and IsSpecialAMobToE[jungleMinion.name] and Param.Jungle.E.SpecialMob and jungleMinion.name == charName:find("dragon") then
+						if (D3 > (jungleMinion.health)) and Param.Jungle.E.SpecialMob and (IsSpecialAMobToE[jungleMinion.name] or jungleMinion.charName:lower():find("dragon")) then
 							if Dragons ~= 0 then
 								if (D3-(((D3*7)/100)*Dragons)) > jungleMinion.health then
 									if not Param.Humanizer then 
@@ -1160,6 +1200,13 @@ function AutoEMob()
 	end
 end
 
+CPASBOJEU = {
+	["YellowTrinket"] = true,
+	["BlueTrinket"] = true,
+	["SightWard"] = true,
+	["VisionWard"] = true
+}
+
 IsSpecialAMobToE = {
 	['SRU_RiftHerald17.1.1'] = {true}, -- Blue | Haut
 	['SRU_Baron12.1.1'] = {true}, -- Blue | Haut
@@ -1207,15 +1254,15 @@ function AutoEHero()
 					D2 = math.floor(myHero:CalcDamage(unit,dmgEX))
 					D3 = D1 + ((GetStacks(unit)-1) * D2)
 
-					if not TargetHaveBuff("SummonerExhaust", myHero) and not TargetHaveBuff("meditate", unit) then
+					if Exhausted == 0 and not TargetHaveBuff("meditate", unit) then
 						D3E1 = D3
-					elseif TargetHaveBuff("SummonerExhaust", myHero) and not TargetHaveBuff("meditate", unit) then
+					elseif Exhausted == 1 and not TargetHaveBuff("meditate", unit) then
 						D3E1 = (D3 - ((D3 * 40)/100))
 					elseif TargetHaveBuff("meditate", unit) then
 						dmgmajoration = (UnitHaveBuff(unit, "meditate") and 1-(unit:GetSpellData(_W).level * 0.05 + 0.5) or 1)
-						if not TargetHaveBuff("SummonerExhaust", myHero) then
+						if Exhausted == 0 then
 							D3E1 = D3*dmgmajoration
-						elseif TargetHaveBuff("SummonerExhaust", myHero) then
+						elseif Exhausted == 1 then
 							D3E1 = (D3 - ((D3 * 40)/100))*dmgmajoration
 						end
 					end
@@ -1269,12 +1316,12 @@ function AutoEHero()
 						end
 					elseif (D3E1 > (unit.health+unit.shield)) and not Immune(unit) and unit.shield > 1 and unit.charName ~= "Blitzcrank"  then
 						if not Param.Humanizer then 
-						CastSpell(_E)
-					else 
-						DelayAction(function()
 							CastSpell(_E)
-						end, Human)
-					end
+						else 
+							DelayAction(function()
+								CastSpell(_E)
+							end, Human)
+						end
 					end
 				end
 			end
@@ -1283,9 +1330,12 @@ function AutoEHero()
 end
 
 function OnUpdateBuff(unit, buff, Stacks)
-   if buff.name == "kalistaexpungemarker" then
-      unitStacks[unit.networkID] = Stacks
-   end
+	if buff.name == "kalistaexpungemarker" then
+		unitStacks[unit.networkID] = Stacks
+	end
+	if buff.name == "SummonerExhaust" and unit.isMe then
+		Exhausted = 1
+	end
 end
  
 function OnRemoveBuff(unit, buff)
@@ -1300,6 +1350,9 @@ function OnRemoveBuff(unit, buff)
 	end
     if buff.name == "kalistaexpungemarker" then
       unitStacks[unit.networkID] = nil
+    end
+    if buff.name == "SummonerExhaust" and unit.isMe then
+    	Exhausted = 0
     end
 end
 
@@ -1377,13 +1430,6 @@ function OnProcessSpell(unit, spell)
 			end
 		end
     end
-	if unit ~= nil and unit.isMe and spell.target and spell.target.networkID == myHero.networkID and Param.Misc.QSS.Enable then
-		if spell.name == "ZedR" and Param.Misc.QSS.Zed then
-			DelayAction(function()
-				QSS()
-			end, 2.8)
-		end
-	end
 end
 
 function GetStacks(unit)
@@ -1452,10 +1498,10 @@ function OnDraw()
 
 							DAA1 = math.round(myHero:CalcDamage(unit,myHero.totalDamage*90/100))
 
-							if not TargetHaveBuff("SummonerExhaust", myHero) then
+							if Exhausted == 0 then
 								D3E1 = math.floor(D3E/unit.health*100)
 								DAA = math.floor(unit.health/(D3E+DAA1))
-							elseif TargetHaveBuff("SummonerExhaust", myHero) then
+							elseif Exhausted == 1 then
 								D3E1 = math.floor(D3E/unit.health*100)-((math.floor(D3E/unit.health*100)*40)/100)
 								DAA = math.floor(unit.health/(D3E+DAA1))-((math.floor(unit.health/(D3E+DAA1))*40)/100)
 							end
@@ -1526,7 +1572,7 @@ function OnDraw()
 
 					if jungleMinion ~= nil and GetDistance(jungleMinion) < 3000 then
 
-						if IsANormalMobToE[jungleMinion.name] or IsABuffMobToE[jungleMinion.name] or IsSpecialAMobToE[jungleMinion.name] then
+						if IsANormalMobToE[jungleMinion.name] or IsABuffMobToE[jungleMinion.name] or IsSpecialAMobToE[jungleMinion.name] or jungleMinion.charName:lower():find("dragon") then
 
 							if GetStacks(jungleMinion) > 0 then
 
@@ -1539,10 +1585,10 @@ function OnDraw()
 
 								DAA1 = math.round(myHero:CalcDamage(jungleMinion,myHero.totalDamage*90/100))
 
-								if not TargetHaveBuff("SummonerExhaust", myHero) then
+								if Exhausted == 0 then
 									D3E1 = math.floor(D3E/jungleMinion.health*100)
 									DAA = math.round(jungleMinion.health/(D3E+DAA1))
-								elseif TargetHaveBuff("SummonerExhaust", myHero) then
+								elseif Exhausted == 1 then
 									D3E1 = math.floor(D3E/jungleMinion.health*100)-((math.floor(D3E/jungleMinion.health*100)*40)/100)
 									DAA = math.floor(jungleMinion.health/(D3E+DAA1))-((math.floor(jungleMinion.health/(D3E+DAA1))*40)/100)
 								end
@@ -1572,9 +1618,9 @@ function OnDraw()
 								-- DMG DRAW SIMPLE
 
 								if Param.Draw.EDraw.Mob3 then
-									if not TargetHaveBuff("SummonerExhaust", myHero) then
+									if Exhausted == 0 then
 										DrawText3D(""..D3E.."", jungleMinion.x+125, jungleMinion.y+175, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
-									elseif TargetHaveBuff("SummonerExhaust", myHero) then
+									elseif Exhausted == 1 then
 										DrawText3D(""..(D3E-((D3E*40)/100)).."", jungleMinion.x+125, jungleMinion.y+175, jungleMinion.z+155, 30, ARGB(255,250,250,250), 0)
 									end
 								end
@@ -1744,15 +1790,13 @@ function QSS()
 			if QSSGet == 1 or MercurialGet == 1 and not myHero.dead then
 				if myHero:GetSpellData(SLOT).name == "QuicksilverSash" or myHero:GetSpellData(SLOT).name == "ItemMercurial" then
 					lastRemove = os.clock()+90
-					DelayAction(function()
-						if QSSGet == 1 then
-							CastItem(3140)
-							EnvoiMessage("Casted : Quicksilver Sash")
-						elseif MercurialGet == 1 then
-							CastItem(3139)
-							EnvoiMessage("Casted : Mercurial Scimitar")
-						end
-					end, Param.Misc.QSS.Humanizer/1000)
+					if QSSGet == 1 then
+						CastItem(3140)
+						EnvoiMessage("Casted : Quicksilver Sash")
+					elseif MercurialGet == 1 then
+						CastItem(3139)
+						EnvoiMessage("Casted : Mercurial Scimitar")
+					end
 				end
 			end
 		end
@@ -2657,4 +2701,4 @@ function LoadSpikeLib()
 		require("SpikeLib")
 		DelayAction(function ()EnvoiMessage("Loaded Libraries with success!") end, 3)
 	end
-en
+end
