@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.16"
+local version = "0.161"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -768,7 +768,6 @@ function LoadSpikeLib()
 	end
 end
 
-
 local priorityTable = {
  
     AP_Carry = {
@@ -795,7 +794,6 @@ local priorityTable = {
         "Aatrox", "Darius", "Elise", "Fiora", "Gangplank", "Garen", "Irelia", "JarvanIV", "Jax", "Khazix", "LeeSin", "Nautilus", "Nocturne", "Olaf", "Poppy",
         "Renekton", "Rengar", "Riven", "Shyvana", "Trundle", "Tryndamere", "Udyr", "Vi", "MonkeyKing", "XinZhao", "Gnar", "Kindred"
     },
- 
 }
 
 function SetPriority(table, hero, priority)
@@ -1070,7 +1068,7 @@ function OnDraw()
 		if Param.Draw.S.Smite and Smite then
 			jungleMinions:update()
 			for i, jungleMinion in pairs(jungleMinions.objects) do
-				if jungleMinion ~= nil and GetDistance(jungleMinion) < 500*4+myHero.boundingRadius and Epiques[jungleMinion.name] or Normal[jungleMinion.name] or Buff[jungleMinion.name] then
+				if jungleMinion ~= nil and GetDistance(jungleMinion) < 500*4+myHero.boundingRadius and Epiques[jungleMinion.name] or Normal[jungleMinion.name] or Buff[jungleMinion.name] or jungleMinion.charName:lower():find("dragon") then
 					D_SX = math.round(D_SM() * 100 / jungleMinion.health, 2)
 					if D_SX >= 100 then
 						DrawText3D(">>SMITE.<<", jungleMinion.x+125, jungleMinion.y+85, jungleMinion.z+155, 30, ARGB(255,205,51,51), 0)
@@ -1136,7 +1134,7 @@ function AutoSmite()
 			if jungleMinion ~= nil and GetDistance(jungleMinion) < 500+myHero.boundingRadius then
 				if jungleMinion.health < D_SM() and myHero:CanUseSpell(Smite) == READY and ValidTarget(jungleMinion) then
 					if Param.JungleClear.Selector == 1 then
-						if Epiques[jungleMinion.name] then
+						if Epiques[jungleMinion.name] or jungleMinion.charName:lower():find("dragon") then
 							CastSpell(Smite, jungleMinion)
 						end
 					elseif Param.JungleClear.Selector == 2 then
@@ -1148,7 +1146,7 @@ function AutoSmite()
 							CastSpell(Smite, jungleMinion)
 						end
 					elseif Param.JungleClear.Selector == 4 then
-						if Epiques[jungleMinion.name] or Normal[jungleMinion.name] or Buff[jungleMinion.name] then
+						if Epiques[jungleMinion.name] or Normal[jungleMinion.name] or Buff[jungleMinion.name] or jungleMinion.charName:lower():find("dragon") then
 							CastSpell(Smite, jungleMinion)
 						end
 					end
