@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.162"
+local version = "0.163"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -244,6 +244,8 @@ function Menu()
 					CastSpell(_R, myHero)
 				end
 			end)
+			Param.Misc.R:addParam("n2blank", "", SCRIPT_PARAM_INFO, "")
+			Param.Misc.R:addParam("CARE", "Enable tower dive _R function", SCRIPT_PARAM_ONOFF, true)
 			Param.Misc.R:addParam("n1blank", "", SCRIPT_PARAM_INFO, "")
 			Param.Misc.R:addParam("EnableA", "Use auto _R on allys :", SCRIPT_PARAM_ONOFF, false)
 			Param.Misc.R:addParam("LifeA", "Use under X Life :", SCRIPT_PARAM_SLICE, 10, 0, 100)
@@ -517,7 +519,7 @@ function OnProcessAttack(unit, spell)
 		if unit.type == "obj_AI_Turret" and GetDistance(myHero, unit) < 1500 then
 			if unit.team ~= myHero.team then
 				if spell.target.isMe then
-					if myHero.health < 300 and myHero:CanUseSpell(_R) == READY and TowerKey then
+					if myHero.health < 300 and myHero:CanUseSpell(_R) == READY and Param.Misc.R.CARE then
 						CastSpell(_R, myHero)
 					end
 				end
