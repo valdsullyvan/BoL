@@ -81,7 +81,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.30001"
+local version = "0.30002"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -434,8 +434,10 @@ function CustomLoad()
 
 	AutoLvlSpellCombo()
 
-	if VIP_USER and Param.Draw.Skin.Enable then
-		SetSkin(myHero, Param.Draw.Skin.skins -1)
+	if VIP_USER then
+		if Param.Draw.Skin.Enable then
+			SetSkin(myHero, Param.Draw.Skin.skins -1)
+		end
 	end
 end
 
@@ -743,8 +745,10 @@ function OutOfAA()
 end
 
 function OnUnload()
-	if Param.Draw.Skin.Enable and VIP_USER then
-		SetSkin(myHero, -1)
+	if VIP_USER then
+		if Param.Draw.Skin.Enable then
+			SetSkin(myHero, -1)
+		end
 	end
 	if bind ~= 0 then
 		if not FileExist(LIB_PATH .. "BaguetteKalista.key") then
