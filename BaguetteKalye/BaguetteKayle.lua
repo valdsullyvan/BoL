@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.161"
+local version = "0.162"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -513,6 +513,17 @@ function IsAutoAttack(name)
 end
 
 function OnProcessAttack(unit, spell)
+	if unit and spell and unit.team then
+		if unit.type == "obj_AI_Turret" and GetDistance(myHero, unit) < 1500 then
+			if unit.team ~= myHero.team then
+				if spell.target.isMe then
+					if myHero.health < 300 and myHero:CanUseSpell(_R) == READY and TowerKey then
+						CastSpell(_R, myHero)
+					end
+				end
+			end
+		end
+	end
     if unit and spell and unit.isMe and spell.name then
         if IsAutoAttack(spell.name) then
             if not OrbwalkManager_DataUpdated then
