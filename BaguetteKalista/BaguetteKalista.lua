@@ -81,7 +81,7 @@ local QSSGet = 0
 -- Kite
 local AAON = 0
 --- Starting AutoUpdate
-local version = "0.30002"
+local version = "0.30003"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKalista"
 local AUTOUPDATE = true
@@ -426,7 +426,7 @@ function CustomLoad()
 				EnvoiMessage("You should bind with an ally!")
 			end
 		end, 300)
-	else
+	elseif FileExist(LIB_PATH .. "BaguetteKalista.key") then
 		local file = assert(io.open(LIB_PATH .. "BaguetteKalista.key","r"))
 		local userKey = file:read("*l")
 		bind = userKey
