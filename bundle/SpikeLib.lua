@@ -6,8 +6,8 @@ function EnvoiMessage(msg)
 end
 
 --- Starting AutoUpdate
-local version = "0.061"
-local league = "6.10"
+local version = "0.062"
+local league = "6.11"
 local author = "spyk"
 local SCRIPT_NAME = "SpikeLib"
 local AUTOUPDATE = true
