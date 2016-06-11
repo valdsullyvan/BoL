@@ -255,7 +255,6 @@ function Menu()
 	Param = scriptConfig("[Baguette] Sona", "BaguetteSona")
 	--
 	Param:addSubMenu("SBTW!","Combo")
-		Param.Combo:addParam("Key", "Combo Key :", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		if Ignite or Exhaust then Param.Combo:addParam("Summoner", "When it will cast summoners?", SCRIPT_PARAM_LIST, 2, {"At the Start of the fight + ComboMode or to KS (Deny Burst / HP Heal)", "During fight (KS, Burst Reduction)"}) end
 		Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true)
 		Param.Combo:addParam("UseW", "Use (W) Spell in Combo?" , SCRIPT_PARAM_ONOFF, true)
@@ -265,18 +264,15 @@ function Menu()
 		Param.Combo:addParam("ManaSpam", "Min. mana to Spam W/E :", SCRIPT_PARAM_SLICE, 250, 0, 5000)
 	--
 	Param:addSubMenu("Harass","Harass")
-		Param.Harass:addParam("Key", "Harass Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
 		Param.Harass:addParam("Auto", "Toggle Harass (Auto)", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("I"))
 		Param.Harass:addParam("Mana", "Required Mana to Harass :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass?" , SCRIPT_PARAM_ONOFF, true)
 	--
 	Param:addSubMenu("WaveClear", "WaveClear")
-		Param.WaveClear:addParam("Key", "WaveClear Key :",SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 		Param.WaveClear:addParam("Mana", "Required Mana to WaveClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear?" , SCRIPT_PARAM_ONOFF, true)
 	--
 	Param:addSubMenu("JungleClear", "JungleClear")
-		Param.JungleClear:addParam("Key", "JungleClear Key :", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 		Param.JungleClear:addParam("Mana", "Required Mana to JungleClear :", SCRIPT_PARAM_SLICE, 50, 0, 100)
 		Param.JungleClear:addParam("UseQ", "Use (Q) Spell in JungleClear?" , SCRIPT_PARAM_ONOFF, true)
 	--
