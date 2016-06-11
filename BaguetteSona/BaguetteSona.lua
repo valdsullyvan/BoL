@@ -10,11 +10,6 @@ Forum Thread : http://forum.botoflegends.com/topic/88896-beta-baguette-sona/
 
 ]]--
 
-local charNames = {
-    
-    ['Sona'] = true,
-    ['sona'] = true
-}
 
 local buffs = {
     ["JudicatorIntervention"] = true,
@@ -34,9 +29,10 @@ local buffs = {
     ["kindredrnodeathbuff"] = true
 }
 
-if not charNames[myHero.charName] then return end
+if myHero.charName ~= "Sona" then return end
 
 function EnvoiMessage(msg)
+
 	PrintChat("<font color=\"#e74c3c\"><b>[BaguetteSona]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
 end
 
@@ -55,7 +51,7 @@ local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tris
 local OnRecall = 0
 
 --- Starting AutoUpdate
-local version = "0.26"
+local version = "0.3"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -122,8 +118,6 @@ function CustomLoad()
 	PriorityOnLoad()
 	LoadVPred()
 	AutoLvlSpellCombo()
-	lastAttack, lastWindUpTime, lastAttackCD = 0, 0, 0
-	range = myHero.range+myHero.boundingRadius
 	LoadVPred()
 	if Param.Miscellaneous.Skin.Enable then
 		SetSkin(myHero, Param.Miscellaneous.Skin.skins -1)
@@ -468,19 +462,14 @@ function LoadVPred()
 		EnvoiMessage("Succesfully loaded VPred")
 		VP = VPrediction()
 	else
-		local ToUpdate = {}
-		ToUpdate.Version = 0.0
-		ToUpdate.UseHttps = true
-		ToUpdate.Name = "VPrediction"
-		ToUpdate.Host = "raw.githubusercontent.com"
-		ToUpdate.VersionPath = "/SidaBoL/Scripts/master/Common/VPrediction.version"
-		ToUpdate.ScriptPath =  "/SidaBoL/Scripts/master/Common/VPrediction.lua"
-		ToUpdate.SavePath = LIB_PATH.."/VPrediction.lua"
-		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
-		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
-		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-		ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>" .. ToUpdate.Name .. ": </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
-		ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+		local Host = "raw.githubusercontent.com"
+		local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua".."?rand="..math.random(1,10000)
+		EnvoiMessage("VPred not found!")
+		DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+		DelayAction(function () 
+			require("VPrediction") 
+			VP = VPrediction() 
+		end, 5)
 	end
 end
 
@@ -668,25 +657,13 @@ function OnNewPath(unit, startPos, endPos, isDash, dashSpeed, dashGravity, dashD
 end
 
 function LoadSXOrb()
-
 	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
 		require("SxOrbWalk")
 		EnvoiMessage("Loaded SxOrbWalk")
 		Param:addSubMenu("SxOrbWalk", "SXMenu")
 		SxOrb:LoadToMenu(Param.SXMenu)
 	else
-		local ToUpdate = {}
-		    ToUpdate.Version = 1
-		   	ToUpdate.UseHttps = true
-		    ToUpdate.Host = "raw.githubusercontent.com"
-		   	ToUpdate.VersionPath = "/Superx321/BoL/master/common/SxOrbWalk.Version"
-		   	ToUpdate.ScriptPath =  "/Superx321/BoL/master/common/SxOrbWalk.lua"
-		    ToUpdate.SavePath = LIB_PATH.."/SxOrbWalk.lua"
-		   	ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Updated to "..NewVersion..". </b></font>") end
-		    ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">No Updates Found</b></font>") end
-		    ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-		   	ToUpdate.CallbackError = function(NewVersion) print("<font color=\"#FF794C\"><b>SxOrbWalk: </b></font> <font color=\"#FFDFBF\">Error while Downloading. Please try again.</b></font>") end
-		   	ScriptUpdate(ToUpdate.Version,ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
+		EnvoiMessage("Download a Fresh BoL Folder.")
 	end
 end
 
