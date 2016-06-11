@@ -1,12 +1,12 @@
 -- Updated for MetaBuild SoonTM
 
-function EnvoiMessage(msg)
+function msg(msg)
 	
 	PrintChat("<b><font color=\"#c0392b\">[</font><i><font color=\"#27ae60\">Spike</font> <font color=\"#2980b9\">Lib</font><font color=\"#c0392b\">'</font><font color=\"#27ae60\">s</font></i><font color=\"#c0392b\">]</font></b> <font color=\"#c5eff7\"> : " .. msg .. "</font>")
 end
 
 --- Starting AutoUpdate
-local version = "0.062"
+local version = "0.063"
 local league = "6.11"
 local author = "spyk"
 local SCRIPT_NAME = "SpikeLib"
@@ -22,15 +22,13 @@ if AUTOUPDATE then
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
 			if tonumber(version) < ServerVersion then
-				DelayAction(function()EnvoiMessage("New version found for Libraries "..ServerVersion) end, 3)
-				DelayAction(function()EnvoiMessage(">>Updating, please don't press F9<<") end, 4)
-				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () EnvoiMessage("Libs updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 5)
-			else
-				DelayAction(function() EnvoiMessage("Libraries updated for League "..league.." on ("..ServerVersion..")") end, 4)
+				DelayAction(function() msg("New version found for Libraries "..ServerVersion) end, 3)
+				DelayAction(function() msg(">>Updating, please don't press F9<<") end, 4)
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () msg("Libs updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 5)
 			end
 		end
 		else
-			DelayAction(function() EnvoiMessage("[LIBs]Error while downloading version info")end, 1)
+			DelayAction(function() msg("[LIBs]Error while downloading version info")end, 1)
 	end
 end
  --- End Of AutoUpdate
