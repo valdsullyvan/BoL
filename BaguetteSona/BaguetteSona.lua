@@ -51,7 +51,7 @@ local ExhaustI = "Zed", "Yasuo", "Vayne", "Twitch", "Varus", "Tryndamere", "Tris
 local OnRecall = 0
 
 --- Starting AutoUpdate
-local version = "0.3"
+local version = "0.301"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteSona"
 local AUTOUPDATE = true
@@ -893,8 +893,10 @@ end
 function OnRemoveBuff(unit, buff)
 	if buff.name == "recall" and unit.isMe then
 		if myHero.level >= 9 then
-			if Param.miscellaneous.Starter.TrinketBleu then
-				BuyItem(3363)
+			if VIP_USER then
+				if Param.miscellaneous.Starter.TrinketBleu then
+					BuyItem(3363)
+				end
 			end
 		end
 		OnRecall = 0
