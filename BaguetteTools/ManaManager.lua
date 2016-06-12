@@ -7,6 +7,9 @@ function ManaManager(Mode, Spell)
 	end
 end
 
+function Mv(String)
+	return string.byte(String)
+end
 
 -- Exemple
 
