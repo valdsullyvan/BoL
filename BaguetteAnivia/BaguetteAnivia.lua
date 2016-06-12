@@ -242,7 +242,7 @@ class 'Anivia';
 				Target = self:GetTarget();
 
 				self:Keys();
-
+				self:KillSteal();
 				self:WintoR(Target);
 
 				if VIP_USER then
@@ -266,7 +266,7 @@ class 'Anivia';
 				end
 
 				self:AutoPotions();
-
+				self:DrawKillable();
 			end
 		end)
 
@@ -313,6 +313,33 @@ class 'Anivia';
 	function Anivia:CurrentTime()
 
 		return (os.clock() * 1000);
+	end
+
+	function Anivia:KillSteal()
+		for _, unit in pairs(GetEnemyHeroes()) do
+			health = unit.health;
+			Qdmg = ((myHero:CanUseSpell(_Q) == READY and damageQ) or 0);
+			Edmg = ((myHero:CanUseSpell(_E) == READY and damageE) or 0);
+			Rdmg = ((myHero:CanUseSpell(_R) == READY and damageR) or 0);
+			if GetDistance(unit) < 1000 then
+				if Param.KillSteal.Enable then
+					if health <= Qdmg and Param.KillSteal.UseQ and myHero:CanUseSpell(_Q) == READY and ValidTarget(unit) then
+						self:LogicQ(unit);
+					end
+					if health <= Edmg and Param.KillSteal.UseE and myHero:CanUseSpell(_E) == READY and ValidTarget(unit) then
+						CastSpell(_E, unit);
+					end
+					if health <= Rdmg and Param.KillSteal.UseR and myHero:CanUseSpell(_R) == READY and ValidTarget(unit) then
+						self:LogicR(unit);
+					end
+					if Ignite then
+						if health <= 40 + (20 * myHero.level) and Param.KillSteal.UseIgnite and (myHero:CanUseSpell(Ignite) == READY) and ValidTarget(unit) then
+							CastSpell(Ignite, unit);
+						end
+					end
+				end
+			end
+		end
 	end
 
 	function OnCreateObj(object)
@@ -658,6 +685,14 @@ class 'Anivia';
 			Param.Combo:addParam("UseQ", "Use (Q) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true);
 			Param.Combo:addParam("UseE", "Use (E) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true);
 			Param.Combo:addParam("UseR", "Use (R) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true);
+
+		Param:addSubMenu("KillSteal Settings", "KillSteal");
+			Param.KillSteal:addParam("Enable", "Use KillSteal :", SCRIPT_PARAM_ONOFF, true);
+			Param.KillSteal:addParam("n1", "", SCRIPT_PARAM_INFO, "");
+			Param.KillSteal:addParam("UseQ", "Use (Q) Spell in KillSteal :", SCRIPT_PARAM_ONOFF, true);
+			Param.KillSteal:addParam("UseE", "Use (E) Spell in KillSteal :", SCRIPT_PARAM_ONOFF, true);
+			Param.KillSteal:addParam("UseR", "Use (R) Spell in KillSteal :", SCRIPT_PARAM_ONOFF, true);
+			if Ignite then Param.KillSteal:addParam("UseIgnite", "Use (Ignite) Spell in KillSteal :", SCRIPT_PARAM_ONOFF, true); end
 
 		Param:addSubMenu("WaveClear Settings", "WaveClear");
 			Param.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear :" , SCRIPT_PARAM_ONOFF, true);
