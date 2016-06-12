@@ -1,11 +1,12 @@
 function ManaManager(Mode, Spell)
 	local String = "Param."..""..Mode..".Mana"..Spell..""
-	if myHero.mana < (myHero.maxMana * (self:Mv(String) / 100)) then
+	if myHero.mana < (myHero.maxMana * (Mv(String) / 100)) then
 		return true
 	else
 		return false
 	end
 end
+
 
 -- Exemple
 
