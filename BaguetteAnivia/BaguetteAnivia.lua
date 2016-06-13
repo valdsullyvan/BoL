@@ -64,7 +64,7 @@ local priorityTable = {
     },
 };
 
-local version = "0.7";
+local version = "0.701";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteAnivia";
 local AUTOUPDATE = true;
@@ -368,35 +368,63 @@ class 'Anivia';
 				castPos = Vector(startPos) + (Vector(endPos) - Vector(startPos)):normalized() * (dashDistance + 50);
 			end
 				
-			if self:AngleDifference(myHero, startPos, castPos) < 45 and GetDistance(castPos) > 50 and GetDistance(castPos) < 500 then
+			if Anivia:AngleDifference(myHero, startPos, castPos) < 45 and GetDistance(castPos) > 50 and GetDistance(castPos) < 500 then
 				CastSpell(_W, castPos.x, castPos.z);
 			end
 		end
 	end
 
+	function Anivia:GetBestCircularFarmPosition(range, radius, objects)
+	    local BestPos 
+	    local BestHit = 0
+	    for i, object in ipairs(objects) do
+	        local hit = self:CountObjectsNearPos(object.pos or object, range, radius, objects)
+	        if hit > BestHit then
+	            BestHit = hit
+	            BestPos = Vector(object)
+	            if BestHit == #objects then
+	               break
+	            end
+	         end
+	    end
+
+	    return BestPos, BestHit
+	end
+
+	function Anivia:CountObjectsNearPos(pos, range, radius, objects)
+	    local n = 0
+	    for i, object in ipairs(objects) do
+	        if GetDistanceSqr(pos, object) <= radius * radius then
+	            n = n + 1
+	        end
+	    end
+
+	    return n
+	end
+
 	function Anivia:DetectQ()
-		local QZone = 195;
+		local QZone = 150;
 		if CurrentMode == "Combo" then
-			if ValidTarget(Target) and Target.visible and not Target.dead and GetDistance(Target, QMissile) <= QZone then
+			if ValidTarget(Target) and Target.visible and not Target.dead and GetDistance(Target, QMissile) < 150 then
 				CastSpell(_Q);
 			else
 				for k, unit in ipairs(GetEnemyHeroes()) do
 					if ValidTarget(unit) and unit.visible and QMissile and not unit.dead then
-						if GetDistance(unit, QMissile) <= QZone then
+						if GetDistance(unit, QMissile) < 150 then
 							CastSpell(_Q);
 						end
 					end
 				end
 			end
 		elseif CurrentMode == "LaneClear" then
-			enemyMinions:update();
-			for i, minion in ipairs(enemyMinions.objects) do
-				if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
-					if GetDistance(minion, QMissile) <= QZone then
-						CastSpell(_Q);
-					end
-				end
-			end
+			-- enemyMinions:update();
+			-- for i, minion in ipairs(enemyMinions.objects) do
+			-- 	if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
+			-- 		if GetDistance(minion, QMissile) <= QZone then
+			-- 			CastSpell(_Q);
+			-- 		end
+			-- 	end
+			-- end
 			jungleMinions:update();
 			for i, jungleMinion in pairs(jungleMinions.objects) do
 				if ValidTarget(jungleMinion) and jungleMinion.visible and QMissile and not jungleMinion.dead then
@@ -417,14 +445,6 @@ class 'Anivia';
 			for k, unit in ipairs(GetEnemyHeroes()) do
 				if ValidTarget(unit) and unit.visible and QMissile and not unit.dead then
 					if GetDistance(unit, QMissile) <= QZone then
-						CastSpell(_Q);
-					end
-				end
-			end
-			enemyMinions:update();
-			for i, minion in ipairs(enemyMinions.objects) do
-				if ValidTarget(minion) and minion.visible and QMissile and not minion.dead then
-					if GetDistance(minion, QMissile) <= QZone and damageQ > minion.health then
 						CastSpell(_Q);
 					end
 				end
@@ -517,19 +537,44 @@ class 'Anivia';
 		jungleMinions:update()
 		for i, jungleMinion in pairs(jungleMinions.objects) do
 			if jungleMinion ~= nil and not jungleMinion.dead then
-				if Param.Jungle.UseE and GetDistance(jungleMinion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
+				if Param.Jungle.UseE and GetDistance(jungleMinion) < SkillE.range and myHero:CanUseSpell(_E) == READY then
 					if not self:ManaManager("Jungle", "E") then
 						self:LogicE(jungleMinion);
 					end
 				end
-				if Param.Jungle.UseR and GetDistance(jungleMinion) <= SkillR.range and myHero:CanUseSpell(_R) == READY then 
+				if Param.Jungle.UseR and GetDistance(jungleMinion) < SkillR.range and myHero:CanUseSpell(_R) == READY then 
 					if not self:ManaManager("Jungle", "R") then
-						self:LogicR(jungleMinion);
+						if RMissile == nil then
+							if Param.Pred.n1 == 1 then
+								CastPosition,  HitChance,  Position = VP:GetCircularCastPosition(jungleMinion, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false);
+								if HitChance >= 2 then
+									CastSpell(_R, CastPosition.x, CastPosition.z);
+								end
+							elseif Param.Pred.n1 == 2 then
+								local CastPosition, HitChance = HPred:GetPredict(HP_R, jungleMinion, myHero);
+								if HitChance >= 1 then
+									CastSpell(_R, CastPosition.x, CastPosition.z);
+								end
+							end
+						end
 					end
 				end
-				if Param.Jungle.UseQ and GetDistance(jungleMinion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+				if Param.Jungle.UseQ and GetDistance(jungleMinion) < SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 					if not self:ManaManager("Jungle", "Q") then
-						self:LogicQ(jungleMinion);
+						if QMissile ~= nil then return end
+						if Param.Pred.n1 == 1 then
+							CastPosition,  HitChance,  Position = VP:GetLineCastPosition(minion, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, false);
+							if HitChance >= 2 then
+								CastSpell(_Q, CastPosition.x, CastPosition.z);
+							end
+						elseif Param.Pred.n1 == 2 then
+							local CastPosition, HitChance = HPred:GetPredict(HP_Q, minion, myHero);
+				  			if HitChance >= 1 then
+				    			CastSpell(_Q, CastPosition.x, CastPosition.z);
+				  			end
+						else
+							self:Alertet("Cast(Q) bug???");
+						end
 					end
 				end
 			end
@@ -538,9 +583,17 @@ class 'Anivia';
 		enemyMinions:update()
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil and not minion.dead then
-				if Param.WaveClear.UseQ and GetDistance(minion) <= SkillQ.range and myHero:CanUseSpell(_Q) == READY then
+				if Param.WaveClear.UseQ and GetDistance(minion) < SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 					if not self:ManaManager("WaveClear", "Q") then
-						self:LogicQ(minion);
+						local BestPos, BestHit = self:GetBestCircularFarmPosition(SkillQ.range, 200, enemyMinions.objects)
+						if BestPos ~= nil and BestHit > 0 then
+							CastSpell(_Q, BestPos.x, BestPos.z);
+							Timing = GetDistance(Vector(BestPos), Vector(myHero)) / 850;
+							DelayAction(function()
+								CastSpell(_Q);
+								print(Timing)
+							end, Timing)
+						end
 					end
 				end
 				if Param.WaveClear.UseE and GetDistance(minion) <= SkillE.range and myHero:CanUseSpell(_E) == READY then
@@ -550,7 +603,10 @@ class 'Anivia';
 				end
 				if Param.WaveClear.UseR and GetDistance(minion) <= SkillR.range and myHero:CanUseSpell(_R) == READY then
 					if not self:ManaManager("WaveClear", "R") then
-						self:LogicR(minion);
+						local BestPos, BestHit = self:GetBestCircularFarmPosition(SkillR.range, SkillR.width, enemyMinions.objects)
+						if BestPos ~= nil and BestHit > 2 then
+							CastSpell(_R, BestPos.x, BestPos.z);
+						end
 					end
 				end
 			end
@@ -586,13 +642,13 @@ class 'Anivia';
 		if Target ~= nil then
 			if ValidTarget(Target) and Target.type == myHero.type then
 				if myHero:CanUseSpell(_Q) == READY and Param.Harass.UseQ and not self:ManaManager("Harass", "Q") then 
-			  		LogicQ(Target);
+			  		self:LogicQ(Target);
 				end
 				if myHero:CanUseSpell(_E) == READY and Param.Harass.UseE and not self:ManaManager("Harass", "E") then 
-			 		LogicE(Target);
+			 		self:LogicE(Target);
 				end
 				if myHero:CanUseSpell(_R) == READY and Param.Harass.UseR and not self:ManaManager("Harass", "R") then
-					LogicR(Target);
+					self:LogicR(Target);
 				end
 			end
 		end
@@ -824,7 +880,7 @@ class 'Anivia';
 		Param:addSubMenu("Exploits", "Exp");
 			if Teleport then
 				Param.Exp:addSubMenu("Teleportation", "Egg");
-					Param.Exp.Egg:addParam("Enable", "Enable Egg Teleport Exploit :", SCRIPT_PARAM_ONOFF, true);
+					Param.Exp.Egg:addParam("Enable", "Enable Egg Teleport Exploit :", SCRIPT_PARAM_ONOFF, false);
 					Param.Exp.Egg:addParam("n1", "", SCRIPT_PARAM_INFO, "");
 					Param.Exp.Egg:addParam("HP", "Set a value in %HP :", SCRIPT_PARAM_SLICE, 25, 0, 100);
 			end
@@ -1108,7 +1164,7 @@ class 'Anivia';
 			OeufTimerDraw = 1
 			DelayAction(function() OeufTimerDraw = 0 end, 6)
 		end
-		end
+	end
 
 	function Anivia:Skills()
 		SkillQ = { name = "Flash Frost", range = 1100, delay = .25, speed = 850, width = 150, ready = false }
@@ -1438,105 +1494,105 @@ class 'Anivia';
 		return F, G;
 	end
 
-function Anivia:LoadVPred()
-	if FileExist(LIB_PATH .. "/VPrediction.lua") then
-		require("VPrediction");
-		VP = VPrediction();
-	else
-		local Host = "raw.githubusercontent.com";
-		local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua".."?rand="..math.random(1,10000);
-		self:Alerte("VPred not found, downloading...");
-		DownloadFile("https://"..Host..Path, LibPath, function ()  end);
-		DelayAction(function () require("VPrediction") end, 5);
-	end
-end
-
-function Anivia:LoadHPred()
-	if FileExist(LIB_PATH .. "/HPrediction.lua") then
-		require("HPrediction");
-		HPred = HPrediction();
-		HP_Q = HPSkillshot({type = "DelayLine", delay = 0.250, range = 1075, width = 110, speed = 850});
-		HP_W = HPSkillshot({type = "DelayLine", delay = 0.25, range = 1000, width = 100, speed = math.huge});
-		HP_R = HPSkillshot({type = "DelayLine", delay = 0.100, range = 625, width = 350, speed = math.huge});
-		UseHP = true;
-	else
-		local Host = "raw.githubusercontent.com";
-		local Path = "/BolHTTF/BoL/master/HTTF/Common/HPrediction.lua".."?rand="..math.random(1,10000);
-		self:Alerte("HPred not found, downloading..");
-		DownloadFile("https://"..Host..Path, LibPath, function ()  end);
-		DelayAction(function () require("HPrediction") end, 5);
-	end
-end
-
-function Anivia:LoadSACR()
-	if _G.Reborn_Initialised then
-	elseif _G.Reborn_Loaded then
-	else
-		DelayAction(function() self:Alerte("Failed to Load SAC:R")end, 7);
-	end 
-end
-
-function Anivia:LoadPewalk()
-	if _Pewalk then
-	elseif not _Pewalk then
-		self:Alerte("Pewalk loading error");
-	end
-end
-
-function Anivia:LoadNEOrb()
-	local function LoadOrb()
-		if not _G.NebelwolfisOrbWalkerLoaded then
-			require "Nebelwolfi's Orb Walker";
-			NebelwolfisOrbWalkerClass();
+	function Anivia:LoadVPred()
+		if FileExist(LIB_PATH .. "/VPrediction.lua") then
+			require("VPrediction");
+			VP = VPrediction();
+		else
+			local Host = "raw.githubusercontent.com";
+			local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua".."?rand="..math.random(1,10000);
+			self:Alerte("VPred not found, downloading...");
+			DownloadFile("https://"..Host..Path, LibPath, function ()  end);
+			DelayAction(function () require("VPrediction") end, 5);
 		end
 	end
-	if not FileExist(LIB_PATH.."Nebelwolfi's Orb Walker.lua") then
-		DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
-			LoadOrb();
-		end)
-	else
-		local f = io.open(LIB_PATH.."Nebelwolfi's Orb Walker.lua")
-		f = f:read("*all")
-		if f:sub(1,4) == "func" then
+
+	function Anivia:LoadHPred()
+		if FileExist(LIB_PATH .. "/HPrediction.lua") then
+			require("HPrediction");
+			HPred = HPrediction();
+			HP_Q = HPSkillshot({type = "DelayLine", delay = 0.250, range = 1075, width = 110, speed = 850});
+			HP_W = HPSkillshot({type = "DelayLine", delay = 0.25, range = 1000, width = 100, speed = math.huge});
+			HP_R = HPSkillshot({type = "DelayLine", delay = 0.100, range = 625, width = 350, speed = math.huge});
+			UseHP = true;
+		else
+			local Host = "raw.githubusercontent.com";
+			local Path = "/BolHTTF/BoL/master/HTTF/Common/HPrediction.lua".."?rand="..math.random(1,10000);
+			self:Alerte("HPred not found, downloading..");
+			DownloadFile("https://"..Host..Path, LibPath, function ()  end);
+			DelayAction(function () require("HPrediction") end, 5);
+		end
+	end
+
+	function Anivia:LoadSACR()
+		if _G.Reborn_Initialised then
+		elseif _G.Reborn_Loaded then
+		else
+			DelayAction(function() self:Alerte("Failed to Load SAC:R")end, 7);
+		end 
+	end
+
+	function Anivia:LoadPewalk()
+		if _Pewalk then
+		elseif not _Pewalk then
+			self:Alerte("Pewalk loading error");
+		end
+	end
+
+	function Anivia:LoadNEOrb()
+		local function LoadOrb()
+			if not _G.NebelwolfisOrbWalkerLoaded then
+				require "Nebelwolfi's Orb Walker";
+				NebelwolfisOrbWalkerClass();
+			end
+		end
+		if not FileExist(LIB_PATH.."Nebelwolfi's Orb Walker.lua") then
 			DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
 				LoadOrb();
 			end)
 		else
-			LoadOrb();
+			local f = io.open(LIB_PATH.."Nebelwolfi's Orb Walker.lua")
+			f = f:read("*all")
+			if f:sub(1,4) == "func" then
+				DownloadFile("http://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/Nebelwolfi's Orb Walker.lua", LIB_PATH.."Nebelwolfi's Orb Walker.lua", function()
+					LoadOrb();
+				end)
+			else
+				LoadOrb();
+			end
 		end
 	end
-end
 
-function Anivia:LoadSpikeLib()
-	local LibPath = LIB_PATH.."SpikeLib.lua"
-	if not FileExist(LibPath) then
-		local Host = "raw.github.com";
-		local Path = "/spyk1/BoL/master/bundle/SpikeLib.lua".."?rand="..math.random(1,10000);
-		DownloadFile("https://"..Host..Path, LibPath, function ()  end);
-		DelayAction(function() require("SpikeLib") end, 5);
-	else
-		require("SpikeLib");
-	end
-end
-
-function Anivia:LoadBFOrb()
-	local LibPath = LIB_PATH.."Big Fat Orbwalker.lua";
-	local ScriptPath = SCRIPT_PATH.."Big Fat Orbwalker.lua";
-		if not (FileExist(ScriptPath) and _G["BigFatOrb_Loaded"] == true) then
+	function Anivia:LoadSpikeLib()
+		local LibPath = LIB_PATH.."SpikeLib.lua"
+		if not FileExist(LibPath) then
 			local Host = "raw.github.com";
-			local Path = "/BigFatNidalee/BoL-Releases/master/LimitedAccess/Big Fat Orbwalker.lua?rand="..math.random(1,10000);
+			local Path = "/spyk1/BoL/master/bundle/SpikeLib.lua".."?rand="..math.random(1,10000);
 			DownloadFile("https://"..Host..Path, LibPath, function ()  end);
-		require "Big Fat Orbwalker";
+			DelayAction(function() require("SpikeLib") end, 5);
+		else
+			require("SpikeLib");
+		end
 	end
-end
 
-function Anivia:LoadSXOrb()
-	if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
-		require("SxOrbWalk")
-		self:Alerte("Loaded SxOrbWalk")
-		Param:addSubMenu("SxOrbWalk", "SXMenu")
-		SxOrb:LoadToMenu(Param.SXMenu)
-	else
-		self:Alerte("Download a Fresh BoL Folder.")
+	function Anivia:LoadBFOrb()
+		local LibPath = LIB_PATH.."Big Fat Orbwalker.lua";
+		local ScriptPath = SCRIPT_PATH.."Big Fat Orbwalker.lua";
+			if not (FileExist(ScriptPath) and _G["BigFatOrb_Loaded"] == true) then
+				local Host = "raw.github.com";
+				local Path = "/BigFatNidalee/BoL-Releases/master/LimitedAccess/Big Fat Orbwalker.lua?rand="..math.random(1,10000);
+				DownloadFile("https://"..Host..Path, LibPath, function ()  end);
+			require "Big Fat Orbwalker";
+		end
 	end
-end
+
+	function Anivia:LoadSXOrb()
+		if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
+			require("SxOrbWalk")
+			self:Alerte("Loaded SxOrbWalk")
+			Param:addSubMenu("SxOrbWalk", "SXMenu")
+			SxOrb:LoadToMenu(Param.SXMenu)
+		else
+			self:Alerte("Download a Fresh BoL Folder.")
+		end
+	end
