@@ -9,6 +9,6 @@ AddProcessAttackCallback(function(unit, spell) self:OnProcessAttack(unit, spell)
 AddMsgCallback(function(msg,key) self:OnWndMsg(msg,key) end);
 AddSendPacketCallback(function(p) self:OnSendPacket(p) end);
 AddRecvPacketCallback(function(p) self:OnRecvPacket(p) end);
-AddCreateObjCallback(function(object) end);
-AddDeleteObjCallback(function(object) end);
+AddCreateObjCallback(function(object) self:OnCreateObj(object) end);
+AddDeleteObjCallback(function(object) self:OnDeleteObj(object) end);
 AddChatCallback(function(msg, prefix) self:OnSendChat(msg, prefix) end);
