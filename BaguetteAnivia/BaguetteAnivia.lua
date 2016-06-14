@@ -64,7 +64,7 @@ local priorityTable = {
     },
 };
 
-local version = "0.701";
+local version = "0.702";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteAnivia";
 local AUTOUPDATE = true;
@@ -591,7 +591,6 @@ class 'Anivia';
 							Timing = GetDistance(Vector(BestPos), Vector(myHero)) / 850;
 							DelayAction(function()
 								CastSpell(_Q);
-								print(Timing)
 							end, Timing)
 						end
 					end
