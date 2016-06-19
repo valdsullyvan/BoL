@@ -64,7 +64,7 @@ local priorityTable = {
     },
 };
 
-local version = "0.702";
+local version = "0.71";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteAnivia";
 local AUTOUPDATE = true;
@@ -741,6 +741,14 @@ class 'Anivia';
 			Param.Combo:addParam("UseE", "Use (E) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true);
 			Param.Combo:addParam("UseR", "Use (R) Spell in Combo :" , SCRIPT_PARAM_ONOFF, true);
 
+		Param:addSubMenu("Harass Settings", "Harass");
+			Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass :" , SCRIPT_PARAM_ONOFF, true);
+			Param.Harass:addParam("ManaQ", "Set a value for (Q) in Mana :", SCRIPT_PARAM_SLICE, 40, 0, 100);
+			Param.Harass:addParam("UseE", "Use (E) Spell in Harass :" , SCRIPT_PARAM_ONOFF, true);
+			Param.Harass:addParam("ManaE", "Set a value for (E) in Mana :", SCRIPT_PARAM_SLICE, 60, 0, 100);
+			Param.Harass:addParam("UseR", "Use (R) Spell in Harass :" , SCRIPT_PARAM_ONOFF, true);
+			Param.Harass:addParam("ManaR", "Set a value for (R) in Mana :", SCRIPT_PARAM_SLICE, 50, 0, 100);
+
 		Param:addSubMenu("KillSteal Settings", "KillSteal");
 			Param.KillSteal:addParam("Enable", "Use KillSteal :", SCRIPT_PARAM_ONOFF, true);
 			Param.KillSteal:addParam("n1", "", SCRIPT_PARAM_INFO, "");
@@ -748,6 +756,8 @@ class 'Anivia';
 			Param.KillSteal:addParam("UseE", "Use (E) Spell in KillSteal :", SCRIPT_PARAM_ONOFF, true);
 			Param.KillSteal:addParam("UseR", "Use (R) Spell in KillSteal :", SCRIPT_PARAM_ONOFF, true);
 			if Ignite then Param.KillSteal:addParam("UseIgnite", "Use (Ignite) Spell in KillSteal :", SCRIPT_PARAM_ONOFF, true); end
+
+		Param:addSubMenu("", "n1");
 
 		Param:addSubMenu("WaveClear Settings", "WaveClear");
 			Param.WaveClear:addParam("UseQ", "Use (Q) Spell in WaveClear :" , SCRIPT_PARAM_ONOFF, true);
@@ -765,13 +775,7 @@ class 'Anivia';
 			Param.Jungle:addParam("UseR", "Use (R) Spell in JungleClear :" , SCRIPT_PARAM_ONOFF, true);
 			Param.Jungle:addParam("ManaR", "Set a value for (R) in Mana :", SCRIPT_PARAM_SLICE, 50, 0, 100);
 
-		Param:addSubMenu("Harass Settings", "Harass");
-			Param.Harass:addParam("UseQ", "Use (Q) Spell in Harass :" , SCRIPT_PARAM_ONOFF, true);
-			Param.Harass:addParam("ManaQ", "Set a value for (Q) in Mana :", SCRIPT_PARAM_SLICE, 40, 0, 100);
-			Param.Harass:addParam("UseE", "Use (E) Spell in Harass :" , SCRIPT_PARAM_ONOFF, true);
-			Param.Harass:addParam("ManaE", "Set a value for (E) in Mana :", SCRIPT_PARAM_SLICE, 60, 0, 100);
-			Param.Harass:addParam("UseR", "Use (R) Spell in Harass :" , SCRIPT_PARAM_ONOFF, true);
-			Param.Harass:addParam("ManaR", "Set a value for (R) in Mana :", SCRIPT_PARAM_SLICE, 50, 0, 100);
+		Param:addSubMenu("", "n2");
 
 		Param:addSubMenu("Draw", "Draw");
 
@@ -883,6 +887,8 @@ class 'Anivia';
 					Param.Exp.Egg:addParam("n1", "", SCRIPT_PARAM_INFO, "");
 					Param.Exp.Egg:addParam("HP", "Set a value in %HP :", SCRIPT_PARAM_SLICE, 25, 0, 100);
 			end
+
+		Param:addSubMenu("", "n3");
 
 		Param:addSubMenu("Orbwalker", "Orb");
 			Param.Orb:addParam("n1", "OrbWalker :", SCRIPT_PARAM_LIST, 3, {"SxOrbWalk", "BigFat OrbWalker", "Nebelwolfi's Orb Walker"});
