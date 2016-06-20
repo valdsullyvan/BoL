@@ -61,7 +61,7 @@ local priorityTable = {
         "Renekton", "Rengar", "Riven", "Shyvana", "Trundle", "Tryndamere", "Udyr", "Vi", "MonkeyKing", "XinZhao", "Gnar", "Kindred"
     },
 };
-local version = "0.3";
+local version = "0.31";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteMalzahar";
 local AUTOUPDATE = true;
@@ -99,7 +99,6 @@ class 'Malzahar';
 
 		self:Menu();
 		self:CustomLoad();
-		self:PriorityOnLoad();
 	end
 
 	function Malzahar:Alerte(msg)
@@ -108,20 +107,22 @@ class 'Malzahar';
 	end
 
 	function Malzahar:AutoBuy()
-		if VIP_USER and GetGameTimer() < 200 then
-			if Param.Misc.Buy.Doran then
-				BuyItem(1056);
+		DelayAction(function()
+			if VIP_USER and GetInGameTimer()/60 < 3 then
+				if Param.Misc.Buy.Doran then
+					BuyItem(1056);
+				end
+				if Param.Misc.Buy.Pots then
+					BuyItem(2003);
+				end
+				if Param.Misc.Buy.Pots then
+					BuyItem(2003);
+				end
+				if Param.Misc.Buy.Trinket then
+					BuyItem(3340);
+				end
 			end
-			if Param.Misc.Buy.Pots then
-				BuyItem(2003);
-			end
-			if Param.Misc.Buy.Pots then
-				BuyItem(2003);
-			end
-			if Param.Misc.Buy.Trinket then
-				BuyItem(3340);
-			end
-		end
+		end, 1);
 	end
 
 	function Malzahar:AutoLVLCombo()
@@ -179,16 +180,6 @@ class 'Malzahar';
 		end
 	end
 
-	function Malzahar:arrangePrioritys()
-		for i, enemy in ipairs(GetEnemyHeroes()) do
-			self:SetPriority(priorityTable.AD_Carry, enemy, 1);
-			self:SetPriority(priorityTable.AP_Carry, enemy, 2);
-			self:SetPriority(priorityTable.Support,  enemy, 3);
-			self:SetPriority(priorityTable.Bruiser,  enemy, 4);
-			self:SetPriority(priorityTable.Tank,     enemy, 5);
-		end
-	end
-
 	function Malzahar:CurrentTime()
 
 		return (os.clock() * 1000);
@@ -224,6 +215,14 @@ class 'Malzahar';
 				end
 			end
 		end
+		if Param.Draw.Misc.PermaShow then
+			CustomPermaShow("Current Mode :", ""..CurrentMode, true, ARGB(255,52,73,94), nil, nil, 1);
+		else
+			CustomPermaShow("Current Mode :", ""..CurrentMode, false, ARGB(255,52,73,94), nil, nil, 1);
+		end
+		if CurrentMode ~= "Combo" then
+			CurrentMode = "Combo";
+		end
 	end
 
 	function Malzahar:CustomLoad()
@@ -232,7 +231,6 @@ class 'Malzahar';
 		self:LoadSpikeLib();
 		self:PredLoader();
 		self:Skills();
-		self:PriorityOnLoad();
 		self:AutoLVLCombo();
 
 		enemyMinions = minionManager(MINION_ENEMY, 700, myHero, MINION_SORT_HEALTH_ASC)
@@ -279,23 +277,23 @@ class 'Malzahar';
 
 	function Malzahar:KillSteal()
 		if ultTimer > self:CurrentTime() then return end
-			for _, unit in pairs(GetEnemyHeroes()) do
-				if GetDistance(unit) < 900 and Param.KillSteal.Enable and not unit.dead then
-					health = unit.health;
-					Qdmg = ((30 * myHero:GetSpellData(_Q).level + 30 + .5 * myHero.ap) or 0);
-					Edmg = (((60 * myHero:GetSpellData(_E).level + 20 + 0.8 * myHero.ap)*8) or 0);
-					Rdmg = ((150 * myHero:GetSpellData(_R).level + 100 + 1.3 * myHero.ap) or 0);
-					if myHero:CanUseSpell(_Q) == READY and health < myHero:CalcMagicDamage(unit, Qdmg) and Param.KillSteal.UseQ and GetDistance(unit) < SkillQ.range then
-						self:LogicQ(unit);
-					elseif myHero:CanUseSpell(_E) == READY and health < myHero:CalcMagicDamage(unit, Edmg) and Param.KillSteal.UseE and GetDistance(unit) < SkillE.range then
-						self:LogicE(unit);
-					elseif myHero:CanUseSpell(_R) == READY and health < myHero:CalcMagicDamage(unit, Rdmg) and Param.KillSteal.UseR and GetDistance(unit) < SkillR.range then
-						self:LogicR(unit);
-					elseif Ignite and myHero:CanUseSpell(Ignite) == READY and health < (50 + 20 * myHero.level) and Param.KillSteal.UseIgnite and ValidTarget(unit, 600) then
-						self:CastSpell(Ignite, unit);
-					end
+		for _, unit in pairs(GetEnemyHeroes()) do
+			if GetDistance(unit) < 900 and Param.KillSteal.Enable and not unit.dead then
+				health = unit.health;
+				Qdmg = ((30 * myHero:GetSpellData(_Q).level + 30 + .5 * myHero.ap) or 0);
+				Edmg = (((60 * myHero:GetSpellData(_E).level + 20 + 0.8 * myHero.ap)*8) or 0);
+				Rdmg = ((150 * myHero:GetSpellData(_R).level + 100 + 1.3 * myHero.ap) or 0);
+				if myHero:CanUseSpell(_Q) == READY and health < myHero:CalcMagicDamage(unit, Qdmg) and Param.KillSteal.UseQ and GetDistance(unit) < SkillQ.range then
+					self:LogicQ(unit);
+				elseif myHero:CanUseSpell(_E) == READY and health < myHero:CalcMagicDamage(unit, Edmg) and Param.KillSteal.UseE and GetDistance(unit) < SkillE.range then
+					self:LogicE(unit);
+				elseif myHero:CanUseSpell(_R) == READY and health < myHero:CalcMagicDamage(unit, Rdmg) and Param.KillSteal.UseR and GetDistance(unit) < SkillR.range then
+					self:LogicR(unit);
+				elseif Ignite and myHero:CanUseSpell(Ignite) == READY and health < (50 + 20 * myHero.level) and Param.KillSteal.UseIgnite and ValidTarget(unit, 600) then
+					self:CastSpell(Ignite, unit);
 				end
 			end
+		end
 	end
 
 	function Malzahar:Menu()
@@ -591,8 +589,7 @@ class 'Malzahar';
 	end
 
 	function Malzahar:Harass()
-		if ultTimer > CurrentTimeInMillis() then return end
-		ts:update()
+		if ultTimer > self:CurrentTime() then return end
 		if Target ~= nil and not Target.dead and GetDistance(Target) < SkillQ.range then
 			if myHero:CanUseSpell(_Q) == READY and not self:ManaManager("Harass", "Q") and Param.Harass.UseQ then 
 		  		self:LogicQ(Target);
@@ -603,6 +600,14 @@ class 'Malzahar';
 			if myHero:CanUseSpell(_E) == READY and not self:ManaManager("Harass", "E") and Param.Harass.UseE then
 				self:LogicE(Target);
 			end
+		end
+		if Param.Draw.Misc.PermaShow then
+			CustomPermaShow("Current Mode :", ""..CurrentMode, true, ARGB(255,52,73,94), nil, nil, 1);
+		else
+			CustomPermaShow("Current Mode :", ""..CurrentMode, false, ARGB(255,52,73,94), nil, nil, 1);
+		end
+		if CurrentMode ~= "Harass" then
+			CurrentMode = "Harass";
 		end
 	end
 
@@ -650,7 +655,7 @@ class 'Malzahar';
 
 		enemyMinions:update()
 		for i, minion in pairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion ~= nil and not minion.dead then
+			if ValidTarget(minion) and GetDistance(minion) < 1100 and not minion.dead then
 				if Param.WaveClear.UseQ and GetDistance(minion) < SkillQ.range and myHero:CanUseSpell(_Q) == READY then
 					if not self:ManaManager("WaveClear", "Q") then
 						if Param.Pred.n1 == 1 then
@@ -696,6 +701,14 @@ class 'Malzahar';
 	end
 
 	function Malzahar:LastHit()
+		if Param.Draw.Misc.PermaShow then
+			CustomPermaShow("Current Mode :", ""..CurrentMode, true, ARGB(255,52,73,94), nil, nil, 1);
+		else
+			CustomPermaShow("Current Mode :", ""..CurrentMode, false, ARGB(255,52,73,94), nil, nil, 1);
+		end
+		if CurrentMode ~= "LastHit" then
+			CurrentMode = "LastHit";
+		end
 	end
 
 	function Malzahar:ManaManager(Mode, Spell)
@@ -854,14 +867,6 @@ class 'Malzahar';
 		end
 	end
 
-	function Malzahar:SetPriority(table, hero, priority)
-		for i=1, #table, 1 do
-			if hero.charName:find(table[i]) ~= nil then
-				TS_SetHeroPriority(priority, hero.charName);
-			end
-		end
-	end
-
 	function Malzahar:Immune(unit)
 		for i = 1, unit.buffCount do
 			local tBuff = unit:getBuff(i);
@@ -895,14 +900,6 @@ class 'Malzahar';
 			CustomPermaShow("Current Mode :", ""..CurrentMode, false, ARGB(255,52,73,94), nil, nil, 1);
 			CustomPermaShow("", "", false, nil, nil, nil, 2);
 			CustomPermaShow("By spyk ", "v"..version, false, ARGB(255,52,73,94), nil, nil, 3);
-		end
-	end
-
-	function Malzahar:PriorityOnLoad()
-		if heroManager.iCount < 10 then
-			self:Alerte("Impossible to Arrange Priority Table.. There is not enough champions... (less than 10)");
-		else
-			self:arrangePrioritys();
 		end
 	end
 
@@ -954,9 +951,6 @@ class 'Malzahar';
 	end
 
 	function OnUpdateBuff(src, buff, stacks)
-		if unit and unit.isMe then
-			print(buff.name)
-		end
     	if buff and buff.name and buff.name == "MalzaharE" then
     		if unit and unit.type and unit.type == myHero.type then
 	    		table.insert(poisson, {unit, os.clock()});
