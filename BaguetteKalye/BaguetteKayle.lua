@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.163"
+local version = "0.164"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -140,8 +140,10 @@ function OnUnload()
 	EnvoiMessage("Unloaded.")
 	EnvoiMessage("There is no justice anymore between us... Ciao!")
 
-	if Param.Draw.Skin.Enable then
-		SetSkin(myHero, -1)
+	if VIP_USER then
+		if Param.Draw.Skin.Enable then
+			SetSkin(myHero, -1);
+		end
 	end
 end
 
@@ -672,8 +674,10 @@ function AutoLvlSpell()
 end
 
 function AutoLvlSpellCombo()
-	if Param.Misc.LVL.Combo == 1 then
-		levelSequence =  { 3,1,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2}
+	if VIP_USER then
+		if Param.Misc.LVL.Combo == 1 then
+			levelSequence =  { 3,1,2,3,3,4,3,1,3,1,4,1,1,2,2,4,2,2};
+		end
 	end
 end
 
