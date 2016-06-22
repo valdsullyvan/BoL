@@ -42,7 +42,7 @@ class 'Riven';
 function Riven:__init()
 
 	self:Update();
-	self:Alerte("Baguette Riven - by spyk, loading.")
+	self:Alerte("[Beta] Baguette Riven - by spyk, loading.");
 end
 
 function Riven:Alerte(msg)
