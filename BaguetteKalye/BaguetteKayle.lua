@@ -4,7 +4,7 @@ Script by spyk for Kayle.
 
 => BaguetteKayle.lua
 
-- Github link : https://github.com/spyk1/BoL/blob/master/BaguetteKayle/BaguetteKayle.lua
+- Github link : https://github.com/spyk1/BoL/blob/master/BaguetteKalye/BaguetteKayle.lua
 
 - Forum Thread : http://forum.botoflegends.com/topic/92596-beta-baguette-kayle/
 
@@ -47,7 +47,7 @@ local Hero4 = ""
 local T1 = 0
 
 --- Starting AutoUpdate
-local version = "0.164"
+local version = "0.165"
 local author = "spyk"
 local SCRIPT_NAME = "BaguetteKayle"
 local AUTOUPDATE = true
@@ -117,8 +117,10 @@ function CustomLoad()
 
 	AutoLvlSpellCombo()
 
-	if Param.Draw.Skin.Enable then
-		SetSkin(myHero, Param.Draw.Skin.skins -1)
+	if VIP_USER then
+		if Param.Draw.Skin.Enable then
+			SetSkin(myHero, Param.Draw.Skin.skins -1)
+		end
 	end
 end
 
