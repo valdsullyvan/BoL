@@ -61,7 +61,7 @@ local priorityTable = {
         "Renekton", "Rengar", "Riven", "Shyvana", "Trundle", "Tryndamere", "Udyr", "Vi", "MonkeyKing", "XinZhao", "Gnar", "Kindred"
     },
 };
-local version = "0.31";
+local version = "0.311";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteMalzahar";
 local AUTOUPDATE = true;
@@ -280,17 +280,21 @@ class 'Malzahar';
 		for _, unit in pairs(GetEnemyHeroes()) do
 			if GetDistance(unit) < 900 and Param.KillSteal.Enable and not unit.dead then
 				health = unit.health;
-				Qdmg = ((30 * myHero:GetSpellData(_Q).level + 30 + .5 * myHero.ap) or 0);
-				Edmg = (((60 * myHero:GetSpellData(_E).level + 20 + 0.8 * myHero.ap)*8) or 0);
-				Rdmg = ((150 * myHero:GetSpellData(_R).level + 100 + 1.3 * myHero.ap) or 0);
-				if myHero:CanUseSpell(_Q) == READY and health < myHero:CalcMagicDamage(unit, Qdmg) and Param.KillSteal.UseQ and GetDistance(unit) < SkillQ.range then
+				Rdmg = unit.maxHealth * damageR / 100;
+				if myHero:CanUseSpell(_R) == READY and myHero:CanUseSpell(_E) == READY and health < myHero:CalcMagicDamage(unit, Rdmg) + myHero:CalcMagicDamage(unit, damageE*8) and GetDistance(unit) < SkillE.range then 
+					CastSpell(_E, unit);
+					DelayAction(function()
+						self:LogicR(unit);
+					end, .25);
+				end
+				if myHero:CanUseSpell(_Q) == READY and health < myHero:CalcMagicDamage(unit, damageQ) and Param.KillSteal.UseQ and GetDistance(unit) < SkillQ.range then
 					self:LogicQ(unit);
-				elseif myHero:CanUseSpell(_E) == READY and health < myHero:CalcMagicDamage(unit, Edmg) and Param.KillSteal.UseE and GetDistance(unit) < SkillE.range then
+				elseif myHero:CanUseSpell(_E) == READY and health < myHero:CalcMagicDamage(unit, damageE*8) and Param.KillSteal.UseE and GetDistance(unit) < SkillE.range then
 					self:LogicE(unit);
 				elseif myHero:CanUseSpell(_R) == READY and health < myHero:CalcMagicDamage(unit, Rdmg) and Param.KillSteal.UseR and GetDistance(unit) < SkillR.range then
 					self:LogicR(unit);
 				elseif Ignite and myHero:CanUseSpell(Ignite) == READY and health < (50 + 20 * myHero.level) and Param.KillSteal.UseIgnite and ValidTarget(unit, 600) then
-					self:CastSpell(Ignite, unit);
+					CastSpell(Ignite, unit);
 				end
 			end
 		end
