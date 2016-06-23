@@ -15,7 +15,7 @@ local buffs = {
 	["NocturneW"] = true,
 	["kindredrnodeathbuff"] = true
 };
-local version = "0.02";
+local version = "0.03";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteRiven";
 local AUTOUPDATE = true;
@@ -1245,6 +1245,9 @@ function Riven:OnProcessAttack(unit, spell)
 									self:CastT(Target);
 								end
 								self:CastR(Target);
+							end
+							if self.QReady == false and self.WReady == true and self.EReady == true and self.RReady == true and self.Ult == true then
+								self:CastW(Target);
 							end
 							if self.QReady == true and self.WReady == false and self.EReady == false and self.RReady == true and self.Ult == true and Target.health > self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) then
 								self:CastQ(Target, self:Distance(Target), "Combo");
