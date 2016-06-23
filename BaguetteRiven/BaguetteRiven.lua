@@ -15,7 +15,7 @@ local buffs = {
 	["NocturneW"] = true,
 	["kindredrnodeathbuff"] = true
 };
-local version = "0.01";
+local version = "0.02";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteRiven";
 local AUTOUPDATE = true;
@@ -198,7 +198,7 @@ function Riven:CastR(unit)
 end
 
 function Riven:CastT(unit)
-	if self:Distance(unit) < 400 then
+	if self:Distance(unit) < 350 then
 		CastSpell(self.TiamatSlot);
 	end
 end
@@ -343,6 +343,19 @@ function Riven:ComboOutRange()
 			self:SpykOP(Target);
 		end
 	end
+	if self.QReady == true and self.WReady == false and self.EReady == false and self.RReady == true and self.Ult == true then
+		if Target.health < self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) then
+			self:CastR(Target);
+			self:CastQ(Target, self:Distance(Target), "Combo");
+		else
+			if self:Distance(unit) < 350 then
+				self:CastQ(Target, self:Distance(Target), "Combo");
+			elseif self:Distance(unit) > 350 then
+				CastSpell(_Q, Target.x, Target.z);
+				self:SpykOP(Target);
+			end
+		end
+	end
 	if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == false then
 		if self:Distance(Target) > 325 and self:Distance(Target) < 580 then
 			self:CastE(Target);
@@ -398,12 +411,27 @@ function Riven:ComboOutRange()
 		self:CastW(Target);
 		self:CastQ(Target, self:Distance(Target), "Combo");
 	end
+	if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == true and self.Ult == true and Target.health > self:D_R(Target) + self:D_W(Target) + self:D_Q(Target) + self:D_P(Target) * 3 then
+		self:CastE(Target);
+		if self.Tiamat == true and self.TiamatReady == true then
+			self:CastT(Target);
+		end
+		self:CastW(Target);
+		self:CastQ(Target, self:Distance(Target), "Combo");
+	end
 	if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) * 3) or (self.Ult == false)) then
 		self:CastE(Target);
 		if self.Tiamat == true and self.TiamatReady == true then
 			self:CastT(Target);
 		end
 		self:CastR(Target);
+		self:CastQ(Target, self:Distance(Target), "Combo");
+	end
+	if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == true and self.Ult == true and Target.health > self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) * 3 then
+		self:CastE(Target);
+		if self.Tiamat == true and self.TiamatReady == true then
+			self:CastT(Target);
+		end
 		self:CastQ(Target, self:Distance(Target), "Combo");
 	end
 	if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == false then 
@@ -515,12 +543,13 @@ function Riven:ComboStarted()
 			elseif self.Etape == 3 then
 				if self.FlashReady == true then
 					self.Etape = 4;
-					if self:Distance(Target) > 300 and self:Distance(Target) < (self:D_Width(Target) + 425) then
+					if self:Distance(Target) > 300 and self:Distance(Target) < 750 then
 						CastSpell(Flash, Target.x, Target.z);
 					elseif self:Distance(Target) > (self:D_Width(Target) + 425) then
 						self.Etape = 1;
 						self.Spyk = 1;
 						self.Started = false;
+						Param.Combo.Flash = false;
 						self:Alerte("[F]Combo aborted, Target is too far.");
 					end
 				else
@@ -581,7 +610,7 @@ end
 
 function Riven:FCombo()
 	if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == true and self.FlashReady == true then
-		if self:Distance(Target) < (self:D_Width(Target) + 425) then
+		if self:Distance(Target) < 325 + 425 then
 			if self.Ult == false then
 				self.Started = true;
 				self.Spyk = 3;
@@ -766,7 +795,7 @@ function Riven:D_R(unit, predHP, t)
 end
 
 function Riven:Distance(unit, unit2)
-	p1 = unit;
+	p1 = unit or Target;
 	p2 = unit2 or myHero;
     return math.sqrt((p1.x - p2.x) ^ 2 + ((p1.z or p1.y) - (p2.z or p2.y)) ^ 2)
 end
@@ -984,6 +1013,13 @@ function Riven:Menu()
 		Param.Combo:addParam("UseT", "Use Tiamat for reset in Combo :", SCRIPT_PARAM_ONOFF, true);
 		Param.Combo:addParam("n2", "", SCRIPT_PARAM_INFO, "");
 		Param.Combo:addParam("Flash", "Set Combo to Flash Combo :", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("T"));
+		Param.Combo:setCallback("Flash", function(AntiNoob)
+			if AntiNoob then
+				self.Spyk = 1;
+				self.Etape = 1;
+				self.Started = false;
+			end
+		end)
 
 	Param:addSubMenu("", "n29");
 
@@ -1153,144 +1189,147 @@ function Riven:OnProcessAttack(unit, spell)
 				if spell.target.charName:lower():find("turret") then return end
 				if self:CheckingQ(CurrentMode) then
 					local T = myHero.spell.target;
-					local Target = myHero.spell.target;
 					if self.QAA == true and self.Spyk ~= 2 and self.Spyk ~= 3 then
 						self.QAA = false;
 						CastSpell(_Q, T.x, T.z);
 						self:SpykOP(T);
 					end
-					-- if self.Spyk == 3 then
-					-- 	if self.QAAC3 == 1 then
-					-- 		if self.QAA == true then
-					-- 			self.Etape = 5;
-					-- 			CastSpell(_Q, T.x, T.z);
-					-- 			self:CastW(T);
-					-- 			self:SpykOP(T);
-					-- 			if self.Tiamat == true and self.TiamatReady == true then
-					-- 				self:CastT(T);
-					-- 			end
-					-- 		end
-					-- 	elseif self.QAAC3 == 2 then
-					-- 		self.Etape = 5;
-					-- 		self:CastW(T);
-					-- 		self:SpykOP(T);
-					-- 		if self.Tiamat == true and self.TiamatReady == true then
-					-- 			self:CastT(T);
-					-- 		end
-					-- 	end
-					-- end
-					if self.Spyk == 2 then
-						if self.QAA == true and self.QAAC2 == true then
-							self.QAA = false;
-							self.QAAC2 = false;
-							CastSpell(_Q, T.x, T.z);
-							self:SpykOP(T);
-						end
-					end
-					if self.Spyk == 1 then
-						if self.QReady == true and self.WReady == false and self.EReady == false and self.RReady == false then
-							if self:Distance(spell.target) < 270 then
+					if CurrentMode == "Combo" then
+						if self.Spyk == 2 and Target ~= nil then
+							local Target = T;
+							if self.QAA == true and self.QAAC2 == true then
+								self.QAA = false;
+								self.QAAC2 = false;
 								CastSpell(_Q, T.x, T.z);
 								self:SpykOP(T);
-							end --Q
-						end
-						if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == false then
-							self:CastE(spell.target);
-							if self.Tiamat == true and self.TiamatReady == true then 
-								self:CastT(spell.target);
 							end
-							CastSpell(_Q, T.x, T.z);
-							self:SpykOP(T); --QE
 						end
-						if self.QReady == false and self.WReady == false and self.EReady == true and self.RReady == false then
-
-							self:CastE(spell.target); -- E
-						end
-						if self.QReady == false and self.WReady == true and self.EReady == false and self.RReady == false then 
-							self:CastW(spell.target);
-							if self.Tiamat == true then
-								if self.TiamatReady == true then
+						if self.Spyk == 1 and Target ~= nil then
+							local Target = T;
+							if self.QReady == true and self.WReady == false and self.EReady == false and self.RReady == false then
+								if self:Distance(spell.target) < 270 then
+									CastSpell(_Q, T.x, T.z);
+									self:SpykOP(T);
+								end --Q
+							end
+							if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == false then
+								self:CastE(spell.target);
+								if self.Tiamat == true and self.TiamatReady == true then 
 									self:CastT(spell.target);
 								end
-							end-- W
-						end
-						if self.QReady == false and self.WReady == true and self.EReady == true and self.RReady == false then
-							self:CastE(spell.target);
-							self:CastW(spell.target);
-							if self.Tiamat == true and self.TiamatReady == true then
-								self:CastT(spell.target);
-							end -- WE
-						end
-						if self.QReady == false and self.WReady == false and self.EReady == true and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target)) or (self.Ult == false and Target.health < self:D_R(Target) + self:D_P(Target) * 2)) then
-							self:CastE(Target);
-							if self.Tiamat == true and self.TiamatReady == true then
-								self:CastT(Target);
-							end
-							self:CastR(Target);
-						end
-						if self.QReady == true and self.WReady == false and self.EReady == false and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_Q(Target) + self:D_P(Target)) or (self.Ult == false and Target.health < self:D_R(Target) + self:D_Q(Target) * 2 + self:D_P(Target) * 4)) then
-							self:CastR(Target)
-							self:CastQ(Target, self:Distance(Target), "Combo");
-						end
-						if self.QReady == false and self.WReady == true and self.EReady == false and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_W(Target) + self:D_P(Target)) or (self.Ult == false and Target.health < self:D_R(Target) + self:D_W(Target) + self:D_P(Target) * 4)) then
-							self:CastR(Target);
-							self:CastW(Target);
-						end
-						if self.QReady == false and self.WReady == false and self.EReady == false and self.RReady == true and self.Ult == true and Target.health < self:D_R(Target) then
-							
-							self:CastR(Target);
-						end
-						if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == false then
-							self:CastE(Target);
-							if self.Tiamat == true and self.TiamatReady == true then
-								self:CastT(Target);
-							end
-							self:CastW(Target);
-							self:CastQ(Target, self:Distance(Target), "Combo");
-						end
-						if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_W(Target) + self:D_Q(Target) + self:D_P(Target) * 3) or (self.Ult == false)) then
-							self:CastE(Target);
-							self:CastR(Target);
-							if self.Tiamat == true and self.TiamatReady == true then
-								self:CastT(Target);
-							end
-							self:CastW(Target);
-							self:CastQ(Target, self:Distance(Target), "Combo");
-						end
-						if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) * 3) or (self.Ult == false)) then
-							self:CastE(Target);
-							if self.Tiamat == true and self.TiamatReady == true then
-								self:CastT(Target);
-							end
-							self:CastR(Target);
-							self:CastQ(Target, self:Distance(Target), "Combo");
-						end
-						if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == false then 
-							self:CastE(Target);
-							if self.Tiamat == true and self.TiamatReady == true then
-								self:CastT(Target);
-							end
-							self:CastQ(Target, self:Distance(Target), "Combo");
-							self:CastW(Target);
-						end
-						if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == false then
-							self:CastE(Target);
-							if self:Distance(Target) < 300 then
 								CastSpell(_Q, T.x, T.z);
-								self:SpykOP(T);
-							else
+								self:SpykOP(T); --QE
+							end
+							if self.QReady == false and self.WReady == false and self.EReady == true and self.RReady == false then
+
+								self:CastE(spell.target); -- E
+							end
+							if self.QReady == false and self.WReady == true and self.EReady == false and self.RReady == false then 
+								self:CastW(spell.target);
+								if self.Tiamat == true then
+									if self.TiamatReady == true then
+										self:CastT(spell.target);
+									end
+								end-- W
+							end
+							if self.QReady == false and self.WReady == true and self.EReady == true and self.RReady == false then
+								self:CastE(spell.target);
+								self:CastW(spell.target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(spell.target);
+								end -- WE
+							end
+							if self.QReady == false and self.WReady == false and self.EReady == true and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target)) or (self.Ult == false and Target.health < self:D_R(Target) + self:D_P(Target) * 2)) then
+								self:CastE(Target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(Target);
+								end
+								self:CastR(Target);
+							end
+							if self.QReady == true and self.WReady == false and self.EReady == false and self.RReady == true and self.Ult == true and Target.health > self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) then
 								self:CastQ(Target, self:Distance(Target), "Combo");
 							end
-							self:CastW(Target);
-						end
-						if self.QReady == true and self.WReady == true and self.EReady == false and self.RReady == false then
-							if self:Distance(Target) < 300 then
-								CastSpell(_Q, T.x, T.z);
-								self:SpykOP(T);
-							else
+							if self.QReady == true and self.WReady == false and self.EReady == false and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_Q(Target) + self:D_P(Target)) or (self.Ult == false and Target.health < self:D_R(Target) + self:D_Q(Target) * 2 + self:D_P(Target) * 4)) then
+								self:CastR(Target);
 								self:CastQ(Target, self:Distance(Target), "Combo");
 							end
-							self:CastW(Target);
+							if self.QReady == false and self.WReady == true and self.EReady == false and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_W(Target) + self:D_P(Target)) or (self.Ult == false and Target.health < self:D_R(Target) + self:D_W(Target) + self:D_P(Target) * 4)) then
+								self:CastR(Target);
+								self:CastW(Target);
+							end
+							if self.QReady == false and self.WReady == true and self.EReady == false and self.RReady == true and self.Ult == true and Target.health > self:D_R(Target) + self:D_W(Target) + self:D_P(Target) then
+								self:CastW(Target);
+							end
+							if self.QReady == false and self.WReady == false and self.EReady == false and self.RReady == true and self.Ult == true and Target.health < self:D_R(Target) then
+								self:CastR(Target);
+							end
+							if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == false then
+								self:CastE(Target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(Target);
+								end
+								self:CastW(Target);
+								self:CastQ(Target, self:Distance(Target), "Combo");
+							end
+							if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_W(Target) + self:D_Q(Target) + self:D_P(Target) * 3) or (self.Ult == false)) then
+								self:CastE(Target);
+								self:CastR(Target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(Target);
+								end
+								self:CastW(Target);
+								self:CastQ(Target, self:Distance(Target), "Combo");
+							end
+							if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == true and self.Ult == true and Target.health > self:D_R(Target) + self:D_W(Target) + self:D_Q(Target) + self:D_P(Target) * 3 then
+								self:CastE(Target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(Target);
+								end
+								self:CastW(Target);
+								self:CastQ(Target, self:Distance(Target), "Combo");
+							end
+							if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == true and ((self.Ult == true and Target.health < self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) * 3) or (self.Ult == false)) then
+								self:CastE(Target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(Target);
+								end
+								self:CastR(Target);
+								self:CastQ(Target, self:Distance(Target), "Combo");
+							end
+							if self.QReady == true and self.WReady == false and self.EReady == true and self.RReady == true and self.Ult == true and Target.health > self:D_R(Target) + self:D_Q(Target) + self:D_P(Target) * 3 then
+								self:CastE(Target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(Target);
+								end
+								self:CastQ(Target, self:Distance(Target), "Combo");
+							end
+							if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == false then 
+								self:CastE(Target);
+								if self.Tiamat == true and self.TiamatReady == true then
+									self:CastT(Target);
+								end
+								self:CastQ(Target, self:Distance(Target), "Combo");
+								self:CastW(Target);
+							end
+							if self.QReady == true and self.WReady == true and self.EReady == true and self.RReady == false then
+								self:CastE(Target);
+								if self:Distance(Target) < 300 then
+									CastSpell(_Q, T.x, T.z);
+									self:SpykOP(T);
+								else
+									self:CastQ(Target, self:Distance(Target), "Combo");
+								end
+								self:CastW(Target);
+							end
+							if self.QReady == true and self.WReady == true and self.EReady == false and self.RReady == false then
+								if self:Distance(Target) < 300 then
+									CastSpell(_Q, T.x, T.z);
+									self:SpykOP(T);
+								else
+									self:CastQ(Target, self:Distance(Target), "Combo");
+								end
+								self:CastW(Target);
+							end
 						end
 					end
 					if CurrentMode == "LaneClear" then
@@ -1366,28 +1405,28 @@ function Riven:RmvBuff(unit, buff)
 			self.T_Q = 0;
 		end
 		if buff.name == "RivenFengShuiEngine" then
-			self.Ult = true;
+			self.Ult = false;
 		end
 	end
 end
 
 function Riven:Ready()
-	if myHero:CanUseSpell(_Q) == READY or myHero:GetSpellData(_Q).currentCd == 0 then
+	if (myHero:CanUseSpell(_Q) == READY or myHero:GetSpellData(_Q).currentCd == 0) and myHero:GetSpellData(_Q).level > 0 then
 		self.QReady = true;
 	else
 		self.QReady = false;
 	end
-	if myHero:GetSpellData(_W).currentCd == 0 or myHero:CanUseSpell(_W) == READY then
+	if (myHero:GetSpellData(_W).currentCd == 0 or myHero:CanUseSpell(_W) == READY) and myHero:GetSpellData(_W).level > 0 then
 		self.WReady = true;
 	else
 		self.WReady = false;
 	end
-	if myHero:GetSpellData(_E).currentCd == 0 or myHero:CanUseSpell(_E) == READY then
+	if (myHero:GetSpellData(_E).currentCd == 0 or myHero:CanUseSpell(_E) == READY) and myHero:GetSpellData(_E).level > 0 then
 		self.EReady = true;
 	else
 		self.EReady = false;
 	end
-	if myHero:GetSpellData(_R).currentCd == 0 or myHero:CanUseSpell(_R) == READY then
+	if (myHero:GetSpellData(_R).currentCd == 0 or myHero:CanUseSpell(_R) == READY) and myHero:GetSpellData(_R).level > 0 then
 		self.RReady = true;
 	else
 		self.RReady = false;
