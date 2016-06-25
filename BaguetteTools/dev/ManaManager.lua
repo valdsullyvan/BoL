@@ -1,15 +1,13 @@
 function ManaManager(Mode, Spell)
-	local String = "Param."..""..Mode..".Mana"..Spell..""
-	if myHero.mana < (myHero.maxMana * (Mv(String) / 100)) then
+	local reqMana = Param[Mode] and Param[Mode]["Mana"..Spell] or 101
+	if 100 * myHero.mana / myHero.maxMana >= reqMana then
 		return true
 	else
 		return false
 	end
 end
 
-function Mv(String)
-	return string.byte(String)
-end
+-- Credit Nebelwolfi!
 
 -- Exemple
 
