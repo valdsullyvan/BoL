@@ -64,7 +64,7 @@ local priorityTable = {
     },
 };
 
-local version = "0.71";
+local version = "0.711";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteAnivia";
 local AUTOUPDATE = true;
@@ -96,7 +96,7 @@ local OeufTimerDraw = 0;
 class 'Anivia';
 	
 	function Anivia:_init()
-		print("<font color=\"#ffffff\">Loading</font><font color=\"#e74c3c\"><b> [BaguetteAnivia]</b></font> <font color=\"#ffffff\">by spyk</font>");
+		self:Alerte("[Beta] Baguette Anivia - by spyk, loading.");
 		self:Update();
 
 		if myHero:GetSpellData(SUMMONER_1).name:find("SummonerDot") then 
@@ -118,24 +118,32 @@ class 'Anivia';
 
 	function Anivia:AutoBuy()
 		if VIP_USER and GetGameTimer() < 200 then
-			if Param.Misc.Buy.Doran then
-				BuyItem(1056);
-			end
-			if Param.Misc.Buy.Pots then
-				BuyItem(2003);
-			end
-			if Param.Misc.Buy.Pots then
-				BuyItem(2003);
-			end
-			if Param.Misc.Buy.Trinket then
-				BuyItem(3340);
-			end
+			DelayAction(function()
+				if Param.Misc.Buy.Doran then
+					BuyItem(1056);
+				end
+				DelayAction(function()
+					if Param.Misc.Buy.Pots then
+						BuyItem(2003);
+					end
+					DelayAction(function()
+						if Param.Misc.Buy.Pots then
+							BuyItem(2003);
+						end
+						DelayAction(function()
+							if Param.Misc.Buy.Trinket then
+								BuyItem(3340);
+							end
+						end, 1)
+					end, 1)
+				end, 1)
+			end, 1)
 		end
 	end
 
 	function Anivia:Alerte(msg)
 
-		PrintChat("<font color=\"#e74c3c\"><b>[BaguetteAnivia]</b></font> <font color=\"#ffffff\">" .. msg .. "</font>")
+		PrintChat("<b><font color=\"#2c3e50\">></font></b> </font><font color=\"#c5eff7\"> " .. msg .. "</font>");
 	end
 
 	function Anivia:AngleDifference(from, p1, p2)
@@ -1369,7 +1377,7 @@ class 'Anivia';
 				end
 			elseif Param.Pred.n1 == 2 then
 				local CastPosition, HitChance = HPred:GetPredict(HP_Q, unit, myHero);
-	  			if HitChance >= 1 then
+	  			if HitChance >= 0 then
 	    			CastSpell(_Q, CastPosition.x, CastPosition.z);
 	  			end
 			else
