@@ -15,7 +15,7 @@ local buffs = {
 	["NocturneW"] = true,
 	["kindredrnodeathbuff"] = true
 };
-local version = "0.04";
+local version = "0.1";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteRiven";
 local AUTOUPDATE = true;
@@ -269,7 +269,6 @@ function Riven:CustomLoad()
 			Target = self:GetTarget();
 
 			self:ComboStarted();
-
 			self:Ready();
 			self:Keys();
 			self:Flee();
@@ -446,6 +445,9 @@ function Riven:ComboOutRange()
 		end
 		self:CastQ(Target, self:Distance(Target), "Combo");
 		self:CastW(Target);
+	end
+	if self.RReady == true and self.Ult == true and Target.health < self:D_R(Target) then
+		CastSpell(_R, Target.x, Target.z);
 	end
 end
 
@@ -785,18 +787,22 @@ function Riven:S_E()
 	return C_D + A_D
 end
 
-function Riven:D_R(unit, predHP, t)
-	local L = myHero:GetSpellData(_R).level
-	local HPerc = 0;
-	if t ~= 1 then
-		HPerc = unit.health / unit.maxHealth;
+function Riven:D_R(unit)
+	local L = myHero:GetSpellData(_R).level;
+	if L > 0 then
+		local T_D = 0;
+		local HPerc = 0;
+		local ld = 40 * L + 40;
+		local ld2 = ld + myHero.addDamage * .6;
+		if 1 - unit.health / unit.maxHealth > .75 then
+			T_D = ld2 * 3;
+		else
+			T_D = ld2 + ld2 * 2.65 * (1 - unit.health / unit.maxHealth);
+		end
+		return myHero:CalcDamage(unit, T_D)
 	else
-		HPerc = (unit.health - predHP) / unit.maxHealth;
+		return 0
 	end
-	local C_D = 40 + L * 40;
-	local A_D = myHero.addDamage * .6;
-	local T_D = (C_D + A_D) * (HPerc) * (-2.67)
-	return myHero:CalcDamage(unit, T_D)
 end
 
 function Riven:Distance(unit, unit2)
@@ -1330,7 +1336,16 @@ function Riven:OnProcessAttack(unit, spell)
 								self:CastW(Target);
 							end
 							if self.QReady == true and self.WReady == true and self.EReady == false and self.RReady == false then
-								if self:Distance(Target) < 300 then
+								if self:Distance(Target) < 500 then
+									CastSpell(_Q, T.x, T.z);
+									self:SpykOP(T);
+								else
+									self:CastQ(Target, self:Distance(Target), "Combo");
+								end
+								self:CastW(Target);
+							end
+							if self.QReady == true and self.WReady == true and self.EReady == false and self.Ult == true then
+								if self:Distance(Target) < 500 then
 									CastSpell(_Q, T.x, T.z);
 									self:SpykOP(T);
 								else
@@ -1662,7 +1677,7 @@ function Riven:OnDraw()
 						DTT = DTT + self:D_P(unit);
 					end
 					if self.RReady == true then
-						DTT = DTT + self:D_R(unit, DTT, 1) + self:D_P(unit);
+						DTT = DTT + self:D_R(unit) + self:D_P(unit);
 					end
 					if self.Tiamat == true and self.TiamatReady == true then
 						DTT = DTT + self:D_P(unit);
