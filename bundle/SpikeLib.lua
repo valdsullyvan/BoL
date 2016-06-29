@@ -6,8 +6,8 @@ function msg(msg)
 end
 
 --- Starting AutoUpdate
-local version = "0.063"
-local league = "6.11"
+local version = "0.064"
+local league = "6.13"
 local author = "spyk"
 local SCRIPT_NAME = "SpikeLib"
 local AUTOUPDATE = true
