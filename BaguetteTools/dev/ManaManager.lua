@@ -13,4 +13,4 @@ end
 
 
 -- Param.Harass:addParam("ManaE", "Set a value for (E) in Mana :", SCRIPT_PARAM_SLICE, 80, 0, 100);
--- if not ManaManager("Harass", "E") then.... end
+-- if ManaManager("Harass", "E") then.... end
