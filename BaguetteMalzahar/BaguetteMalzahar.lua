@@ -61,7 +61,7 @@ local priorityTable = {
         "Renekton", "Rengar", "Riven", "Shyvana", "Trundle", "Tryndamere", "Udyr", "Vi", "MonkeyKing", "XinZhao", "Gnar", "Kindred"
     },
 };
-local version = "0.311";
+local version = "0.32";
 local author = "spyk";
 local SCRIPT_NAME = "BaguetteMalzahar";
 local AUTOUPDATE = true;
@@ -289,12 +289,31 @@ class 'Malzahar';
 				end
 				if myHero:CanUseSpell(_Q) == READY and health < myHero:CalcMagicDamage(unit, damageQ) and Param.KillSteal.UseQ and GetDistance(unit) < SkillQ.range then
 					self:LogicQ(unit);
-				elseif myHero:CanUseSpell(_E) == READY and health < myHero:CalcMagicDamage(unit, damageE*8) and Param.KillSteal.UseE and GetDistance(unit) < SkillE.range then
+				elseif myHero:CanUseSpell(_E) == READY and health < myHero:CalcMagicDamage(unit, damageE*8) and Param.KillSteal.UseE and GetDistance(unit) < 700 then
 					self:LogicE(unit);
 				elseif myHero:CanUseSpell(_R) == READY and health < myHero:CalcMagicDamage(unit, Rdmg) and Param.KillSteal.UseR and GetDistance(unit) < SkillR.range then
 					self:LogicR(unit);
 				elseif Ignite and myHero:CanUseSpell(Ignite) == READY and health < (50 + 20 * myHero.level) and Param.KillSteal.UseIgnite and ValidTarget(unit, 600) then
 					CastSpell(Ignite, unit);
+				elseif myHero:CanUseSpell(_Q) == READY and myHero:CanUseSpell(_W) == READY and myHero:CanUseSpell(_E) == READY and myHero:CanUseSpell(_R) == READY and GetDistance(unit) < 600 then
+					if Param.KillSteal.UseQ and Param.KillSteal.UseW and Param.KillSteal.UseE and Param.KillSteal.UseR then 
+						if health < myHero:CalcMagicDamage(unit, Rdmg) + myHero:CalcMagicDamage(unit, damageE*8) + myHero:CalcMagicDamage(unit, damageQ) + 150 then
+							self:LogicQ();
+							DelayAction(function()
+								if GetDistance(unit) < SkillW.range then
+									CastSpell(_W, unit.x, unit.z);
+								else
+									CastSpell(_W, myHero.x, myHero.z);
+								end
+								DelayAction(function()
+									self:LogicE();
+									DelayAction(function ()
+										self:LogicR();
+									end, .35)
+								end, .35)
+							end, .05)
+						end
+					end
 				end
 			end
 		end
@@ -513,7 +532,6 @@ class 'Malzahar';
 					end
 				end
 				for x, v in pairs(poisson) do
-					print("ok")
 					if poisson[x][1] ~= nil then
 						unit = poisson[x][1];
 						if GetDistance(unit) < 3000 then
@@ -818,7 +836,7 @@ class 'Malzahar';
 		SkillQ = { name = "AlZaharCalloftheVoid", range = 900, delay = 0.25, speed = math.huge, width = 80, ready = false } --400
 		SkillW = { name = "AlZaharNullZone", range = 450, delay = 0.25, speed = math.huge, width = nil, ready = false }
 		SkillE = { name = "AlZaharMaleficVisions", range = 650, delay = 0.25, speed = math.huge, width = nil, ready = false }
-		SkillR = { name = "AlZaharNetherGrasp", range = 700, delay = 0.25, speed = math.huge, width = nil, ready = false }
+		SkillR = { name = "AlZaharNetherGrasp", range = 650, delay = 0.25, speed = math.huge, width = nil, ready = false }
 	end
 
 	function Malzahar:Usepot()
@@ -1054,7 +1072,6 @@ function Malzahar:LoadHPred()
 		require("HPrediction");
 		HPred = HPrediction();
 		HP_Q = HPSkillshot({type = "DelayLine", delay = 0.250, range = 1075, width = 110, speed = 850});
-		HP_W = HPSkillshot({type = "DelayLine", delay = 0.25, range = 1000, width = 100, speed = math.huge});
 		HP_R = HPSkillshot({type = "DelayLine", delay = 0.100, range = 625, width = 350, speed = math.huge});
 		UseHP = true;
 	else
